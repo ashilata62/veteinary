@@ -96,9 +96,14 @@ export default function Login({ setIsAuthenticated, setCurrentRole }) {
     { role: 'Doctor',       email: 'demodoctor@gmail.com',       icon: Stethoscope },
     { role: 'Receptionist', email: 'demoR@gmail.com',            icon: Users },
     { role: 'Vet Assistant',email: 'assistant@vetcarepro.com',   icon: HeartHandshake },
+    { role: 'Super Admin',  email: 'superadmin@vetcarepro.com',  icon: ShieldCheck },
   ];
 
   const selectDemoUser = (role, demoEmail) => {
+    if (role === 'Super Admin') {
+      navigate('/super-admin/login');
+      return;
+    }
     setActiveRole(role);
     setEmail(demoEmail);
     setPassword('password123');

@@ -27,10 +27,29 @@ import DoctorRevenue from './components/DoctorRevenue';
 import ReminderQueue from './components/ReminderQueue';
 import SuperAdminLogin from './components/SuperAdmin/SuperAdminLogin';
 import SuperAdminLayout from './components/SuperAdmin/SuperAdminLayout';
+import PaymentPage from './components/Checkout/PaymentPage';
+import TrialExpired from './components/TrialExpired';
+import Support from './components/Support';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
 
 import api from './utils/api';
+
+// Helper: check if clinic trial has expired
+const checkTrialExpired = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // backend stores trial_end_date on the user/clinic object
+    const trialEnd = user.trial_end_date || user.trialEndDate || user.trial_expires_at;
+    if (!trialEnd) return false; // no trial info → not expired (paid or no restriction)
+    const isExpired = new Date(trialEnd) < new Date();
+    // Also respect an explicit plan flag
+    if (user.subscription_status === 'active' || user.plan === 'paid') return false;
+    return isExpired;
+  } catch (e) {
+    return false;
+  }
+};
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,6 +80,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => checkAuth());
   const [currentRole, setCurrentRole] = useState(() => localStorage.getItem('role') || '');
   const [isSuperAdmin, setIsSuperAdmin] = useState(() => !!localStorage.getItem('sa_token'));
+  const [isTrialExpired, setIsTrialExpired] = useState(() => checkTrialExpired());
   // Sidebar: open by default on desktop only
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
   const [selectedPetId, setSelectedPetId] = useState(null);
@@ -162,6 +182,7 @@ export default function App() {
     });
     setIsAuthenticated(false);
     setCurrentRole('');
+    setIsTrialExpired(false);
     navigate(LOGIN_PATH, { replace: true });
   };
 
@@ -169,6 +190,10 @@ export default function App() {
     setSelectedPetId(petId);
     setCurrentTab('medical');
   };
+
+  if (location.pathname.startsWith('/checkout/')) {
+    return <PaymentPage />;
+  }
 
   if (location.pathname.startsWith('/super-admin')) {
     if (!isSuperAdmin) {
@@ -189,12 +214,23 @@ export default function App() {
 
   if (!isAuthenticated) {
     if (location.pathname === LOGIN_PATH) {
-      return <Login setIsAuthenticated={setIsAuthenticated} setCurrentRole={setCurrentRole} />;
+      return (
+        <Login
+          setIsAuthenticated={setIsAuthenticated}
+          setCurrentRole={setCurrentRole}
+          onLoginSuccess={() => setIsTrialExpired(checkTrialExpired())}
+        />
+      );
     }
     if (location.pathname === '/register') {
       return <Register />;
     }
     return <LandingPage />;
+  }
+
+  // Show trial expired page if trial period is over
+  if (isTrialExpired) {
+    return <TrialExpired onLogout={handleLogout} />;
   }
 
   return (
@@ -282,6 +318,7 @@ export default function App() {
           {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
           {currentTab === 'notifications' && <Notifications notifications={notifications} setNotifications={setNotifications} />}
           {currentTab === 'reminders' && <ReminderQueue />}
+          {currentTab === 'support' && <Support />}
         </main>
       </div>
     </div>

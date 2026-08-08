@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -32,6 +32,7 @@ export default function Sidebar({
     { id: 'attendance',   label: 'Attendance',            icon: Clock,           roles: ['Admin','Manager'] },
     { id: 'reports',      label: 'Reports & Analytics',   icon: BarChart3,       roles: ['Admin','Manager'] },
     { id: 'settings',     label: currentRole !== 'Admin' ? 'Profile Settings' : 'Settings', icon: Settings, roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'support',      label: 'Support',               icon: Headphones,      roles: ['Admin'] },
   ];
 
   const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
@@ -66,7 +67,8 @@ export default function Sidebar({
       'inventory': '#ef4444',
       'staff': '#a855f7',
       'reports': '#10b981',
-      'settings': '#94a3b8'
+      'settings': '#94a3b8',
+      'support': '#f97316'
     };
     return colors[id] || '#94a3b8';
   };

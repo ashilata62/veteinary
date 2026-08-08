@@ -812,7 +812,13 @@ export default function Register() {
               </button>
 
               <a
-                href={`mailto:${successData.email}`}
+                href={(() => {
+                  const domain = successData.email?.split('@')[1]?.toLowerCase() || '';
+                  if (domain.includes('gmail')) return 'https://mail.google.com';
+                  if (domain.includes('yahoo')) return 'https://mail.yahoo.com';
+                  if (domain.includes('outlook') || domain.includes('hotmail') || domain.includes('live')) return 'https://outlook.live.com';
+                  return `https://${domain || 'mail.google.com'}`;
+                })()}
                 target="_blank"
                 rel="noreferrer"
                 className="vet-btn-outline"
