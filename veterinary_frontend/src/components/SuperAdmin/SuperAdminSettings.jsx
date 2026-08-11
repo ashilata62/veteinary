@@ -35,34 +35,23 @@ export default function SuperAdminSettings() {
       )}
 
       <form onSubmit={handleSave}>
-        <div className="sa-renewals-header" style={{ marginBottom: '1.75rem' }}>
+        <div className="sa-page-header" style={{ marginBottom: '1.75rem' }}>
           <div>
             <h1 className="sa-dash-title">System Settings</h1>
-            <p className="sa-dash-subtitle">Configure platform branding, payment gateway & system security.</p>
+            <p className="sa-dash-subtitle">Configure platform branding, payment gateway &amp; system security.</p>
           </div>
-
-          <button 
-            type="submit" 
-            style={{
-              backgroundColor: '#14b8a6', color: '#ffffff', border: 'none',
-              padding: '0.6rem 1.25rem', borderRadius: '10px', fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(20, 184, 166, 0.25)'
-            }}
-          >
-            <Save size={18} /> Save All Changes
+          <button type="submit" className="sa-btn sa-btn-primary">
+            <Save size={16} /> Save All Changes
           </button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* General Platform Settings */}
-          <div className="sa-renewals-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.85rem' }}>
-              <Globe color="#14b8a6" size={20} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>General Platform Settings</h3>
+          <div className="sa-section-card">
+            <div className="sa-section-header">
+              <div className="sa-section-title"><Globe color="#14b8a6" size={18} /> General Platform Settings</div>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Platform Name</label>
                 <input 
@@ -86,13 +75,11 @@ export default function SuperAdminSettings() {
           </div>
 
           {/* Payment Gateway Settings */}
-          <div className="sa-renewals-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.85rem' }}>
-              <CreditCard color="#06b6d4" size={20} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>Razorpay Integration Config</h3>
+          <div className="sa-section-card">
+            <div className="sa-section-header">
+              <div className="sa-section-title"><CreditCard color="#06b6d4" size={18} /> Razorpay Integration Config</div>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Razorpay Key ID</label>
                 <input 
@@ -116,13 +103,12 @@ export default function SuperAdminSettings() {
           </div>
 
           {/* Security & Access Settings */}
-          <div className="sa-renewals-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.85rem' }}>
-              <Shield color="#f59e0b" size={20} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>Security & Platform Maintenance</h3>
+          <div className="sa-section-card">
+            <div className="sa-section-header">
+              <div className="sa-section-title"><Shield color="#f59e0b" size={18} /> Security &amp; Platform Maintenance</div>
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <div style={{ padding: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
               <div>
                 <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>Maintenance Mode</div>
                 <div style={{ color: '#64748b', fontSize: '0.825rem' }}>Temporarily disable clinic admin access for scheduled updates.</div>
@@ -135,15 +121,14 @@ export default function SuperAdminSettings() {
               />
             </div>
           </div>
+          </div>
 
           {/* SMTP Email Provider Settings */}
-          <div className="sa-renewals-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.85rem' }}>
-              <Mail color="#8b5cf6" size={20} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>System SMTP Notifications</h3>
+          <div className="sa-section-card">
+            <div className="sa-section-header">
+              <div className="sa-section-title"><Mail color="#8b5cf6" size={18} /> System SMTP Notifications</div>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>SMTP Host</label>
                 <input 

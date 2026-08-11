@@ -425,26 +425,52 @@ export default function HomeVisits({ currentRole }) {
 
       {/* 8. Completed Visits Section */}
       <div className="card">
-         <h4 className="font-bold text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Past & Completed Home Visits</h4>
+         <h4 className="font-bold text-sm mb-4" style={{ color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Past & Completed Home Visits</h4>
          {pastVisits.length === 0 ? (
              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No past records found in the system.</p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-              {pastVisits.map(apt => (
-                <div key={apt.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem', backgroundColor: '#fafafa' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                     <div>
-                       <strong style={{ fontSize: '0.9rem', display: 'block' }}>{apt.petName} <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>({apt.ownerName})</span></strong>
-                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>{apt.date} • {apt.doctorName}</span>
-                     </div>
-                     <span className={`badge ${getStatusBadgeClass(apt.status)}`} style={{ fontSize: '0.65rem' }}>{apt.status}</span>
-                   </div>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
-                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}><MapPin size={10} style={{ display: 'inline', marginRight: '2px'}}/> {apt.address || 'Address on file'}</span>
-                     <span className="font-semibold text-xs" style={{ color: 'var(--success)' }}>Paid: LKR {(apt.travelFee || 0).toLocaleString()}</span>
-                   </div>
-                </div>
-              ))}
+            <div className="table-responsive">
+              <table className="custom-table" style={{ fontSize: '0.85rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: '0.75rem 1rem' }}>Pet / Owner</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Visit Address</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Date & Doctor</th>
+                    <th style={{ textAlign: 'right', padding: '0.75rem 1rem' }}>Amount Paid</th>
+                    <th style={{ textAlign: 'center', padding: '0.75rem 1rem' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pastVisits.map(apt => (
+                    <tr key={apt.id} style={{ transition: 'background-color 0.15s ease' }}>
+                      <td style={{ padding: '1rem' }}>
+                        <div>
+                          <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)' }}>{apt.petName}</strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{apt.ownerName}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', maxWidth: '280px' }}>
+                          <MapPin size={12} style={{ color: 'var(--text-muted)', marginTop: '2px', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.8rem', lineHeight: 1.2 }}>{apt.address || 'Address on file'}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <div>
+                          <span className="font-semibold" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{apt.date}</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{apt.doctorName}</span>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--success)', padding: '1rem' }}>
+                        LKR {(apt.travelFee || 0).toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '1rem' }}>
+                        <span className={`badge ${getStatusBadgeClass(apt.status)}`} style={{ fontSize: '0.7rem' }}>{apt.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
       </div>

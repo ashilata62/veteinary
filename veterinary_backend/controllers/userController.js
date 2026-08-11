@@ -2,7 +2,7 @@ const userService = require('../services/userService');
 
 exports.getProfile = async (req, res) => {
     try {
-        const user = await userService.getUserById(req.user.id);
+        const user = await userService.getUserById(req.user.clinic_id, req.user.id);
         if (!user) {
             return res.status(404).json({ status: 'error', message: 'User not found' });
         }
@@ -15,7 +15,7 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const updatedUser = await userService.updateProfile(req.user.id, req.body);
+        const updatedUser = await userService.updateProfile(req.user.clinic_id, req.user.id, req.body);
         if (!updatedUser) {
             return res.status(404).json({ status: 'error', message: 'User not found' });
         }
@@ -32,7 +32,7 @@ exports.getAllUsers = async (req, res) => {
             role: req.query.role,
             status: req.query.status
         };
-        const users = await userService.getAllUsers(filters);
+        const users = await userService.getAllUsers(req.user.clinic_id, filters);
         res.status(200).json({ status: 'success', data: users });
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -51,7 +51,7 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'Missing required fields' });
         }
         
-        const newUser = await userService.createUser(req.body);
+        const newUser = await userService.createUser(req.user.clinic_id, req.body);
         res.status(201).json({ status: 'success', data: newUser });
     } catch (error) {
         console.error('Error creating user:', error);
@@ -69,7 +69,7 @@ exports.updateUser = async (req, res) => {
         }
         
         const { id } = req.params;
-        const updatedUser = await userService.updateUser(id, req.body);
+        const updatedUser = await userService.updateUser(req.user.clinic_id, id, req.body);
         
         if (!updatedUser) {
             return res.status(404).json({ status: 'error', message: 'Staff member not found' });
@@ -97,7 +97,7 @@ exports.deleteUser = async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'You cannot delete your own account' });
         }
 
-        const success = await userService.deleteUser(id);
+        const success = await userService.deleteUser(req.user.clinic_id, id);
         if (!success) {
             return res.status(404).json({ status: 'error', message: 'Staff member not found' });
         }

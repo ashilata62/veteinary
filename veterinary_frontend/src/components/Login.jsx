@@ -21,22 +21,6 @@ export default function Login({ setIsAuthenticated, setCurrentRole }) {
   const [transitionOut, setTransitionOut] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Particles for the background
-  const [particles, setParticles] = useState([]);
-  
-  useEffect(() => {
-    // Generate random particles
-    const newParticles = Array.from({ length: 15 }).map((_, i) => ({
-      id: i,
-      size: Math.random() * 20 + 10,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: Math.random() * 20 + 10,
-      delay: Math.random() * 5
-    }));
-    setParticles(newParticles);
-  }, []);
-
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.getModifierState) {
@@ -116,24 +100,6 @@ export default function Login({ setIsAuthenticated, setCurrentRole }) {
       <div className="login-bg-container">
         <div className="login-bg-image"></div>
         <div className="login-overlay-grad"></div>
-        <div className="login-particles">
-          {particles.map(p => (
-            <div 
-              key={p.id} 
-              className="particle"
-              style={{
-                width: p.size,
-                height: p.size,
-                left: `${p.left}%`,
-                top: `${p.top}%`,
-                animationDuration: `${p.duration}s`,
-                animationDelay: `${p.delay}s`
-              }}
-            >
-              <HeartHandshake size={p.size} strokeWidth={1} />
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="login-premium-layout">
@@ -176,21 +142,6 @@ export default function Login({ setIsAuthenticated, setCurrentRole }) {
             <div className="login-feature-item">
               <PieChart className="login-feature-icon" size={24} />
               <span>Reports</span>
-            </div>
-          </div>
-
-          <div className="floating-stats-container">
-            <div className="glass-stat-card c1">
-              <span className="stat-val">500+</span>
-              <span className="stat-lbl">Happy Clinics</span>
-            </div>
-            <div className="glass-stat-card c2">
-              <span className="stat-val">50K+</span>
-              <span className="stat-lbl">Pets Treated</span>
-            </div>
-            <div className="glass-stat-card c3">
-              <span className="stat-val">99.9%</span>
-              <span className="stat-lbl">Uptime</span>
             </div>
           </div>
         </div>

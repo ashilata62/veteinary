@@ -15,6 +15,7 @@ import AssistanceTasks from './components/AssistanceTasks';
 import Billing from './components/Billing';
 import Inventory from './components/Inventory';
 import Reports from './components/Reports';
+import Hospitalization from './components/Hospitalization';
 import SettingsPage from './components/Settings';
 import Login from './components/Login';
 import LandingPage from './components/LandingPage';
@@ -312,6 +313,7 @@ export default function App() {
           {currentTab === 'assistance-tasks' && <AssistanceTasks />}
           {currentTab === 'billing' && <Billing currentRole={currentRole} />}
           {currentTab === 'inventory' && <Inventory />}
+          {currentTab === 'hospitalization' && <Hospitalization />}
           {currentTab === 'staff' && <StaffManagement />}
           {currentTab === 'attendance' && <Attendance currentRole={currentRole} />}
           {currentTab === 'reports' && <Reports />}

@@ -38,37 +38,22 @@ export default function SuperAdminPayments() {
 
   return (
     <div className="sa-dash-wrapper">
-      <div className="sa-renewals-header">
+      <div className="sa-page-header">
         <div>
           <h1 className="sa-dash-title">Payments & Ledger</h1>
           <p className="sa-dash-subtitle">Track SaaS transaction history, Razorpay orders and invoices.</p>
         </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <div className="sa-search-bar">
-            <Search size={18} className="sa-search-icon" />
-            <input
-              type="text"
-              placeholder="Search TX ID or clinic..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="sa-search-input"
-            />
+            <Search size={16} className="sa-search-icon" />
+            <input type="text" placeholder="Search TX ID or clinic..." value={search} onChange={(e) => setSearch(e.target.value)} className="sa-search-input" />
           </div>
-
-          <div className="sa-select-wrapper">
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="sa-filter-select"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Successful">Successful</option>
-              <option value="Pending">Pending</option>
-              <option value="Failed">Failed</option>
-            </select>
-          </div>
-
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="sa-filter-select">
+            <option value="All">All Statuses</option>
+            <option value="Successful">Successful</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
+          </select>
           <button onClick={handleExportCSV} className="sa-export-btn">
             <Download size={15} />
             <span>Export CSV</span>

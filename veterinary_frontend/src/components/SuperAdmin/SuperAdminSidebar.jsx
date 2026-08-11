@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  LayoutDashboard, Users, Tag, CreditCard, 
+  LayoutDashboard, Users, CreditCard, 
   Settings, Ticket, LogOut
 } from 'lucide-react';
 import './SuperAdmin.css';
@@ -14,7 +14,6 @@ export default function SuperAdminSidebar({
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'admins',    label: 'Admins',    icon: Users },
-    { id: 'plans',     label: 'Plans & Pricing', icon: Tag },
     { id: 'payments',  label: 'Payments',  icon: CreditCard },
     { id: 'settings',  label: 'Setting',   icon: Settings },
     { id: 'tickets',   label: 'Support Tickets', icon: Ticket },

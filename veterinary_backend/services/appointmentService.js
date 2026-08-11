@@ -2,16 +2,16 @@ const db = require('../config/db');
 const crypto = require('crypto');
 
 class AppointmentService {
-    async getAllAppointments(filters = {}) {
+    async getAllAppointments(clinic_id, filters = {}) {
         let query = `
             SELECT a.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, p.name as petName, u.name as doctorName, o.id as ownerId, o.name as ownerName
             FROM appointments a
             JOIN pets p ON a.pet_id = p.id
             LEFT JOIN pet_owners o ON p.owner_id = o.id
             LEFT JOIN users u ON a.doctor_id = u.id
-            WHERE 1=1
+            WHERE a.clinic_id = ?
         `;
-        const params = [];
+        const params = [clinic_id];
         
         if (filters.ownerId) {
             query += ` AND o.id = ?`;
@@ -32,20 +32,20 @@ class AppointmentService {
         return rows;
     }
 
-    async getAppointmentById(id) {
+    async getAppointmentById(clinic_id, id) {
         const query = `
             SELECT a.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, p.name as petName, u.name as doctorName, o.id as ownerId, o.name as ownerName
             FROM appointments a
             JOIN pets p ON a.pet_id = p.id
             LEFT JOIN pet_owners o ON p.owner_id = o.id
             LEFT JOIN users u ON a.doctor_id = u.id
-            WHERE a.id = ?
+            WHERE a.id = ? AND a.clinic_id = ?
         `;
-        const [rows] = await db.query(query, [id]);
+        const [rows] = await db.query(query, [id, clinic_id]);
         return rows[0];
     }
 
-    async createAppointment(data) {
+    async createAppointment(clinic_id, data) {
         const id = `APT-2026-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
         const { petId, doctorId, appointmentDate, appointmentTime, appointmentType, notes } = data;
         
@@ -53,9 +53,9 @@ class AppointmentService {
         if (doctorId) {
             const conflictQuery = `
                 SELECT id FROM appointments 
-                WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND status != 'Cancelled'
+                WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND status != 'Cancelled' AND clinic_id = ?
             `;
-            const [conflicts] = await db.query(conflictQuery, [doctorId, appointmentDate, appointmentTime]);
+            const [conflicts] = await db.query(conflictQuery, [doctorId, appointmentDate, appointmentTime, clinic_id]);
             if (conflicts.length > 0) {
                 throw new Error("Double booking detected: Doctor is already booked at this date and time.");
             }
@@ -63,28 +63,28 @@ class AppointmentService {
         
         const query = `
             INSERT INTO appointments (
-                id, pet_id, doctor_id, appointment_date, appointment_time, 
+                id, clinic_id, pet_id, doctor_id, appointment_date, appointment_time, 
                 appointment_type, status, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)
         `;
         
         await db.query(query, [
-            id, petId, doctorId || null, appointmentDate, appointmentTime, 
+            id, clinic_id, petId, doctorId || null, appointmentDate, appointmentTime, 
             appointmentType, notes || null
         ]);
         
-        return await this.getAppointmentById(id);
+        return await this.getAppointmentById(clinic_id, id);
     }
 
-    async updateAppointment(id, data) {
+    async updateAppointment(clinic_id, id, data) {
         const { petId, doctorId, appointmentDate, appointmentTime, appointmentType, status, notes } = data;
         
         if (doctorId && appointmentDate && appointmentTime) {
             const conflictQuery = `
                 SELECT id FROM appointments 
-                WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND id != ? AND status != 'Cancelled'
+                WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND id != ? AND status != 'Cancelled' AND clinic_id = ?
             `;
-            const [conflicts] = await db.query(conflictQuery, [doctorId, appointmentDate, appointmentTime, id]);
+            const [conflicts] = await db.query(conflictQuery, [doctorId, appointmentDate, appointmentTime, id, clinic_id]);
             if (conflicts.length > 0) {
                 throw new Error("Double booking detected: Doctor is already booked at this date and time.");
             }
@@ -99,25 +99,25 @@ class AppointmentService {
                 appointment_type = COALESCE(?, appointment_type), 
                 status = COALESCE(?, status), 
                 notes = COALESCE(?, notes)
-            WHERE id = ?
+            WHERE id = ? AND clinic_id = ?
         `;
         
         const [result] = await db.query(query, [
-            petId, doctorId, appointmentDate, appointmentTime, appointmentType, status, notes, id
+            petId, doctorId, appointmentDate, appointmentTime, appointmentType, status, notes, id, clinic_id
         ]);
         
         if (result.affectedRows === 0) return null;
-        return await this.getAppointmentById(id);
+        return await this.getAppointmentById(clinic_id, id);
     }
 
-    async deleteAppointment(id) {
+    async deleteAppointment(clinic_id, id) {
         // Soft delete implementation: change status to Cancelled instead of deleting
-        const query = `UPDATE appointments SET status = 'Cancelled' WHERE id = ?`;
-        const [result] = await db.query(query, [id]);
+        const query = `UPDATE appointments SET status = 'Cancelled' WHERE id = ? AND clinic_id = ?`;
+        const [result] = await db.query(query, [id, clinic_id]);
         return result.affectedRows > 0;
     }
 
-    async getUpcomingReminders() {
+    async getUpcomingReminders(clinic_id) {
         const query = `
             SELECT a.id, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, a.appointment_time, a.status, a.notes, a.reminder_sent,
                    p.name as petName, p.breed as petBreed,
@@ -127,23 +127,23 @@ class AppointmentService {
             JOIN pets p ON a.pet_id = p.id
             JOIN pet_owners o ON p.owner_id = o.id
             LEFT JOIN users u ON a.doctor_id = u.id
-            WHERE a.appointment_date >= CURRENT_DATE() AND a.status IN ('Pending', 'Upcoming')
+            WHERE a.clinic_id = ? AND a.appointment_date >= CURRENT_DATE() AND a.status IN ('Pending', 'Upcoming')
             ORDER BY a.appointment_date ASC, a.appointment_time ASC
         `;
-        const [rows] = await db.query(query);
+        const [rows] = await db.query(query, [clinic_id]);
         return rows;
     }
 
-    async sendReminder(appointmentId, customMessageBody, customRecipientEmail) {
+    async sendReminder(clinic_id, appointmentId, customMessageBody, customRecipientEmail) {
         // Retrieve full appointment details
         const query = `
             SELECT a.*, p.name as petName, o.name as ownerName, o.email as ownerEmail, o.id as ownerId
             FROM appointments a
             JOIN pets p ON a.pet_id = p.id
             JOIN pet_owners o ON p.owner_id = o.id
-            WHERE a.id = ?
+            WHERE a.id = ? AND a.clinic_id = ?
         `;
-        const [rows] = await db.query(query, [appointmentId]);
+        const [rows] = await db.query(query, [appointmentId, clinic_id]);
         if (rows.length === 0) {
             throw new Error('Appointment not found.');
         }

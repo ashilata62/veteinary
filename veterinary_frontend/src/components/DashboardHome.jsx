@@ -429,27 +429,23 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem',
-          padding: '2.5rem 2.5rem',
+          gap: '1.5rem',
+          padding: '2.5rem 3rem',
           borderRadius: 'var(--radius-xl)',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0f172a 0%, #0f766e 55%, #3b82f6 100%)',
-          boxShadow: '0 8px 32px -8px rgba(15,118,110,0.35)',
+          background: 'linear-gradient(135deg, var(--primary-teal) 0%, #0891b2 100%)',
+          color: '#ffffff',
+          boxShadow: '0 10px 25px -5px rgba(20, 184, 166, 0.4)',
         }}
       >
-        {/* Decorative blobs */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '220px', height: '220px', borderRadius: '50%', background: 'rgba(20,184,166,0.13)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-50px', right: '130px', width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(59,130,246,0.12)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '8px', left: '38%', opacity: 0.07 }}>
-          <Users size={110} color="#fff" />
-        </div>
-
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px 0' }}>
             Admin Control Panel
           </p>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>Clinic Operations Command</h1>
-          <p style={{ color: 'rgba(203,213,225,0.85)', fontSize: '0.9rem', margin: '0.5rem 0 0 0', fontWeight: 400 }}>
+          <h1 style={{ color: '#ffffff', fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.75rem 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+            Clinic Operations Command
+          </h1>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.05rem', margin: 0, fontWeight: 500, maxWidth: '550px', lineHeight: '1.5' }}>
             Real-time overview of patients, revenue, appointments, and stock.
           </p>
         </div>
@@ -484,16 +480,18 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
           { label: 'Inventory Alerts', value: lowStockAlertsCount,  sub: lowStockAlertsCount > 0 ? 'Needs action' : 'Stock level healthy',            subColor: lowStockAlertsCount > 0 ? 'var(--danger)' : 'var(--success)',   icon: AlertTriangle, iconBg: lowStockAlertsCount > 0 ? 'var(--danger-light)' : 'var(--primary-teal-light)',         iconColor: lowStockAlertsCount > 0 ? 'var(--danger)' : 'var(--primary-teal)' },
           { label: 'Staff Attendance', value: `${staffPresent}/${staffTotal}`, sub: 'Present today', subColor: 'var(--success)', icon: CheckCircle2, iconBg: '#dcfce7', iconColor: '#16a34a' },
         ].map(({ label, value, sub, subColor, icon: Icon, iconBg, iconColor }, i) => (
-          <div key={label} className={`card animate-fade-in-up hover-lift stagger-${i + 1}`} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-            <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-lg)', backgroundColor: iconBg, color: iconColor, flexShrink: 0 }}>
-              <Icon size={24} />
-            </div>
-            <div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
-              <h3 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '2px 0 0 0' }}>{value}</h3>
-              <span style={{ color: subColor, fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '2px' }}>
+          <div key={label} className={`card animate-fade-in-up hover-lift stagger-${i + 1}`} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1.5rem', boxShadow: 'var(--shadow-md)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: iconBg, color: iconColor }}>
+                <Icon size={22} />
+              </div>
+              <span style={{ color: subColor, fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--background)', padding: '4px 8px', borderRadius: '20px' }}>
                 <TrendingUp size={12} />{sub}
               </span>
+            </div>
+            <div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>{label}</p>
+              <h3 style={{ fontSize: '1.65rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{value}</h3>
             </div>
           </div>
         ))}
@@ -528,18 +526,24 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
       </div>
 
       {/* 3 Interactive Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        <ChartCard title="Revenue Analytics Trend (LKR)" badge="Live Growth" badgeClass="badge-success">
-          <RevenueChart data={revenueData} />
-        </ChartCard>
+      <div className="dashboard-charts-grid">
+        <div className="chart-card-revenue">
+          <ChartCard title="Revenue Analytics Trend (LKR)" badge="Live Growth" badgeClass="badge-success">
+            <RevenueChart data={revenueData} />
+          </ChartCard>
+        </div>
 
-        <ChartCard title="Daily Appointment Analytics" badge="Capacity Rate" badgeClass="badge-info">
-          <AppointmentChart data={appointmentData} />
-        </ChartCard>
+        <div className="chart-card-demographics">
+          <ChartCard title="Patient Demographics Distribution">
+            <DonutChart data={demographicsData} />
+          </ChartCard>
+        </div>
 
-        <ChartCard title="Patient Demographics Distribution">
-          <DonutChart data={demographicsData} />
-        </ChartCard>
+        <div className="chart-card-appointments">
+          <ChartCard title="Daily Appointment Analytics" badge="Capacity Rate" badgeClass="badge-info">
+            <AppointmentChart data={appointmentData} />
+          </ChartCard>
+        </div>
       </div>
 
       {/* Bottom: Doctor Performance & Notifications & Recent Patients */}
@@ -625,7 +629,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
         </div>
 
         {/* Active System Notifications */}
-        <div className="card animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animationDelay: '300ms' }}>
+        <div className="card animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animationDelay: '300ms', gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 className="font-bold text-sm" style={{ color: 'var(--text-secondary)' }}>System Notifications Panel</h4>
           </div>

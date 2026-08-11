@@ -13,7 +13,7 @@ const protect = (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey123');
             
             // Set user in request object
-            req.user = decoded; // Contains { id, role, email }
+            req.user = decoded; // Contains { id, role, email, clinic_id }
             
             next();
         } catch (error) {

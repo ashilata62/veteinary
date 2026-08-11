@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 const getPets = async (req, res) => {
     try {
-        const pets = await petService.getAllPets();
+        const pets = await petService.getAllPets(req.user.clinic_id);
         res.json({ status: 'success', data: pets });
     } catch (error) {
         console.error('Error fetching pets:', error);
@@ -15,7 +15,7 @@ const getPets = async (req, res) => {
 
 const getPet = async (req, res) => {
     try {
-        const pet = await petService.getPetById(req.params.id);
+        const pet = await petService.getPetById(req.user.clinic_id, req.params.id);
         if (!pet) return res.status(404).json({ status: 'error', message: 'Pet not found' });
         res.json({ status: 'success', data: pet });
     } catch (error) {
@@ -33,16 +33,17 @@ const createPet = async (req, res) => {
         if (weight && isNaN(Number(weight))) {
             return res.status(400).json({ status: 'error', message: 'Weight must be a valid number' });
         }
-        const newPet = await petService.createPet(req.body);
+        const newPet = await petService.createPet(req.user.clinic_id, req.body);
 
         // ── In-App Notification ───────────────────────────────────────────
         try {
             const { createNotification } = require('../services/notificationService');
             await createNotification(
-                null, // Broadcast to all admin/manager staff
+                req.user.clinic_id,
+                null,
                 '🐾 New Pet Registered',
-                `${newPet.name || name} (${newPet.species || species}) has been registered under owner ID: ${ownerId}. Patient profile is now active.`,
-                'system'
+                `${newPet.name} (${newPet.species}) has been registered by ${req.user.name}.`,
+                'pet_registered'
             );
         } catch (notifErr) {
             console.error('[PetController] Notification error (non-fatal):', notifErr.message);
@@ -71,7 +72,7 @@ const updatePet = async (req, res) => {
         if (weight && isNaN(Number(weight))) {
             return res.status(400).json({ status: 'error', message: 'Weight must be a valid number' });
         }
-        const updated = await petService.updatePet(req.params.id, req.body);
+        const updated = await petService.updatePet(req.user.clinic_id, req.params.id, req.body);
         if (!updated) return res.status(404).json({ status: 'error', message: 'Pet not found' });
         res.json({ status: 'success', data: updated });
     } catch (error) {
@@ -85,7 +86,7 @@ const updatePet = async (req, res) => {
 
 const deletePet = async (req, res) => {
     try {
-        const deleted = await petService.deletePet(req.params.id);
+        const deleted = await petService.deletePet(req.user.clinic_id, req.params.id);
         if (!deleted) return res.status(404).json({ status: 'error', message: 'Pet not found' });
         res.json({ status: 'success', message: 'Pet archived successfully' });
     } catch (error) {

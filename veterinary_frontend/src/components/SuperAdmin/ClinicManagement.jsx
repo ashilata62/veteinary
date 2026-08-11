@@ -88,48 +88,29 @@ export default function ClinicManagement() {
     <div className="sa-dash-wrapper">
       {/* Toast Notification */}
       {toastMessage && (
-        <div style={{
-          position: 'fixed', top: '80px', right: '2rem', zIndex: 1000,
-          backgroundColor: '#0f172a', color: '#2dd4bf', padding: '0.85rem 1.5rem',
-          borderRadius: '10px', border: '1px solid #2dd4bf', boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-          fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
-        }}>
-          <CheckCircle size={18} />
+        <div className="sa-toast">
+          <CheckCircle size={16} color="#0d9488" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Page Header */}
-      <div className="sa-renewals-header">
+      <div className="sa-page-header">
         <div>
           <h1 className="sa-dash-title">Admins & Clinic Management</h1>
           <p className="sa-dash-subtitle">View, edit, suspend or upgrade platform clinic administrators.</p>
         </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <div className="sa-search-bar">
-            <Search size={18} className="sa-search-icon" />
-            <input
-              type="text"
-              placeholder="Search clinic or admin..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="sa-search-input"
-            />
+            <Search size={16} className="sa-search-icon" />
+            <input type="text" placeholder="Search clinic or admin..." value={search} onChange={(e) => setSearch(e.target.value)} className="sa-search-input" />
           </div>
-
-          <div className="sa-select-wrapper">
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="sa-filter-select"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Active">Active Paid</option>
-              <option value="Trial">Free Trial</option>
-              <option value="Suspended">Suspended</option>
-            </select>
-          </div>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="sa-filter-select">
+            <option value="All">All Statuses</option>
+            <option value="Active">Active Paid</option>
+            <option value="Trial">Free Trial</option>
+            <option value="Suspended">Suspended</option>
+          </select>
         </div>
       </div>
 

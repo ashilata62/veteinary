@@ -18,7 +18,7 @@ exports.createEncounter = async (req, res) => {
             return res.status(403).json({ message: 'Vet Assistants are restricted from writing prescriptions' });
         }
 
-        const encounter = await encounterService.createEncounter(req.body, req.user.id);
+        const encounter = await encounterService.createEncounter(req.user.clinic_id, req.body, req.user.id);
         res.status(201).json({ message: 'Encounter created successfully', id: encounter.id });
     } catch (error) {
         console.error('Error creating encounter:', error);
@@ -32,9 +32,9 @@ exports.getEncounters = async (req, res) => {
         let encounters;
         
         if (petId) {
-            encounters = await encounterService.getEncountersByPet(petId);
+            encounters = await encounterService.getEncountersByPet(req.user.clinic_id, petId);
         } else {
-            encounters = await encounterService.getAllEncounters();
+            encounters = await encounterService.getAllEncounters(req.user.clinic_id);
         }
         
         res.json(encounters);
@@ -46,7 +46,7 @@ exports.getEncounters = async (req, res) => {
 
 exports.uploadReport = async (req, res) => {
     try {
-        const result = await encounterService.uploadReport(req.body, req.user ? req.user.id : null);
+        const result = await encounterService.uploadReport(req.user.clinic_id, req.body, req.user ? req.user.id : null);
         res.status(200).json({ status: 'success', ...result });
     } catch (error) {
         console.error('Error uploading report:', error);

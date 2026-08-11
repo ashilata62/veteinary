@@ -2,7 +2,7 @@ const db = require('../config/db');
 const crypto = require('crypto');
 
 class HomeVisitService {
-    async getAllHomeVisits(filters = {}) {
+    async getAllHomeVisits(clinic_id, filters = {}) {
         let query = `
             SELECT hv.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, a.appointment_time, 
                    p.name as petName, u.name as doctorName, 
@@ -12,9 +12,9 @@ class HomeVisitService {
             JOIN pets p ON hv.pet_id = p.id
             JOIN pet_owners o ON hv.owner_id = o.id
             LEFT JOIN users u ON hv.doctor_id = u.id
-            WHERE 1=1
+            WHERE hv.clinic_id = ?
         `;
-        const params = [];
+        const params = [clinic_id];
         
         if (filters.ownerId) {
             query += ` AND hv.owner_id = ?`;
@@ -39,7 +39,7 @@ class HomeVisitService {
         return rows;
     }
 
-    async getHomeVisitById(id) {
+    async getHomeVisitById(clinic_id, id) {
         const query = `
             SELECT hv.*, DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as appointment_date, a.appointment_time, 
                    p.name as petName, u.name as doctorName, 
@@ -49,13 +49,13 @@ class HomeVisitService {
             JOIN pets p ON hv.pet_id = p.id
             JOIN pet_owners o ON hv.owner_id = o.id
             LEFT JOIN users u ON hv.doctor_id = u.id
-            WHERE hv.id = ?
+            WHERE hv.id = ? AND hv.clinic_id = ?
         `;
-        const [rows] = await db.query(query, [id]);
+        const [rows] = await db.query(query, [id, clinic_id]);
         return rows[0];
     }
 
-    async createHomeVisit(data) {
+    async createHomeVisit(clinic_id, data) {
         const { petId, ownerId, doctorId, appointmentDate, appointmentTime, address, travelFee, notes } = data;
         
         // Travel Fee Validation
@@ -73,9 +73,9 @@ class HomeVisitService {
             if (doctorId) {
                 const conflictQuery = `
                     SELECT id FROM appointments 
-                    WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND status != 'Cancelled'
+                    WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND status != 'Cancelled' AND clinic_id = ?
                 `;
-                const [conflicts] = await connection.query(conflictQuery, [doctorId, appointmentDate, appointmentTime]);
+                const [conflicts] = await connection.query(conflictQuery, [doctorId, appointmentDate, appointmentTime, clinic_id]);
                 if (conflicts.length > 0) {
                     throw new Error("Double booking detected: Doctor is already booked at this date and time.");
                 }
@@ -85,29 +85,29 @@ class HomeVisitService {
             const appointmentId = `APT-2026-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
             const aptQuery = `
                 INSERT INTO appointments (
-                    id, pet_id, doctor_id, appointment_date, appointment_time, 
+                    id, clinic_id, pet_id, doctor_id, appointment_date, appointment_time, 
                     appointment_type, status, notes
-                ) VALUES (?, ?, ?, ?, ?, 'Home Visit', 'Pending', ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, 'Home Visit', 'Pending', ?)
             `;
             await connection.query(aptQuery, [
-                appointmentId, petId, doctorId || null, appointmentDate, appointmentTime, notes || null
+                appointmentId, clinic_id, petId, doctorId || null, appointmentDate, appointmentTime, notes || null
             ]);
 
             // 3. Create Home Visit
             const visitId = `HV-2026-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
             const hvQuery = `
                 INSERT INTO home_visits (
-                    id, appointment_id, pet_id, owner_id, doctor_id, 
+                    id, clinic_id, appointment_id, pet_id, owner_id, doctor_id, 
                     address, travel_fee, visit_status, notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Scheduled', ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Scheduled', ?)
             `;
             await connection.query(hvQuery, [
-                visitId, appointmentId, petId, ownerId, doctorId || null,
+                visitId, clinic_id, appointmentId, petId, ownerId, doctorId || null,
                 address, parsedFee, notes || null
             ]);
 
             await connection.commit();
-            return await this.getHomeVisitById(visitId);
+            return await this.getHomeVisitById(clinic_id, visitId);
             
         } catch (error) {
             await connection.rollback();
@@ -117,11 +117,11 @@ class HomeVisitService {
         }
     }
 
-    async updateHomeVisit(id, data) {
+    async updateHomeVisit(clinic_id, id, data) {
         const { doctorId, address, travelFee, visitStatus, notes, appointmentDate, appointmentTime } = data;
         
         // Retrieve current visit to apply business rules
-        const currentVisit = await this.getHomeVisitById(id);
+        const currentVisit = await this.getHomeVisitById(clinic_id, id);
         if (!currentVisit) {
             throw new Error("Home Visit not found");
         }
@@ -172,9 +172,9 @@ class HomeVisitService {
             if (targetDoctorId && targetDate && targetTime && (targetDoctorId !== currentVisit.doctor_id || targetDate !== currentVisit.appointment_date || targetTime !== currentVisit.appointment_time)) {
                 const conflictQuery = `
                     SELECT id FROM appointments 
-                    WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND id != ? AND status != 'Cancelled'
+                    WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND id != ? AND status != 'Cancelled' AND clinic_id = ?
                 `;
-                const [conflicts] = await connection.query(conflictQuery, [targetDoctorId, targetDate, targetTime, currentVisit.appointment_id]);
+                const [conflicts] = await connection.query(conflictQuery, [targetDoctorId, targetDate, targetTime, currentVisit.appointment_id, clinic_id]);
                 if (conflicts.length > 0) {
                     throw new Error("Double booking detected: Doctor is already booked at this date and time.");
                 }
@@ -186,9 +186,9 @@ class HomeVisitService {
                     doctor_id = COALESCE(?, doctor_id), 
                     appointment_date = COALESCE(?, appointment_date), 
                     appointment_time = COALESCE(?, appointment_time)
-                WHERE id = ?
+                WHERE id = ? AND clinic_id = ?
             `;
-            await connection.query(aptQuery, [doctorId, appointmentDate, appointmentTime, currentVisit.appointment_id]);
+            await connection.query(aptQuery, [doctorId, appointmentDate, appointmentTime, currentVisit.appointment_id, clinic_id]);
 
             // Update Home Visit
             const hvQuery = `
@@ -198,21 +198,21 @@ class HomeVisitService {
                     travel_fee = ?, 
                     visit_status = COALESCE(?, visit_status), 
                     notes = COALESCE(?, notes)
-                WHERE id = ?
+                WHERE id = ? AND clinic_id = ?
             `;
-            await connection.query(hvQuery, [doctorId, address, parsedFee, visitStatus, notes, id]);
+            await connection.query(hvQuery, [doctorId, address, parsedFee, visitStatus, notes, id, clinic_id]);
 
             // Synchronize status with appointment if necessary
             if (visitStatus === 'Cancelled') {
-                 await connection.query(`UPDATE appointments SET status = 'Cancelled' WHERE id = ?`, [currentVisit.appointment_id]);
+                 await connection.query(`UPDATE appointments SET status = 'Cancelled' WHERE id = ? AND clinic_id = ?`, [currentVisit.appointment_id, clinic_id]);
             } else if (visitStatus === 'Completed') {
-                 await connection.query(`UPDATE appointments SET status = 'Completed' WHERE id = ?`, [currentVisit.appointment_id]);
+                 await connection.query(`UPDATE appointments SET status = 'Completed' WHERE id = ? AND clinic_id = ?`, [currentVisit.appointment_id, clinic_id]);
             } else if (visitStatus === 'In Progress') {
-                 await connection.query(`UPDATE appointments SET status = 'Confirmed' WHERE id = ?`, [currentVisit.appointment_id]);
+                 await connection.query(`UPDATE appointments SET status = 'Confirmed' WHERE id = ? AND clinic_id = ?`, [currentVisit.appointment_id, clinic_id]);
             }
 
             await connection.commit();
-            return await this.getHomeVisitById(id);
+            return await this.getHomeVisitById(clinic_id, id);
         } catch (error) {
             await connection.rollback();
             throw error;
@@ -221,20 +221,20 @@ class HomeVisitService {
         }
     }
 
-    async deleteHomeVisit(id) {
+    async deleteHomeVisit(clinic_id, id) {
         // No physical deletes. Change status to Cancelled.
-        const currentVisit = await this.getHomeVisitById(id);
+        const currentVisit = await this.getHomeVisitById(clinic_id, id);
         if (!currentVisit) return false;
 
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
             
-            const queryHV = `UPDATE home_visits SET visit_status = 'Cancelled' WHERE id = ?`;
-            await connection.query(queryHV, [id]);
+            const queryHV = `UPDATE home_visits SET visit_status = 'Cancelled' WHERE id = ? AND clinic_id = ?`;
+            await connection.query(queryHV, [id, clinic_id]);
 
-            const queryApt = `UPDATE appointments SET status = 'Cancelled' WHERE id = ?`;
-            await connection.query(queryApt, [currentVisit.appointment_id]);
+            const queryApt = `UPDATE appointments SET status = 'Cancelled' WHERE id = ? AND clinic_id = ?`;
+            await connection.query(queryApt, [currentVisit.appointment_id, clinic_id]);
 
             await connection.commit();
             return true;

@@ -2,7 +2,7 @@
 
 .login-premium-page {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   position: relative;
   font-family: var(--font-family);
@@ -85,6 +85,7 @@
   flex-direction: column;
   justify-content: center;
   position: relative;
+  min-width: 0;
 }
 
 .login-brand-premium {
@@ -207,44 +208,23 @@
   padding: 2rem;
   perspective: 1000px;
   position: relative;
+  min-width: 0;
 }
 
 .glass-login-card {
   width: 100%;
-  max-width: 480px;
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
-  padding: 3rem 2.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(20, 184, 166, 0.15);
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2rem 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
-  /* Entrance Animation: 700ms easeOutExpo */
+  /* Entrance Animation */
   opacity: 0;
   transform: translateX(100px) scale(0.95);
   animation: slideInRight 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-}
-
-/* Glow effect around edges */
-.glass-login-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.8), transparent);
-}
-.glass-login-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
 }
 
 @keyframes slideInRight {
@@ -258,25 +238,26 @@
 
 .login-header-text h2 {
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: #0f172a;
 }
 
 .cursor-blink {
   display: inline-block;
   width: 2px;
   height: 1.5rem;
-  background-color: #2dd4bf;
+  background-color: #0f766e;
   animation: blink 1s step-end infinite;
 }
 
 @keyframes blink { 50% { opacity: 0; } }
 
 .login-header-text p {
-  color: #94a3b8;
+  color: #64748b;
   font-size: 0.95rem;
   margin: 0;
 }
@@ -290,31 +271,30 @@
 }
 
 .role-chip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f1f5f9;
+  border: 1px solid transparent;
   border-radius: 999px;
   padding: 0.5rem 0.8rem;
-  color: #cbd5e1;
+  color: #475569;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .role-chip:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  background: #e2e8f0;
+  transform: translateY(-1px);
 }
 
 .role-chip.active {
-  background: rgba(20, 184, 166, 0.15);
-  border-color: #2dd4bf;
-  color: #2dd4bf;
-  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2);
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
 }
 
 /* Inputs */
@@ -335,43 +315,47 @@
 
 .premium-input {
   width: 100%;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1.25rem 1rem 0.75rem 3rem;
-  color: #fff;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.6rem 1rem 0.4rem 2.75rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  height: 3.5rem;
 }
 
 .premium-input:focus {
   outline: none;
-  border-color: #2dd4bf;
-  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
-  background: rgba(15, 23, 42, 0.8);
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  background: #ffffff;
 }
 
 .premium-input:focus + .premium-input-icon {
-  color: #2dd4bf;
+  color: #0f766e;
 }
 
 .input-label-float {
   position: absolute;
-  left: 3rem;
+  left: 2.75rem;
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
   pointer-events: none;
   transition: all 0.2s ease-out;
-  font-size: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .premium-input:focus ~ .input-label-float,
 .premium-input:not(:placeholder-shown) ~ .input-label-float {
-  top: 0.6rem;
-  left: 3rem;
-  font-size: 0.7rem;
-  color: #2dd4bf;
+  top: 0.4rem;
+  left: 2.75rem;
+  font-size: 0.75rem;
+  color: #0f766e;
   transform: translateY(0);
 }
 
@@ -410,43 +394,27 @@
 /* Submit Button */
 .premium-submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #14b8a6, #3b82f6);
-  color: white;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #0f766e;
+  color: #fff;
   border: none;
-  border-radius: 16px;
-  padding: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
-  position: relative;
-  overflow: hidden;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(15, 118, 110, 0.2);
   margin-top: 1rem;
 }
 
-.premium-submit-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s ease;
-}
-
 .premium-submit-btn:hover:not(:disabled) {
+  background: #0d9488;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.5);
-}
-
-.premium-submit-btn:hover:not(:disabled)::after {
-  left: 100%;
+  box-shadow: 0 15px 25px rgba(15, 118, 110, 0.3);
 }
 
 .premium-submit-btn:active:not(:disabled) {
@@ -454,8 +422,10 @@
 }
 
 .premium-submit-btn:disabled {
-  opacity: 0.7;
+  background: #94a3b8;
   cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
 }
 
 .btn-arrow {

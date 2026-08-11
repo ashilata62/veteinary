@@ -112,15 +112,6 @@ export default function Navbar({
   return (
     <header className="app-navbar" style={{ padding: '0 1rem' }}>
       <div className="app-navbar__left">
-        <button
-          type="button"
-          className="app-navbar__icon-btn"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
-        >
-          <Menu size={20} />
-        </button>
-
         <div className="navbar-search app-navbar__search-desktop">
           <Search size={16} className="app-navbar__search-icon" />
           <input
@@ -179,80 +170,80 @@ export default function Navbar({
             <Bell size={20} />
             {unreadCount > 0 && <span className="app-navbar__notif-dot" />}
           </button>
+        </div>
 
-          {showNotifications && (
-            <>
-              <div className="app-navbar__backdrop" onClick={() => setShowNotifications(false)} />
-              <div className="app-navbar__dropdown">
-                <div className="app-navbar__dropdown-head">
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Notifications</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {unreadCount > 0 && (
-                      <span className="badge badge-danger" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>
-                        {unreadCount} new
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setShowNotifications(false)}
-                      className="app-navbar__icon-btn"
-                      style={{ width: 32, height: 32 }}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                </div>
-                <div className="app-navbar__dropdown-body">
-                  {(notifications || []).slice(0, 6).map((n) => (
-                    <div
-                      key={n.id}
-                      className="app-navbar__notif-item"
-                      style={{
-                        backgroundColor: n.read
-                          ? '#fafafa'
-                          : n.severity === 'danger'
-                            ? 'var(--danger-light)'
-                            : n.severity === 'warning'
-                              ? 'var(--warning-light)'
-                              : '#f0fdfa',
-                        borderLeftColor:
-                          n.severity === 'danger'
-                            ? 'var(--danger)'
-                            : n.severity === 'warning'
-                              ? 'var(--warning)'
-                              : n.severity === 'success'
-                                ? 'var(--success)'
-                                : 'var(--secondary-blue)',
-                        opacity: n.read ? 0.7 : 1,
-                      }}
-                    >
-                      {getNotifIcon(n.severity)}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 600, fontSize: '0.78rem', margin: '0 0 2px 0' }}>{n.title}</p>
-                        <p style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', margin: '0 0 2px 0', lineHeight: 1.4 }}>
-                          {n.message}
-                        </p>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{n.time}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="app-navbar__dropdown-foot">
+        {showNotifications && (
+          <>
+            <div className="app-navbar__backdrop" onClick={() => setShowNotifications(false)} />
+            <div className="app-navbar__dropdown">
+              <div className="app-navbar__dropdown-head">
+                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Notifications</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {unreadCount > 0 && (
+                    <span className="badge badge-danger" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>
+                      {unreadCount} new
+                    </span>
+                  )}
                   <button
                     type="button"
-                    onClick={() => {
-                      setCurrentTab('notifications');
-                      setShowNotifications(false);
-                    }}
-                    className="app-navbar__link-btn"
+                    onClick={() => setShowNotifications(false)}
+                    className="app-navbar__icon-btn"
+                    style={{ width: 32, height: 32 }}
                   >
-                    View all notifications →
+                    <X size={16} />
                   </button>
                 </div>
               </div>
-            </>
-          )}
-        </div>
+              <div className="app-navbar__dropdown-body">
+                {(notifications || []).slice(0, 6).map((n) => (
+                  <div
+                    key={n.id}
+                    className="app-navbar__notif-item"
+                    style={{
+                      backgroundColor: n.read
+                        ? '#fafafa'
+                        : n.severity === 'danger'
+                          ? 'var(--danger-light)'
+                          : n.severity === 'warning'
+                            ? 'var(--warning-light)'
+                            : '#f0fdfa',
+                      borderLeftColor:
+                        n.severity === 'danger'
+                          ? 'var(--danger)'
+                          : n.severity === 'warning'
+                            ? 'var(--warning)'
+                            : n.severity === 'success'
+                              ? 'var(--success)'
+                              : 'var(--secondary-blue)',
+                      opacity: n.read ? 0.7 : 1,
+                    }}
+                  >
+                    {getNotifIcon(n.severity)}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 600, fontSize: '0.78rem', margin: '0 0 2px 0' }}>{n.title}</p>
+                      <p style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', margin: '0 0 2px 0', lineHeight: 1.4 }}>
+                        {n.message}
+                      </p>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{n.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="app-navbar__dropdown-foot">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentTab('notifications');
+                    setShowNotifications(false);
+                  }}
+                  className="app-navbar__link-btn"
+                >
+                  View all notifications →
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         <button
           type="button"

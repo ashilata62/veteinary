@@ -37,7 +37,7 @@ const loginUser = async (req, res) => {
 
         // Generate JWT Token
         const token = jwt.sign(
-            { id: user.id, role: user.role, email: user.email },
+            { id: user.id, role: user.role, email: user.email, clinic_id: user.clinic_id },
             process.env.JWT_SECRET || 'secretkey123',
             { expiresIn: '8h' }
         );
@@ -52,7 +52,8 @@ const loginUser = async (req, res) => {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    profile_image: user.profile_image
+                    profile_image: user.profile_image,
+                    clinic_id: user.clinic_id
                 }
             }
         });
@@ -140,12 +141,18 @@ const registerUser = async (req, res) => {
         const trialExpiryDate = new Date();
         trialExpiryDate.setDate(trialStartDate.getDate() + 7);
 
-        // 6. Insert User into Users Table
+        // 6. Insert Clinic into Clinics Table and User into Users Table
+        const subdomain = businessName.trim().toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+        await db.query(
+            `INSERT INTO clinics (id, name, subdomain, trial_end_date, subscription_status) VALUES (?, ?, ?, ?, 'trial')`,
+            [tenantId, businessName.trim(), subdomain, trialExpiryDate]
+        );
+
         const username = email.split('@')[0].toLowerCase() + Math.floor(Math.random() * 100);
         await db.query(
-            `INSERT INTO users (id, name, email, phone, role, username, password_hash, status) 
-             VALUES (?, ?, ?, ?, 'Admin', ?, ?, 'Active')`,
-            [userId, adminName.trim(), email.trim().toLowerCase(), mobileClean, username, passwordHash]
+            `INSERT INTO users (id, name, email, phone, role, username, password_hash, status, clinic_id) 
+             VALUES (?, ?, ?, ?, 'Admin', ?, ?, 'Active', ?)`,
+            [userId, adminName.trim(), email.trim().toLowerCase(), mobileClean, username, passwordHash, tenantId]
         );
 
         // Send Welcome email using Brevo

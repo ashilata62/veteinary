@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   IndianRupee, Users, UserCheck, Clock, 
-  AlertTriangle, Ticket, ChevronDown, BarChart2
+  AlertTriangle, Ticket, ChevronDown, BarChart2, TrendingUp
 } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
 
@@ -80,9 +80,11 @@ export default function SuperAdminDashboard() {
   return (
     <div className="sa-dash-wrapper">
       {/* Title Header */}
-      <div className="sa-dash-header">
-        <h1 className="sa-dash-title">Analytics Dashboard</h1>
-        <p className="sa-dash-subtitle">Super Admin · Business Overview</p>
+      <div className="sa-page-header">
+        <div>
+          <h1 className="sa-dash-title">Analytics Dashboard</h1>
+          <p className="sa-dash-subtitle">Super Admin · Business Overview</p>
+        </div>
       </div>
 
       {/* Top 7 Stat Cards Grid */}
@@ -207,46 +209,77 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
 
-      </div>
+        {/* Card 8 (from banner): Total Revenue Overall */}
+        <div className="sa-card border-slate">
+          <div className="sa-card-top">
+            <div>
+              <span className="sa-card-label">OVERALL REVENUE</span>
+              <div className="sa-card-value">{formatRevenue(statsData.totalRevenue)}</div>
+            </div>
+            <div className="sa-card-watermark slate">
+              <IndianRupee size={28} />
+            </div>
+          </div>
+          <div className="sa-card-bottom">
+            <span className="sa-trend-sub">All time total</span>
+          </div>
+        </div>
 
-      {/* Dark Summary Banner */}
-      <div className="sa-dark-banner">
-        <div className="sa-banner-item">
-          <div className="sa-banner-val">{formatRevenue(statsData.totalRevenue)}</div>
-          <div className="sa-banner-lbl">Total Revenue</div>
+        {/* Card 9 (from banner): Monthly Performance */}
+        <div className="sa-card border-indigo">
+          <div className="sa-card-top">
+            <div>
+              <span className="sa-card-label">MONTHLY SUMMARY</span>
+              <div className="sa-card-value">{formatRevenue(statsData.monthlyRevenue)}</div>
+            </div>
+            <div className="sa-card-watermark indigo">
+              <TrendingUp size={28} />
+            </div>
+          </div>
+          <div className="sa-card-bottom">
+            <span className="sa-trend-sub">Current Month</span>
+          </div>
         </div>
-        <div className="sa-banner-item">
-          <div className="sa-banner-val">{formatRevenue(statsData.monthlyRevenue)}</div>
-          <div className="sa-banner-lbl">Monthly</div>
+
+        {/* Card 10 (from banner): Platform Admins */}
+        <div className="sa-card border-fuchsia">
+          <div className="sa-card-top">
+            <div>
+              <span className="sa-card-label">TOTAL CLINICS</span>
+              <div className="sa-card-value">{statsData.totalAdmins}</div>
+            </div>
+            <div className="sa-card-watermark fuchsia">
+              <UserCheck size={28} />
+            </div>
+          </div>
+          <div className="sa-card-bottom">
+            <span className="sa-trend-sub">Registered Clinics</span>
+          </div>
         </div>
-        <div className="sa-banner-item">
-          <div className="sa-banner-val">{statsData.totalAdmins}</div>
-          <div className="sa-banner-lbl">Admins</div>
-        </div>
+
       </div>
 
       {/* Upcoming Renewals Table Container */}
-      <div className="sa-renewals-card">
-        <div className="sa-renewals-header">
-          <div className="sa-renewals-title">
-            <Clock size={20} className="sa-clock-icon" />
+      <div className="sa-section-card">
+        <div className="sa-section-header">
+          <div className="sa-section-title">
+            <Clock size={16} />
             <span>Upcoming Renewals</span>
           </div>
-          <div className="sa-renewals-actions">
+          <div className="sa-section-actions">
             <div className="sa-select-wrapper">
               <select 
                 value={timeFilter} 
                 onChange={(e) => setTimeFilter(e.target.value)}
-                className="sa-filter-select"
+                className="sa-select"
               >
                 <option value="Next 7 Days">Next 7 Days</option>
                 <option value="Next 15 Days">Next 15 Days</option>
                 <option value="Next 30 Days">Next 30 Days</option>
               </select>
-              <ChevronDown size={14} className="sa-select-arrow" />
             </div>
 
-            <button className="sa-export-btn">
+            <button className="sa-btn sa-btn-outline">
               <span>Export</span>
               <ChevronDown size={14} />
             </button>
