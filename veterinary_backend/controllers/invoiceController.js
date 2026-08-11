@@ -2,7 +2,7 @@ const invoiceService = require('../services/invoiceService');
 
 exports.getInvoices = async (req, res) => {
     try {
-        const invoices = await invoiceService.getAllInvoices();
+        const invoices = await invoiceService.getAllInvoices(req.user.clinic_id);
         res.json(invoices);
     } catch (error) {
         console.error('Error fetching invoices:', error);
@@ -13,7 +13,7 @@ exports.getInvoices = async (req, res) => {
 exports.getInvoice = async (req, res) => {
     try {
         const { id } = req.params;
-        const invoice = await invoiceService.getInvoiceById(id);
+        const invoice = await invoiceService.getInvoiceById(req.user.clinic_id, id);
         if (!invoice) {
             return res.status(404).json({ message: 'Invoice not found' });
         }
@@ -31,7 +31,7 @@ exports.getUnbilled = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to view unbilled records' });
         }
 
-        const unbilled = await invoiceService.getUnbilledRecords();
+        const unbilled = await invoiceService.getUnbilledRecords(req.user.clinic_id);
         res.json(unbilled);
     } catch (error) {
         console.error('Error fetching unbilled records:', error);
@@ -52,7 +52,7 @@ exports.createInvoice = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to generate invoices' });
         }
 
-        const invoice = await invoiceService.createInvoice(req.body);
+        const invoice = await invoiceService.createInvoice(req.user.clinic_id, req.body);
         res.status(201).json({ message: 'Invoice created successfully', id: invoice.id });
     } catch (error) {
         console.error('Error creating invoice:', error);
@@ -74,7 +74,7 @@ exports.updateStatus = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to update invoice status' });
         }
 
-        const result = await invoiceService.updateInvoiceStatus(id, status);
+        const result = await invoiceService.updateInvoiceStatus(req.user.clinic_id, id, status);
         res.json({ message: `Invoice status updated to ${status} successfully`, id: result.id });
     } catch (error) {
         console.error('Error updating invoice status:', error);

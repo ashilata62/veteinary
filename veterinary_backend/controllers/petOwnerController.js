@@ -2,7 +2,7 @@ const petOwnerService = require('../services/petOwnerService');
 
 const getOwners = async (req, res) => {
     try {
-        const owners = await petOwnerService.getAllOwners();
+        const owners = await petOwnerService.getAllOwners(req.user.clinic_id);
         res.json({ status: 'success', data: owners });
     } catch (error) {
         console.error('Error fetching owners:', error);
@@ -12,7 +12,7 @@ const getOwners = async (req, res) => {
 
 const getOwner = async (req, res) => {
     try {
-        const owner = await petOwnerService.getOwnerById(req.params.id);
+        const owner = await petOwnerService.getOwnerById(req.user.clinic_id, req.params.id);
         if (!owner) return res.status(404).json({ status: 'error', message: 'Owner not found' });
         res.json({ status: 'success', data: owner });
     } catch (error) {
@@ -27,7 +27,7 @@ const createOwner = async (req, res) => {
         if (!name || !nic || !mobile) {
             return res.status(400).json({ status: 'error', message: 'Name, NIC, and Mobile are required fields' });
         }
-        const newOwner = await petOwnerService.createOwner(req.body);
+        const newOwner = await petOwnerService.createOwner(req.user.clinic_id, req.body);
         res.status(201).json({ status: 'success', data: newOwner });
     } catch (error) {
         console.error('Error creating owner:', error);
@@ -40,7 +40,7 @@ const createOwner = async (req, res) => {
 
 const updateOwner = async (req, res) => {
     try {
-        const updated = await petOwnerService.updateOwner(req.params.id, req.body);
+        const updated = await petOwnerService.updateOwner(req.user.clinic_id, req.params.id, req.body);
         if (!updated) return res.status(404).json({ status: 'error', message: 'Owner not found' });
         res.json({ status: 'success', data: updated });
     } catch (error) {
@@ -54,7 +54,7 @@ const updateOwner = async (req, res) => {
 
 const deleteOwner = async (req, res) => {
     try {
-        const deleted = await petOwnerService.deleteOwner(req.params.id);
+        const deleted = await petOwnerService.deleteOwner(req.user.clinic_id, req.params.id);
         if (!deleted) return res.status(404).json({ status: 'error', message: 'Owner not found' });
         res.json({ status: 'success', message: 'Owner deleted successfully' });
     } catch (error) {

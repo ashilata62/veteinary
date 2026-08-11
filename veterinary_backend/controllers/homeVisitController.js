@@ -9,7 +9,7 @@ class HomeVisitController {
                 doctorId: req.query.doctorId,
                 status: req.query.status
             };
-            const visits = await homeVisitService.getAllHomeVisits(filters);
+            const visits = await homeVisitService.getAllHomeVisits(req.user.clinic_id, filters);
             res.status(200).json({ success: true, count: visits.length, data: visits });
         } catch (error) {
             console.error('Error fetching home visits:', error);
@@ -19,7 +19,7 @@ class HomeVisitController {
 
     async getHomeVisitById(req, res) {
         try {
-            const visit = await homeVisitService.getHomeVisitById(req.params.id);
+            const visit = await homeVisitService.getHomeVisitById(req.user.clinic_id, req.params.id);
             if (!visit) {
                 return res.status(404).json({ success: false, message: 'Home Visit not found' });
             }
@@ -41,7 +41,7 @@ class HomeVisitController {
                 });
             }
 
-            const visit = await homeVisitService.createHomeVisit(req.body);
+            const visit = await homeVisitService.createHomeVisit(req.user.clinic_id, req.body);
             res.status(201).json({ success: true, data: visit });
         } catch (error) {
             console.error('Error creating home visit:', error);
@@ -52,7 +52,7 @@ class HomeVisitController {
 
     async updateHomeVisit(req, res) {
         try {
-            const visit = await homeVisitService.updateHomeVisit(req.params.id, req.body);
+            const visit = await homeVisitService.updateHomeVisit(req.user.clinic_id, req.params.id, req.body);
             if (!visit) {
                  return res.status(404).json({ success: false, message: 'Home Visit not found' });
             }
@@ -66,7 +66,7 @@ class HomeVisitController {
 
     async deleteHomeVisit(req, res) {
         try {
-            const success = await homeVisitService.deleteHomeVisit(req.params.id);
+            const success = await homeVisitService.deleteHomeVisit(req.user.clinic_id, req.params.id);
             if (!success) {
                 return res.status(404).json({ success: false, message: 'Home Visit not found' });
             }

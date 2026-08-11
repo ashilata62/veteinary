@@ -1,7 +1,7 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Package, Plus, AlertTriangle, Search, Edit3, Trash2, ShieldAlert, Activity, CheckCircle, Clock, Loader, Filter, SlidersHorizontal, RotateCcw, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Package, Plus, AlertTriangle, Search, Edit3, Trash2, ShieldAlert, Activity, CheckCircle, Clock, Loader, Filter, SlidersHorizontal, RotateCcw, X, Maximize2, Minimize2, Camera } from 'lucide-react';
 import FormSelect from './FormSelect';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../utils/formatters';
@@ -19,6 +19,12 @@ export default function Inventory() {
   const [maxPrice, setMaxPrice] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
+  // Webcam Barcode Scanner states
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scanStatus, setScanStatus] = useState('Standby');
+  const [stream, setStream] = useState(null);
+  const videoRef = React.useRef(null);
 
   // Dedicated Stock Refill Modal states
   const [refillModalItem, setRefillModalItem] = useState(null);
@@ -89,6 +95,60 @@ export default function Inventory() {
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    let timer;
+    if (showScannerModal) {
+      setScanStatus('Initializing camera...');
+      
+      const hasMedia = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+      if (hasMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(mediaStream => {
+            setStream(mediaStream);
+            if (videoRef.current) {
+              videoRef.current.srcObject = mediaStream;
+              videoRef.current.play();
+            }
+            setScanStatus('Scanning for barcode...');
+
+            // Auto simulate scan completion after 3.5 seconds
+            timer = setTimeout(() => {
+              if (stock.length > 0) {
+                const randomItem = stock[Math.floor(Math.random() * stock.length)];
+                handleBarcodeSuccess(randomItem.sku || 'RB-9920K');
+              } else {
+                handleBarcodeSuccess('RB-9920K');
+              }
+            }, 3500);
+          })
+          .catch(err => {
+            console.warn('Camera access denied:', err);
+            setScanStatus('Simulated scanner active (Webcam not found/blocked).');
+          });
+      } else {
+        setScanStatus('Simulated scanner active (Webcam API not supported in this browser).');
+      }
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showScannerModal]);
+
+  const handleBarcodeSuccess = (barcode) => {
+    setSearchQuery(barcode);
+    toast.success(`Mock Scan Success: SKU [${barcode}] loaded!`);
+    closeScanner();
+  };
+
+  const closeScanner = () => {
+    setShowScannerModal(false);
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
 
   const handleAddStock = async (e) => {
     e.preventDefault();
@@ -364,8 +424,8 @@ export default function Inventory() {
           </p>
         </div>
         {!showAddForm && (
-          <button onClick={() => setShowAddForm(true)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={16} /> Manual Stock Refill
+          <button onClick={() => setShowAddForm(true)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1.25rem', fontWeight: 600 }}>
+            <Plus size={16} /> Add Product
           </button>
         )}
       </div>
@@ -476,76 +536,76 @@ export default function Inventory() {
       ) : (
         <>
           {/* Top KPI Cards (Interactive Filters) */}
-          <div className="kpi-grid-responsive">
+          <div className="kpi-grid-responsive" style={{ marginBottom: '1.5rem' }}>
             <div 
-              className="card" 
+              className="card hover-lift" 
               onClick={() => setStatusFilter('')} 
               style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', 
-                borderBottom: '3px solid var(--primary-teal)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                 outline: statusFilter === '' ? '2px solid var(--primary-teal)' : 'none',
-                transition: 'all 0.2s' 
+                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
               }}
               title="Click to view all items"
             >
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)' }}><Package size={24} /></div>
+              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)' }}><Package size={20} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Total Medicines</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{totalItems}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Total Medicines</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{totalItems}</h3>
               </div>
             </div>
 
             <div 
-              className="card" 
+              className="card hover-lift" 
               onClick={() => setStatusFilter(statusFilter === 'Low Stock' ? '' : 'Low Stock')} 
               style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', 
-                borderBottom: '3px solid var(--warning)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                 outline: statusFilter === 'Low Stock' ? '2px solid var(--warning)' : 'none',
-                transition: 'all 0.2s' 
+                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
               }}
               title="Click to filter low stock items"
             >
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--warning-light)', color: 'var(--warning)' }}><Activity size={24} /></div>
+              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--warning-light)', color: 'var(--warning)' }}><Activity size={20} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Low Stock Items</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{lowStockCount}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Low Stock Items</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{lowStockCount}</h3>
               </div>
             </div>
 
             <div 
-              className="card" 
+              className="card hover-lift" 
               onClick={() => setStatusFilter(statusFilter === 'Expiring Soon' ? '' : 'Expiring Soon')} 
               style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', 
-                borderBottom: '3px solid #f59e0b', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                 outline: statusFilter === 'Expiring Soon' ? '2px solid #f59e0b' : 'none',
-                transition: 'all 0.2s' 
+                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
               }}
               title="Click to filter expiring soon items"
             >
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-lg)', backgroundColor: '#fef3c7', color: '#d97706' }}><Clock size={24} /></div>
+              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: '#fef3c7', color: '#d97706' }}><Clock size={20} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Expiring Soon</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{expiringSoonCount}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Expiring Soon</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{expiringSoonCount}</h3>
               </div>
             </div>
 
             <div 
-              className="card" 
+              className="card hover-lift" 
               onClick={() => setStatusFilter(statusFilter === 'Out of Stock' ? '' : 'Out of Stock')} 
               style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', 
-                borderBottom: '3px solid var(--danger)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                 outline: statusFilter === 'Out of Stock' ? '2px solid var(--danger)' : 'none',
-                transition: 'all 0.2s' 
+                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
               }}
               title="Click to filter out of stock items"
             >
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}><AlertTriangle size={24} /></div>
+              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}><AlertTriangle size={20} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Out of Stock</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{outOfStockCount}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Out of Stock</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{outOfStockCount}</h3>
               </div>
             </div>
           </div>
@@ -576,77 +636,48 @@ export default function Inventory() {
                   } : {})
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h3 className="font-bold text-lg" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                      <Package size={20} /> Clinic Stock
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 className="font-bold text-lg" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--text-primary)' }}>
+                      <Package size={20} style={{ color: 'var(--primary-teal)' }} /> Clinic Stock
                     </h3>
-                    <span className="badge badge-secondary" style={{ fontSize: '0.75rem' }}>
-                      {filteredStock.length} / {totalItems}
+                    <span className="badge badge-secondary" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                      {filteredStock.length} total
                     </span>
-
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      {/* Full Screen Toggle Button */}
-                      <button
-                        type="button"
-                        onClick={() => setIsFullScreen(!isFullScreen)}
-                        className={`btn btn-sm ${inPortal ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', fontWeight: 700, fontSize: '0.75rem' }}
-                        title={inPortal ? "Exit Fullscreen View" : "View Table in Fullscreen"}
-                      >
-                        {inPortal ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                        <span>{inPortal ? "Exit Fullscreen" : "Full Screen"}</span>
-                      </button>
-
-                      {/* Add New Product Button */}
-                      <button
-                        type="button"
-                        onClick={() => { resetForm(); setShowAddForm(true); if (isFullScreen) setIsFullScreen(false); }}
-                        className="btn btn-primary btn-sm"
-                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', fontWeight: 700, fontSize: '0.75rem' }}
-                      >
-                        <Plus size={14} />
-                        <span>+ Add Product</span>
-                      </button>
-                    </div>
                   </div>
 
-                  {/* Action & Filter Controls Toolbar */}
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', width: '100%', maxWidth: '100%', justifyContent: 'flex-start' }}>
-                    <div style={{ flex: '1 1 140px', minWidth: '120px' }}>
-                      <FormSelect
-                        value={categoryFilter}
-                        onChange={setCategoryFilter}
-                        options={[
-                          { value: '', label: 'All Categories' },
-                          { value: 'Medicine', label: 'Medicine' },
-                          { value: 'Accessories & Toys', label: 'Accessories & Toys' },
-                          { value: 'Food & Snacks', label: 'Food & Snacks' },
-                          { value: 'Vitamins & Supplements', label: 'Vitamins & Supplements' },
-                          { value: 'Hygiene Items', label: 'Hygiene Items' },
-                          { value: 'Service', label: 'Service' },
-                        ]}
-                      />
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Compact Search Input with Webcam Barcode scanner */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div style={{ position: 'relative', width: '200px' }}>
+                        <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          placeholder="Search name/sku..." 
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          style={{ paddingLeft: '2.25rem', backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.85rem', height: '36px' }}
+                        />
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setShowScannerModal(true)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '0 10px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border)' }}
+                        title="Scan Barcode using Webcam"
+                      >
+                        <Camera size={16} style={{ color: 'var(--primary-teal)' }} />
+                      </button>
                     </div>
 
-                    <div style={{ position: 'relative', flex: '2 1 180px', minWidth: '140px' }}>
-                      <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        placeholder="Search name/batch..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ paddingLeft: '2.25rem', backgroundColor: '#fff', fontSize: '0.85rem' }}
-                      />
-                    </div>
-
-                    {/* Main Filter Toggle Button */}
+                    {/* Advanced Filter Button */}
                     <button
                       type="button"
                       onClick={() => setShowFilterDrawer(!showFilterDrawer)}
-                      className={`btn ${showFilterDrawer || activeFilterCount > 0 ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '0.85rem' }}
+                      className={`btn btn-sm ${showFilterDrawer || activeFilterCount > 0 ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', height: '36px', borderRadius: '8px', fontWeight: 600 }}
                     >
                       <SlidersHorizontal size={14} />
                       <span>Filter</span>
@@ -654,20 +685,36 @@ export default function Inventory() {
                         <span style={{
                           backgroundColor: showFilterDrawer || activeFilterCount > 0 ? '#fff' : 'var(--primary-teal)',
                           color: showFilterDrawer || activeFilterCount > 0 ? 'var(--primary-teal)' : '#fff',
-                          borderRadius: '9999px',
-                          padding: '1px 6px',
-                          fontSize: '0.72rem',
+                          borderRadius: '50%',
+                          width: '18px',
+                          height: '18px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.65rem',
                           fontWeight: 800
                         }}>
                           {activeFilterCount}
                         </span>
                       )}
                     </button>
+
+                    {/* Full Screen Toggle Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsFullScreen(!isFullScreen)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', height: '36px', borderRadius: '8px', fontWeight: 600 }}
+                      title={inPortal ? "Exit Fullscreen View" : "View Table in Fullscreen"}
+                    >
+                      {inPortal ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                      <span>{inPortal ? "Exit Fullscreen" : "Full Screen"}</span>
+                    </button>
                   </div>
                 </div>
 
                 {/* Primary Category Division Navigation Tabs (Scrollable on Mobile) */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', paddingTop: '0.25rem', maxWidth: '100%' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', paddingTop: '0.5rem', maxWidth: '100%' }}>
                   {[
                     { id: '', label: 'All Items', icon: '📦', count: categoryCounts['All'] },
                     { id: 'Medicine', label: 'Medicine', icon: '💊', count: categoryCounts['Medicine'] },
@@ -709,7 +756,7 @@ export default function Inventory() {
                 </div>
 
                 {/* Quick Status Filter Pills Row (Scrollable on Mobile) */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', alignItems: 'center', paddingTop: '0.25rem', maxWidth: '100%' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', alignItems: 'center', paddingTop: '0.25rem', maxWidth: '100%', marginBottom: '0.25rem' }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginRight: '4px' }}>Quick Filter:</span>
                   {[
                     { id: '', label: 'All Items' },
@@ -821,18 +868,18 @@ export default function Inventory() {
 
                 {/* Table Responsive Scroll View */}
                 <div className="table-responsive" style={{ maxHeight: inPortal ? 'calc(100vh - 240px)' : '550px', overflowY: 'auto', overflowX: 'auto' }}>
-                  <table className="custom-table" style={{ width: '100%', minWidth: '950px', borderCollapse: 'separate', borderSpacing: '0 4px' }}>
+                  <table className="custom-table" style={{ width: '100%', minWidth: '950px' }}>
                     <thead style={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
                       <tr>
-                        <th>Medicine Name</th>
-                        <th>Category</th>
-                        <th>Batch No.</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Expiry Date</th>
-                        <th>Supplier</th>
-                        <th>Status</th>
-                        <th style={{ textAlign: 'right' }}>Actions</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Medicine Name</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Category</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Batch No.</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Quantity</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Price</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Expiry Date</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Supplier</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Status</th>
+                        <th style={{ textAlign: 'right', padding: '0.75rem 1rem' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -853,19 +900,18 @@ export default function Inventory() {
                         const statusText = getComputedStatus(item.qty, item.lowStockLimit, item.expiry);
                         const isAlert = statusText === 'Out of Stock' || statusText === 'Low Stock' || statusText === 'Critical Stock';
                         return (
-                          <tr key={item.id} style={{ 
-                            backgroundColor: statusText === 'Out of Stock' ? 'rgba(239, 68, 68, 0.05)' : statusText === 'Critical Stock' ? 'rgba(234, 88, 12, 0.05)' : statusText === 'Low Stock' ? '#fefce8' : (statusText === 'Expiring Soon' ? '#fffbeb' : '#fff'),
-                            transition: 'all 0.2s'
-                          }}>
-                            <td><span className="font-bold">{item.name}</span></td>
-                            <td>{getCategoryBadge(item.category)}</td>
-                            <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.batchNumber}</td>
-                            <td className="font-bold text-lg" style={{ color: isAlert ? 'var(--danger)' : 'var(--text-primary)' }}>{item.qty} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{item.unit}</span></td>
-                            <td className="font-bold font-mono" style={{ color: 'var(--primary-teal)' }}>{formatCurrency(item.price)}</td>
-                            <td style={{ color: statusText === 'Expiring Soon' ? '#d97706' : 'var(--text-primary)', fontWeight: statusText === 'Expiring Soon' ? 'bold' : 'normal' }}>{item.expiry}</td>
-                            <td style={{ fontSize: '0.8rem' }}>{item.supplier}</td>
-                            <td>{getStatusBadge(statusText)}</td>
-                            <td style={{ textAlign: 'right' }}>
+                          <tr key={item.id} style={{ transition: 'all 0.2s' }}>
+                            <td style={{ padding: '1rem' }}><span className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>{item.name}</span></td>
+                            <td style={{ padding: '1rem' }}>{getCategoryBadge(item.category)}</td>
+                            <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.batchNumber}</td>
+                            <td style={{ padding: '1rem', color: isAlert ? 'var(--danger)' : 'var(--text-primary)', fontWeight: 700, fontSize: '0.95rem' }}>
+                              {item.qty} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)' }}>{item.unit}</span>
+                            </td>
+                            <td style={{ padding: '1rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--primary-teal)' }}>{formatCurrency(item.price)}</td>
+                            <td style={{ padding: '1rem', color: statusText === 'Expiring Soon' ? '#d97706' : 'var(--text-primary)', fontWeight: statusText === 'Expiring Soon' ? 700 : 500 }}>{item.expiry}</td>
+                            <td style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.supplier || '-'}</td>
+                            <td style={{ padding: '1rem' }}>{getStatusBadge(statusText)}</td>
+                            <td style={{ textAlign: 'right', padding: '1rem' }}>
                               <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
                                 <button 
                                   onClick={() => {
@@ -875,15 +921,25 @@ export default function Inventory() {
                                     setRefillNotes('');
                                   }} 
                                   className="btn btn-secondary btn-sm" 
-                                  style={{ padding: '6px', backgroundColor: 'var(--primary-teal-light)', border: '1px solid var(--primary-teal-light)' }} 
+                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                                   title="Add Quantity / Refill Stock"
                                 >
                                   <Plus size={14} style={{ color: 'var(--primary-teal)' }} />
                                 </button>
-                                <button onClick={() => handleEditClick(item)} className="btn btn-secondary btn-sm" style={{ padding: '6px' }} title="Adjust Stock">
+                                <button 
+                                  onClick={() => handleEditClick(item)} 
+                                  className="btn btn-secondary btn-sm" 
+                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                                  title="Adjust Stock"
+                                >
                                   <Edit3 size={14} style={{ color: 'var(--secondary-blue)' }} />
                                 </button>
-                                <button onClick={() => handleDeleteClick(item.id)} className="btn btn-secondary btn-sm" style={{ padding: '6px' }} title="Remove Item">
+                                <button 
+                                  onClick={() => handleDeleteClick(item.id)} 
+                                  className="btn btn-secondary btn-sm" 
+                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                                  title="Remove Item"
+                                >
                                   <Trash2 size={14} style={{ color: 'var(--danger)' }} />
                                 </button>
                               </div>
@@ -1053,6 +1109,106 @@ export default function Inventory() {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Webcam Barcode Scanner Modal */}
+      {showScannerModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.75)', zIndex: 99999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(4px)' }}>
+          <div className="animate-fade-in-up" style={{ backgroundColor: '#1e293b', color: '#f8fafc', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155' }}>
+            
+            {/* Inject Laser Scanning Animation CSS */}
+            <style>{`
+              @keyframes scanLaser {
+                0% { top: 0%; }
+                50% { top: 100%; }
+                100% { top: 0%; }
+              }
+            `}</style>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Camera size={20} style={{ color: 'var(--primary-teal)' }} /> Webcam Barcode Scanner
+              </h3>
+              <button onClick={closeScanner} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Video Viewport Container */}
+            <div style={{ position: 'relative', width: '100%', height: '260px', backgroundColor: '#0f172a', borderRadius: '8px', overflow: 'hidden', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              
+              {/* Corner targeting brackets */}
+              <div style={{ position: 'absolute', top: '20px', left: '20px', width: '20px', height: '20px', borderLeft: '3px solid var(--primary-teal)', borderTop: '3px solid var(--primary-teal)' }} />
+              <div style={{ position: 'absolute', top: '20px', right: '20px', width: '20px', height: '20px', borderRight: '3px solid var(--primary-teal)', borderTop: '3px solid var(--primary-teal)' }} />
+              <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '20px', height: '20px', borderLeft: '3px solid var(--primary-teal)', borderBottom: '3px solid var(--primary-teal)' }} />
+              <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '20px', height: '20px', borderRight: '3px solid var(--primary-teal)', borderBottom: '3px solid var(--primary-teal)' }} />
+
+              {/* Red moving laser scan line */}
+              <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, height: '3px',
+                backgroundColor: '#ef4444',
+                boxShadow: '0 0 10px #ef4444',
+                animation: 'scanLaser 2s linear infinite'
+              }} />
+
+              {/* Live Video element */}
+              <video 
+                ref={videoRef} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                muted 
+                playsInline
+              />
+
+              {/* Scanning status banner */}
+              <div style={{ position: 'absolute', bottom: '15px', backgroundColor: 'rgba(15,23,42,0.85)', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', color: '#38bdf8', border: '1px solid #334155' }}>
+                {scanStatus}
+              </div>
+            </div>
+
+            {/* Simulated mock search triggers for demo capability */}
+            <div style={{ marginTop: '1.25rem', backgroundColor: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '0.5rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                Quick Scan Simulation (Click to Mock Scan)
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {stock.slice(0, 3).map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleBarcodeSuccess(item.sku)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600 }}
+                  >
+                    🔍 {item.name.split(' ')[0]} ({item.sku})
+                  </button>
+                ))}
+                {stock.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleBarcodeSuccess('RB-9920K')}
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600 }}
+                  >
+                    🔍 Rabies Vaccine (RB-9920K)
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Cancel button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '0.75rem' }}>
+              <button 
+                type="button" 
+                onClick={closeScanner} 
+                className="btn btn-secondary btn-sm"
+                style={{ backgroundColor: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
+              >
+                Close Scanner
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

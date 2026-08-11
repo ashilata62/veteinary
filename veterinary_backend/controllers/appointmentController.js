@@ -7,7 +7,7 @@ exports.getAllAppointments = async (req, res) => {
             petId: req.query.petId,
             doctorId: req.query.doctorId
         };
-        const appointments = await appointmentService.getAllAppointments(filters);
+        const appointments = await appointmentService.getAllAppointments(req.user.clinic_id, filters);
         res.status(200).json({
             status: 'success',
             results: appointments.length,
@@ -21,7 +21,7 @@ exports.getAllAppointments = async (req, res) => {
 
 exports.getAppointmentById = async (req, res) => {
     try {
-        const appointment = await appointmentService.getAppointmentById(req.params.id);
+        const appointment = await appointmentService.getAppointmentById(req.user.clinic_id, req.params.id);
         if (!appointment) {
             return res.status(404).json({ status: 'error', message: 'Appointment not found' });
         }
@@ -37,7 +37,7 @@ exports.getAppointmentById = async (req, res) => {
 
 exports.createAppointment = async (req, res) => {
     try {
-        const newAppointment = await appointmentService.createAppointment(req.body);
+        const newAppointment = await appointmentService.createAppointment(req.user.clinic_id, req.body);
 
         // ── In-App Notifications ──────────────────────────────────────────
         try {
@@ -49,6 +49,7 @@ exports.createAppointment = async (req, res) => {
             // 1. Notify the assigned doctor (targeted)
             if (apt.doctor_id) {
                 await createNotification(
+                    req.user.clinic_id,
                     apt.doctor_id,
                     '📅 New Appointment Scheduled',
                     `Patient: ${apt.petName || 'Unknown'} (Owner: ${apt.ownerName || 'Unknown'}) — on ${dateStr} at ${timeStr}. Please review your schedule.`,
@@ -58,6 +59,7 @@ exports.createAppointment = async (req, res) => {
 
             // 2. Broadcast to Admin/Manager (user_id = NULL means all admins see it)
             await createNotification(
+                req.user.clinic_id,
                 null,
                 '📅 New Appointment Booked',
                 `${apt.petName || 'Unknown'} with Dr. ${apt.doctorName || 'Unassigned'} on ${dateStr} at ${timeStr}.`,
@@ -83,7 +85,7 @@ exports.createAppointment = async (req, res) => {
 
 exports.updateAppointment = async (req, res) => {
     try {
-        const updatedAppointment = await appointmentService.updateAppointment(req.params.id, req.body);
+        const updatedAppointment = await appointmentService.updateAppointment(req.user.clinic_id, req.params.id, req.body);
         if (!updatedAppointment) {
             return res.status(404).json({ status: 'error', message: 'Appointment not found' });
         }
@@ -102,7 +104,7 @@ exports.updateAppointment = async (req, res) => {
 
 exports.deleteAppointment = async (req, res) => {
     try {
-        const success = await appointmentService.deleteAppointment(req.params.id);
+        const success = await appointmentService.deleteAppointment(req.user.clinic_id, req.params.id);
         if (!success) {
             return res.status(404).json({ status: 'error', message: 'Appointment not found' });
         }
@@ -118,7 +120,7 @@ exports.deleteAppointment = async (req, res) => {
 
 exports.getUpcomingReminders = async (req, res) => {
     try {
-        const reminders = await appointmentService.getUpcomingReminders();
+        const reminders = await appointmentService.getUpcomingReminders(req.user.clinic_id);
         res.status(200).json({
             status: 'success',
             data: reminders
@@ -136,7 +138,7 @@ exports.sendReminderEmail = async (req, res) => {
         if (!messageBody || messageBody.trim() === '') {
             return res.status(400).json({ status: 'error', message: 'Message body cannot be empty.' });
         }
-        await appointmentService.sendReminder(id, messageBody, customRecipientEmail);
+        await appointmentService.sendReminder(req.user.clinic_id, id, messageBody, customRecipientEmail);
         res.status(200).json({
             status: 'success',
             message: 'Reminder email sent successfully.'

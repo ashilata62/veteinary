@@ -3,7 +3,7 @@ const attendanceService = require('../services/attendanceService');
 exports.getDailyAttendance = async (req, res) => {
     try {
         const date = req.query.date || new Date().toLocaleDateString('en-CA');
-        const data = await attendanceService.getDailyAttendance(date);
+        const data = await attendanceService.getDailyAttendance(req.user.clinic_id, date);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching attendance:', error);
@@ -13,7 +13,7 @@ exports.getDailyAttendance = async (req, res) => {
 
 exports.getPersonalHistory = async (req, res) => {
     try {
-        const data = await attendanceService.getPersonalHistory(req.user.id);
+        const data = await attendanceService.getPersonalHistory(req.user.clinic_id, req.user.id);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching history:', error);
@@ -27,7 +27,7 @@ exports.checkIn = async (req, res) => {
         const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const time = d.toLocaleTimeString('en-GB');
         
-        await attendanceService.checkIn(req.user.id, date, time);
+        await attendanceService.checkIn(req.user.clinic_id, req.user.id, date, time);
         res.status(200).json({ status: 'success', message: 'Checked in successfully' });
     } catch (error) {
         console.error('Check-in error:', error);
@@ -41,7 +41,7 @@ exports.checkOut = async (req, res) => {
         const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const time = d.toLocaleTimeString('en-GB');
         
-        const result = await attendanceService.checkOut(req.user.id, date, time);
+        const result = await attendanceService.checkOut(req.user.clinic_id, req.user.id, date, time);
         res.status(200).json({ status: 'success', message: 'Checked out successfully', data: result });
     } catch (error) {
         console.error('Check-out error:', error);

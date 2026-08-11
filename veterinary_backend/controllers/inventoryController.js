@@ -5,7 +5,7 @@ const inventoryService = require('../services/inventoryService');
 // @access  Private (All Roles)
 const getInventory = async (req, res) => {
     try {
-        const items = await inventoryService.getAllItems();
+        const items = await inventoryService.getAllItems(req.user.clinic_id);
         res.json({ status: 'success', data: items });
     } catch (error) {
         console.error('Error fetching inventory:', error);
@@ -18,7 +18,7 @@ const getInventory = async (req, res) => {
 // @access  Private (All Roles)
 const getInventoryItem = async (req, res) => {
     try {
-        const item = await inventoryService.getItemById(req.params.id);
+        const item = await inventoryService.getItemById(req.user.clinic_id, req.params.id);
         if (!item) {
             return res.status(404).json({ status: 'error', message: 'Inventory item not found' });
         }
@@ -44,7 +44,7 @@ const createInventoryItem = async (req, res) => {
             });
         }
 
-        const newItem = await inventoryService.createItem(req.body);
+        const newItem = await inventoryService.createItem(req.user.clinic_id, req.body);
         res.status(201).json({ status: 'success', data: newItem });
     } catch (error) {
         console.error('Error creating inventory item:', error);
@@ -60,7 +60,7 @@ const createInventoryItem = async (req, res) => {
 // @access  Private (Admin, Manager)
 const updateInventoryItem = async (req, res) => {
     try {
-        const updatedItem = await inventoryService.updateItem(req.params.id, req.body);
+        const updatedItem = await inventoryService.updateItem(req.user.clinic_id, req.params.id, req.body);
         if (!updatedItem) {
             return res.status(404).json({ status: 'error', message: 'Inventory item not found' });
         }
@@ -76,7 +76,7 @@ const updateInventoryItem = async (req, res) => {
 // @access  Private (Admin, Manager)
 const deleteInventoryItem = async (req, res) => {
     try {
-        const deleted = await inventoryService.deleteItem(req.params.id);
+        const deleted = await inventoryService.deleteItem(req.user.clinic_id, req.params.id);
         if (!deleted) {
             return res.status(404).json({ status: 'error', message: 'Inventory item not found' });
         }

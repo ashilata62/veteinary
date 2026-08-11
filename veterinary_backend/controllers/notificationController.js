@@ -14,10 +14,10 @@ exports.getNotifications = async (req, res) => {
                 is_read,
                 created_at
              FROM notifications 
-             WHERE user_id = ? OR user_id IS NULL 
+             WHERE (user_id = ? OR user_id IS NULL) AND clinic_id = ? 
              ORDER BY created_at DESC 
              LIMIT 15`,
-            [userId]
+            [userId, req.user.clinic_id]
         );
         res.status(200).json({ status: 'success', data: rows });
     } catch (error) {
@@ -30,8 +30,8 @@ exports.markAsRead = async (req, res) => {
     try {
         const { id } = req.params;
         const [result] = await db.query(
-            'UPDATE notifications SET is_read = TRUE WHERE id = ?',
-            [id]
+            'UPDATE notifications SET is_read = TRUE WHERE id = ? AND clinic_id = ?',
+            [id, req.user.clinic_id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ status: 'error', message: 'Notification not found' });
@@ -47,8 +47,8 @@ exports.markAllAsRead = async (req, res) => {
     try {
         const userId = req.user.id;
         await db.query(
-            'UPDATE notifications SET is_read = TRUE WHERE user_id = ? OR user_id IS NULL',
-            [userId]
+            'UPDATE notifications SET is_read = TRUE WHERE (user_id = ? OR user_id IS NULL) AND clinic_id = ?',
+            [userId, req.user.clinic_id]
         );
         res.status(200).json({ status: 'success', message: 'All notifications marked as read' });
     } catch (error) {
@@ -60,7 +60,7 @@ exports.markAllAsRead = async (req, res) => {
 exports.deleteNotification = async (req, res) => {
     try {
         const { id } = req.params;
-        const [result] = await db.query('DELETE FROM notifications WHERE id = ?', [id]);
+        const [result] = await db.query('DELETE FROM notifications WHERE id = ? AND clinic_id = ?', [id, req.user.clinic_id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ status: 'error', message: 'Notification not found' });
         }
