@@ -1,20 +1,44 @@
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const app = express();
 app.set('trust proxy', 1);
 const port = process.env.PORT || 5001;
 
-// Security Middleware: Rate limiting for auth routes
+// Security Headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "checkout.razorpay.com", "cdn.jsdelivr.net"],
+            frameSrc: ["'self'", "checkout.razorpay.com"],
+            imgSrc: ["'self'", "data:", "https:", "http:"],
+            connectSrc: ["'self'", "http://localhost:*"],
+            styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"],
+            fontSrc: ["'self'", "data:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+}));
+
+// Rate limiting for auth routes
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: { status: 'error', message: 'Too many requests from this IP, please try again after 15 minutes' }
 });
 
-// Middleware
+// Rate limiting for payment verification routes
+const paymentLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 20,
+    message: { status: 'error', message: 'Too many payment attempts, please try again after 5 minutes' }
+});
+
+// CORS Configuration
 const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5174', 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
 app.use(cors({
     origin: function (origin, callback) {
@@ -23,19 +47,22 @@ app.use(cors({
         } else {
             callback(new Error('Not allowed by CORS'));
         }
-    }
+    },
+    credentials: true
 }));
+
+// Body Parsers
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const path = require('path');
 const { protect } = require('./middlewares/authMiddleware');
 const { errorHandler } = require('./middlewares/errorHandler');
+const { subscriptionMiddleware } = require('./middlewares/subscriptionMiddleware');
 
-// Serve static files from the uploads directory.
-// We removed strict JWT protection here because standard <img> tags in the frontend 
-// cannot easily send Authorization headers or query tokens without significant frontend rewrites.
+// Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
@@ -57,29 +84,26 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
-app.use('/api/v1/inventory', inventoryRoutes);
-app.use('/api/v1/owners', petOwnerRoutes);
-app.use('/api/v1/pets', petRoutes);
-app.use('/api/v1/appointments', appointmentRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/home-visits', homeVisitRoutes);
-app.use('/api/v1/encounters', encounterRoutes);
-app.use('/api/v1/treatment-notes', treatmentNoteRoutes);
-app.use('/api/v1/invoices', invoiceRoutes);
-app.use('/api/v1/attendance', attendanceRoutes);
-app.use('/api/v1/reports', reportRoutes);
-app.use('/api/v1/notifications', notificationRoutes);
-app.use('/api/v1/settings', settingsRoutes);
-app.use('/api/v1/assistance-tasks', assistanceTaskRoutes);
+
+// Apply subscription middleware to all protected API routes
+app.use('/api/v1/inventory', protect, subscriptionMiddleware, inventoryRoutes);
+app.use('/api/v1/owners', protect, subscriptionMiddleware, petOwnerRoutes);
+app.use('/api/v1/pets', protect, subscriptionMiddleware, petRoutes);
+app.use('/api/v1/appointments', protect, subscriptionMiddleware, appointmentRoutes);
+app.use('/api/v1/users', protect, subscriptionMiddleware, userRoutes);
+app.use('/api/v1/home-visits', protect, subscriptionMiddleware, homeVisitRoutes);
+app.use('/api/v1/encounters', protect, subscriptionMiddleware, encounterRoutes);
+app.use('/api/v1/treatment-notes', protect, subscriptionMiddleware, treatmentNoteRoutes);
+app.use('/api/v1/invoices', protect, subscriptionMiddleware, invoiceRoutes);
+app.use('/api/v1/attendance', protect, subscriptionMiddleware, attendanceRoutes);
+app.use('/api/v1/reports', protect, subscriptionMiddleware, reportRoutes);
+app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRoutes);
+app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
+app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
 app.use('/api/super-admin', superAdminRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', paymentLimiter, paymentRoutes);
 
-// Basic Route to check if server is running
-app.get('/', (req, res) => {
-    res.send('Veterinary Clinic API is running...');
-});
-
-// Database Connection Test Route
+// Health check
 app.get('/api/health', async (req, res) => {
     try {
         const db = require('./config/db');

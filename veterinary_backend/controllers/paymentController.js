@@ -18,21 +18,31 @@ exports.createOrder = async (req, res) => {
     }
 
     const options = {
-      amount: amount * 100, // Razorpay works in paise
+      amount: amount * 100,
       currency,
       receipt: `receipt_${Date.now()}`,
     };
 
     const order = await razorpay.orders.create(options);
 
-    // Only log payment in DB if there's a real user ID (not temp/null)
     const isRealUser = clinicAdminId && clinicAdminId !== 'temp_user_id';
     if (isRealUser) {
       const paymentId = crypto.randomUUID();
+      let clinicId = null;
+      
+      try {
+        const [userRows] = await pool.query('SELECT clinic_id FROM users WHERE id = ? LIMIT 1', [clinicAdminId]);
+        if (userRows && userRows.length > 0) {
+          clinicId = userRows[0].clinic_id;
+        }
+      } catch (err) {
+        console.error('Error fetching user clinic for payment:', err.message);
+      }
+
       await pool.query(
-        `INSERT INTO saas_payments (id, clinic_admin_id, amount, status, currency, razorpay_order_id, plan_id) 
-         VALUES (?, ?, ?, 'Pending', ?, ?, ?)`,
-        [paymentId, clinicAdminId, amount, currency, order.id, planId]
+        `INSERT INTO saas_payments (id, clinic_id, clinic_admin_id, amount, status, currency, razorpay_order_id, plan_id) 
+         VALUES (?, ?, ?, ?, 'Pending', ?, ?, ?)`,
+        [paymentId, clinicId, clinicAdminId, amount, currency, order.id, planId]
       );
     }
 
@@ -64,10 +74,18 @@ exports.verifyPayment = async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-      // Payment successful
       const invoiceNumber = `INV-${Date.now()}`;
       
-      // Update Payment
+      let clinicId = null;
+      try {
+        const [userRows] = await pool.query('SELECT clinic_id FROM users WHERE id = ? LIMIT 1', [clinicAdminId]);
+        if (userRows && userRows.length > 0) {
+          clinicId = userRows[0].clinic_id;
+        }
+      } catch (err) {
+        console.error('Error fetching user clinic for payment verification:', err.message);
+      }
+      
       await pool.query(
         `UPDATE saas_payments SET 
           status = 'Successful', 
@@ -79,17 +97,21 @@ exports.verifyPayment = async (req, res) => {
         [razorpay_payment_id, razorpay_signature, invoiceNumber, razorpay_order_id]
       );
 
-      // Create or update subscription
       const subId = crypto.randomUUID();
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
+      endDate.setMonth(endDate.getMonth() + 1);
       
       await pool.query(
-        `INSERT INTO saas_subscriptions (id, clinic_admin_id, plan_id, status, start_date, end_date, razorpay_payment_id) 
-         VALUES (?, ?, ?, 'Active', ?, ?, ?)
+        `INSERT INTO saas_subscriptions (id, clinic_id, clinic_admin_id, plan_id, status, start_date, end_date, razorpay_payment_id) 
+         VALUES (?, ?, ?, ?, 'Active', ?, ?, ?)
          ON DUPLICATE KEY UPDATE status = 'Active', end_date = ?, razorpay_payment_id = ?`,
-        [subId, clinicAdminId, planId, startDate, endDate, razorpay_payment_id, endDate, razorpay_payment_id]
+        [subId, clinicId, clinicAdminId, planId, startDate, endDate, razorpay_payment_id, endDate, razorpay_payment_id]
+      );
+
+      await pool.query(
+        "UPDATE clinics SET status = 'ACTIVE', updated_at = NOW() WHERE id = ?",
+        [clinicId]
       );
 
       // Fetch user email to send transactional receipt email

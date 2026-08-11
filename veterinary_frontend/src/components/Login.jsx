@@ -72,10 +72,10 @@ export default function Login({ setIsAuthenticated, setCurrentRole }) {
           setLoading(false);
           setTransitionOut(true);
 
-          // Wait for transition before navigating
           setTimeout(() => {
             setIsAuthenticated(true);
             if (setCurrentRole) setCurrentRole(user.role);
+            if (onLoginSuccess) onLoginSuccess(user);
             navigate(pathForTab('dashboard', user.role), { replace: true });
           }, 1000);
         } else {

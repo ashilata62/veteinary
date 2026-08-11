@@ -29,6 +29,8 @@ import SuperAdminLogin from './components/SuperAdmin/SuperAdminLogin';
 import SuperAdminLayout from './components/SuperAdmin/SuperAdminLayout';
 import PaymentPage from './components/Checkout/PaymentPage';
 import TrialExpired from './components/TrialExpired';
+import SubscriptionExpired from './components/SubscriptionExpired';
+import AccountSuspended from './components/AccountSuspended';
 import Support from './components/Support';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
@@ -81,6 +83,9 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState(() => localStorage.getItem('role') || '');
   const [isSuperAdmin, setIsSuperAdmin] = useState(() => !!localStorage.getItem('sa_token'));
   const [isTrialExpired, setIsTrialExpired] = useState(() => checkTrialExpired());
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
+  const [accountSuspended, setAccountSuspended] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState({ clinicName: '', plan: '', expiryDate: '' });
   // Sidebar: open by default on desktop only
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
   const [selectedPetId, setSelectedPetId] = useState(null);
@@ -183,6 +188,9 @@ export default function App() {
     setIsAuthenticated(false);
     setCurrentRole('');
     setIsTrialExpired(false);
+    setSubscriptionExpired(false);
+    setAccountSuspended(false);
+    setSubscriptionData({ clinicName: '', plan: '', expiryDate: '' });
     navigate(LOGIN_PATH, { replace: true });
   };
 
@@ -231,6 +239,19 @@ export default function App() {
   // Show trial expired page if trial period is over
   if (isTrialExpired) {
     return <TrialExpired onLogout={handleLogout} />;
+  }
+
+  if (accountSuspended) {
+    return <AccountSuspended onLogout={handleLogout} clinicName={subscriptionData.clinicName} />;
+  }
+
+  if (subscriptionExpired) {
+    return <SubscriptionExpired 
+      onLogout={handleLogout} 
+      clinicName={subscriptionData.clinicName}
+      plan={subscriptionData.plan}
+      expiryDate={subscriptionData.expiryDate}
+    />;
   }
 
   return (

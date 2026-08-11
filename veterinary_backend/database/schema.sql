@@ -218,3 +218,40 @@ CREATE TABLE Treatment_Notes (
     FOREIGN KEY (encounter_id) REFERENCES Clinical_Encounters(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
 );
+
+-- 16. Audit Logs
+CREATE TABLE Audit_Logs (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36),
+    clinic_id VARCHAR(36),
+    action VARCHAR(100) NOT NULL,
+    entity VARCHAR(100) NOT NULL,
+    entity_id VARCHAR(36),
+    old_values TEXT,
+    new_values TEXT,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
+    FOREIGN KEY (clinic_id) REFERENCES Clinics(id) ON DELETE SET NULL
+);
+
+-- 17. Clinics
+CREATE TABLE Clinics (
+    id VARCHAR(36) PRIMARY KEY,
+    clinic_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    status ENUM('TRIAL', 'ACTIVE', 'SUSPENDED', 'EXPIRED', 'INACTIVE') DEFAULT 'TRIAL',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_audit_logs_clinic_id ON Audit_Logs(clinic_id);
+CREATE INDEX idx_audit_logs_user_id ON Audit_Logs(user_id);
+CREATE INDEX idx_audit_logs_entity ON Audit_Logs(entity, entity_id);
+CREATE INDEX idx_audit_logs_created_at ON Audit_Logs(created_at);

@@ -30,7 +30,6 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token expired or invalid
       const isSuperAdminRoute = error.config && error.config.url && error.config.url.includes('/api/super-admin');
       
       if (isSuperAdminRoute) {
@@ -38,6 +37,14 @@ api.interceptors.response.use(
         localStorage.removeItem('sa_user');
         window.location.href = '/super-admin/login';
       } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    } else if (error.response && error.response.status === 403) {
+      const code = error.response.data && error.response.data.code;
+      if (code === 'TRIAL_EXPIRED' || code === 'SUBSCRIPTION_EXPIRED' || code === 'ACCOUNT_SUSPENDED' || code === 'SUBSCRIPTION_REQUIRED') {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('user');

@@ -1,19 +1,25 @@
 const jwt = require('jsonwebtoken');
+const db = require('../config/db');
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
     let token;
     
-    // Check if token exists in headers
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // Get token from header (Bearer <token>)
             token = req.headers.authorization.split(' ')[1];
-            
-            // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey123');
             
-            // Set user in request object
-            req.user = decoded; // Contains { id, role, email }
+            req.user = decoded;
+            
+            const [users] = await db.query(
+                'SELECT id, role, clinic_id, status FROM users WHERE id = ? LIMIT 1',
+                [decoded.id]
+            );
+            
+            if (users && users.length > 0) {
+                req.user.clinicId = users[0].clinic_id;
+                req.user.accountStatus = users[0].status;
+            }
             
             next();
         } catch (error) {

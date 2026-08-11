@@ -35,6 +35,24 @@ const loginUser = async (req, res) => {
             return res.status(403).json({ status: 'error', message: 'User account is suspended or inactive' });
         }
 
+        // Check clinic status for non-SuperAdmin users
+        let clinicStatus = null;
+        let clinicName = null;
+        if (user.clinic_id) {
+            try {
+                const [clinics] = await db.query(
+                    'SELECT status, clinic_name FROM clinics WHERE id = ? LIMIT 1',
+                    [user.clinic_id]
+                );
+                if (clinics && clinics.length > 0) {
+                    clinicStatus = clinics[0].status;
+                    clinicName = clinics[0].clinic_name;
+                }
+            } catch (err) {
+                console.error('Error fetching clinic status during login:', err.message);
+            }
+        }
+
         // Generate JWT Token
         const token = jwt.sign(
             { id: user.id, role: user.role, email: user.email },
@@ -52,7 +70,10 @@ const loginUser = async (req, res) => {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    profile_image: user.profile_image
+                    profile_image: user.profile_image,
+                    clinicId: user.clinic_id,
+                    clinicStatus,
+                    clinicName
                 }
             }
         });
