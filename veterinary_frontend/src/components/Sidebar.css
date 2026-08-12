@@ -227,3 +227,13 @@
   z-index: 999;
   backdrop-filter: blur(2px);
 }
+
+/* Toggle icon responsive swap */
+@media (max-width: 1024px) {
+  .sidebar-collapse-btn .desktop-icon {
+    display: none !important;
+  }
+  .sidebar-collapse-btn .mobile-icon {
+    display: inline-flex !important;
+  }
+}

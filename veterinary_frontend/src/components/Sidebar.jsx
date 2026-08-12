@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -118,7 +118,12 @@ export default function Sidebar({
             className="sidebar-collapse-btn"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            <span className="desktop-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            </span>
+            <span className="mobile-icon" style={{ display: 'none', alignItems: 'center', justifyContent: 'center' }}>
+              <MoreVertical size={14} />
+            </span>
           </button>
         </div>
 
