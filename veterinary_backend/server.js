@@ -42,11 +42,8 @@ const paymentLimiter = rateLimit({
 const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5174', 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        // Allow mobile app requests (no origin or exp:// or any local IP)
+        callback(null, true);
     },
     credentials: true
 }));
@@ -81,10 +78,10 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const assistanceTaskRoutes = require('./routes/assistanceTaskRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const supportTicketRoutes = require('./routes/supportTicketRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
-
 // Apply subscription middleware to all protected API routes
 app.use('/api/v1/inventory', protect, subscriptionMiddleware, inventoryRoutes);
 app.use('/api/v1/owners', protect, subscriptionMiddleware, petOwnerRoutes);
@@ -100,6 +97,7 @@ app.use('/api/v1/reports', protect, subscriptionMiddleware, reportRoutes);
 app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRoutes);
 app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
 app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
+app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicketRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
 

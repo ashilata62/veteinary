@@ -133,7 +133,7 @@ export default function Hospitalization() {
           status: 'Occupied',
           petName: chosenPet.name,
           breed: chosenPet.breed,
-          photo: chosenPet.photo_url || chosenPet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200',
+          photo: chosenPet.photo_url || chosenPet.photo || '',
           reason: admissionReason,
           checkIn: new Date().toLocaleString(),
           flowsheet: { fed: false, meds: false, walk: false, eveningFed: false }
@@ -284,11 +284,29 @@ export default function Hospitalization() {
               {isOccupied && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--background)', padding: '0.75rem', borderRadius: '8px' }}>
-                    <img 
-                      src={cage.photo} 
-                      alt={cage.petName} 
-                      style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} 
-                    />
+                    {cage.photo ? (
+                      <img 
+                        src={cage.photo} 
+                        alt={cage.petName} 
+                        style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} 
+                      />
+                    ) : (
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--primary-teal-light)',
+                        color: 'var(--primary-teal)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '1.15rem',
+                        border: '1px solid var(--primary-teal-light)'
+                      }}>
+                        {cage.petName ? cage.petName.charAt(0).toUpperCase() : 'P'}
+                      </div>
+                    )}
                     <div>
                       <span className="font-bold" style={{ display: 'block', color: 'var(--text-primary)' }}>{cage.petName}</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{cage.breed}</span>

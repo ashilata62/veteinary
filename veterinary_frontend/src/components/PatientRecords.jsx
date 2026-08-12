@@ -44,6 +44,8 @@ export default function PatientRecords({
   const [loading, setLoading] = useState(true);
   const [fetchingEncounters, setFetchingEncounters] = useState(false);
   const [localReports, setLocalReports] = useState({});
+  const [billingHistory, setBillingHistory] = useState([]);
+  const [loadingBilling, setLoadingBilling] = useState(false);
   
   const [activeTab, setActiveTab] = useState(() => {
     return sessionStorage.getItem('patientRecordsActiveTab') || externalTab || 'Overview';
@@ -226,6 +228,24 @@ export default function PatientRecords({
     }
   };
 
+  const fetchBillingHistory = async (petId) => {
+    try {
+      setLoadingBilling(true);
+      const res = await apiFetch(`http://localhost:5000/api/v1/invoices/pet/${petId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBillingHistory(data);
+      } else {
+        setBillingHistory([]);
+      }
+    } catch (error) {
+      console.error('Failed to load billing history:', error);
+      setBillingHistory([]);
+    } finally {
+      setLoadingBilling(false);
+    }
+  };
+
   React.useEffect(() => {
     fetchInitialData();
   }, []);
@@ -234,6 +254,7 @@ export default function PatientRecords({
     const activePetId = selectedPetId || (pets[0] && pets[0].id);
     if (activePetId) {
       fetchEncounters(activePetId);
+      fetchBillingHistory(activePetId);
     }
   }, [selectedPetId, pets]);
 
@@ -256,7 +277,7 @@ export default function PatientRecords({
   const baseActivePet = pets.find(p => p.id === selectedPetId) || pets[0] || {};
   const activePet = {
     ...baseActivePet,
-    photo: baseActivePet.photo_url || baseActivePet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300',
+    photo: baseActivePet.photo_url || baseActivePet.photo || null,
     microchip: baseActivePet.microchip_number || baseActivePet.microchip || 'N/A',
     lastDeworming: formatDateSafely(baseActivePet.last_deworming, baseActivePet.lastDeworming || 'N/A'),
     lastVaccination: formatDateSafely(baseActivePet.last_vaccination, baseActivePet.lastVaccination || 'N/A'),
@@ -264,10 +285,7 @@ export default function PatientRecords({
       { date: formatDateSafely(baseActivePet.last_vaccination, '2026-04-10'), vaccine: baseActivePet.species === 'Cat' ? 'Nobivac Feline 1-HCP' : 'Nobivac Canine 1-DAPPv', batch: 'NK-8829-X', nextDue: '2027-04-10' },
       { date: '2025-04-15', vaccine: 'Rabies Defensor 3', batch: 'RB-9920-K', nextDue: '2028-04-15' }
     ],
-    billingHistory: baseActivePet.billingHistory || [
-      { id: 'INV-2026-0041', date: '2026-06-15', amount: 4500, status: 'Paid' },
-      { id: 'INV-2026-0089', date: '2026-07-06', amount: 8200, status: 'Paid' }
-    ]
+    billingHistory: billingHistory || []
   };
   const owner = owners.find(o => o.id === activePet.owner_id) || {};
 
@@ -424,11 +442,29 @@ export default function PatientRecords({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          <img
-            src={activePet.photo}
-            alt={activePet.name}
-            style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-xl)', objectFit: 'cover', border: '2px solid var(--primary-teal-light)' }}
-          />
+          {activePet.photo ? (
+            <img
+              src={activePet.photo}
+              alt={activePet.name}
+              style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-xl)', objectFit: 'cover', border: '2px solid var(--primary-teal-light)' }}
+            />
+          ) : (
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: 'var(--radius-xl)',
+              backgroundColor: 'var(--primary-teal-light)',
+              color: 'var(--primary-teal)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: '1.75rem',
+              border: '2px solid var(--primary-teal-light)'
+            }}>
+              {activePet.name ? activePet.name.charAt(0).toUpperCase() : 'P'}
+            </div>
+          )}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '4px' }}>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{activePet.name}</h2>
@@ -1159,14 +1195,23 @@ export default function PatientRecords({
                     </thead>
                     <tbody>
                       {activePet.billingHistory && activePet.billingHistory.length > 0 ? (
-                        activePet.billingHistory.map((bill, index) => (
-                          <tr key={index}>
-                            <td className="font-bold" style={{ color: 'var(--primary-teal)' }}>{bill.id}</td>
-                            <td>{bill.date}</td>
-                            <td className="font-bold">LKR {bill.amount.toLocaleString()}</td>
-                            <td><span className="badge badge-success">{bill.status}</span></td>
-                          </tr>
-                        ))
+                        activePet.billingHistory.map((bill, index) => {
+                          const isPaid = bill.status?.toLowerCase() === 'paid';
+                          const displayAmount = bill.grand_total !== undefined ? bill.grand_total : (bill.amount || 0);
+                          const displayDate = bill.invoice_date ? formatDateSafely(bill.invoice_date) : (bill.date || 'N/A');
+                          return (
+                            <tr key={index}>
+                              <td className="font-bold" style={{ color: 'var(--primary-teal)' }}>{bill.id}</td>
+                              <td>{displayDate}</td>
+                              <td className="font-bold">LKR {Number(displayAmount).toLocaleString()}</td>
+                              <td>
+                                <span className={`badge ${isPaid ? 'badge-success' : 'badge-warning'}`}>
+                                  {bill.status || 'Pending'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan="4" className="text-center" style={{ color: 'var(--text-secondary)' }}>No invoices registered for this patient.</td>

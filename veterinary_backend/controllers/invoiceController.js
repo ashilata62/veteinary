@@ -10,6 +10,17 @@ exports.getInvoices = async (req, res) => {
     }
 };
 
+exports.getPetInvoices = async (req, res) => {
+    try {
+        const { petId } = req.params;
+        const invoices = await invoiceService.getInvoicesByPetId(req.user.clinic_id, petId);
+        res.json(invoices);
+    } catch (error) {
+        console.error('Error fetching pet invoices:', error);
+        res.status(500).json({ message: 'Server error while fetching pet invoices' });
+    }
+};
+
 exports.getInvoice = async (req, res) => {
     try {
         const { id } = req.params;
