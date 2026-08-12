@@ -14,6 +14,19 @@ exports.getAllInvoices = async (clinic_id) => {
     return rows;
 };
 
+exports.getInvoicesByPetId = async (clinic_id, pet_id) => {
+    const [rows] = await db.query(`
+        SELECT i.*, po.name as ownerName, p.name as petName, u.name as doctorName
+        FROM invoices i
+        LEFT JOIN pet_owners po ON i.owner_id = po.id
+        LEFT JOIN pets p ON i.pet_id = p.id
+        LEFT JOIN users u ON i.doctor_id = u.id
+        WHERE i.clinic_id = ? AND i.pet_id = ?
+        ORDER BY i.invoice_date DESC, i.id DESC
+    `, [clinic_id, pet_id]);
+    return rows;
+};
+
 exports.getInvoiceById = async (clinic_id, id) => {
     const [invoices] = await db.query(`
         SELECT i.*, po.name as ownerName, p.name as petName, u.name as doctorName
