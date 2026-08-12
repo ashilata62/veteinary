@@ -8,6 +8,7 @@ export default function DoctorDashboard({ setCurrentTab, setSelectedPetId, handl
   const [appointments, setAppointments] = React.useState([]);
   const [encounters, setEncounters] = React.useState([]);
   const [homeVisits, setHomeVisits] = React.useState(0);
+  const [revenueReport, setRevenueReport] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -15,12 +16,18 @@ export default function DoctorDashboard({ setCurrentTab, setSelectedPetId, handl
       try {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
-        const [aptRes, encRes, hvRes] = await Promise.all([
+        const [aptRes, encRes, hvRes, revRes] = await Promise.all([
           apiFetch('/api/v1/appointments', { headers }),
           apiFetch('/api/v1/encounters', { headers }),
-          apiFetch('/api/v1/home-visits', { headers })
+          apiFetch('/api/v1/home-visits', { headers }),
+          apiFetch('/api/v1/reports/my-revenue', { headers })
         ]);
-        const [apts, encs, hvs] = await Promise.all([aptRes.json(), encRes.json(), hvRes.json()]);
+        const [apts, encs, hvs, rev] = await Promise.all([
+          aptRes.json(), 
+          encRes.json(), 
+          hvRes.json(),
+          revRes.json()
+        ]);
         
         const aptsArray = apts.data ? apts.data : (Array.isArray(apts) ? apts : []);
         setAppointments(aptsArray);
@@ -28,9 +35,12 @@ export default function DoctorDashboard({ setCurrentTab, setSelectedPetId, handl
         setEncounters(Array.isArray(encs) ? encs : []);
         
         const hvsArray = hvs.data ? hvs.data : (Array.isArray(hvs) ? hvs : []);
-        // Count home visits with travel_fee if field exists, else count all
         const hvCount = hvsArray.filter(hv => hv.travel_fee).length || hvsArray.length;
         setHomeVisits(hvCount);
+
+        if (rev.status === 'success') {
+          setRevenueReport(rev.data);
+        }
       } catch (err) {
         console.error('Error fetching dashboard data', err);
       } finally {
@@ -43,24 +53,25 @@ export default function DoctorDashboard({ setCurrentTab, setSelectedPetId, handl
   const todayApts = appointments.filter(a => ['Upcoming', 'Pending'].includes(a.status));
   const emergencyCases = appointments.filter(a => a.type === 'Emergency').length;
   const completedVisits = appointments.filter(a => a.status === 'Completed').length;
-  // homeVisits state is set from API; fallback to 0 if not loaded
   const pendingFollowUps = appointments.filter(a => a.status === 'Pending').length;
 
-  const chartData = [
-    { name: 'Mon', visits: 4 },
-    { name: 'Tue', visits: 7 },
-    { name: 'Wed', visits: 5 },
-    { name: 'Thu', visits: 8 },
-    { name: 'Fri', visits: 6 },
-    { name: 'Sat', visits: 9 },
-    { name: 'Sun', visits: 3 },
-  ];
+  const chartData = revenueReport && revenueReport.trend.length > 0
+    ? revenueReport.trend.map(t => ({ name: t.day, visits: t.consultations }))
+    : [
+        { name: 'Mon', visits: 0 },
+        { name: 'Tue', visits: 0 },
+        { name: 'Wed', visits: 0 },
+        { name: 'Thu', visits: 0 },
+        { name: 'Fri', visits: 0 },
+        { name: 'Sat', visits: 0 },
+        { name: 'Sun', visits: 0 },
+      ];
 
   const kpis = [
-    { label: "Clinic Appointments", value: todayApts.length, sub: 'Next at 11:00 AM', subColor: 'var(--text-secondary)', icon: Calendar, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },
+    { label: "Clinic Appointments", value: todayApts.length, sub: 'Active scheduled visits', subColor: 'var(--text-secondary)', icon: Calendar, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },
     { label: 'Home Visits Today', value: homeVisits, sub: 'Route optimized', subColor: 'var(--text-secondary)', icon: Stethoscope, iconBg: 'rgba(139, 92, 246, 0.15)', iconColor: '#8b5cf6' },
-    { label: 'Completed Consults', value: completedVisits, sub: '+4% this week', subColor: 'var(--success)', icon: CheckCircle, iconBg: 'var(--success-light)', iconColor: 'var(--success)' },
-    { label: 'Revenue Generated', value: '₹8,500', sub: 'Today so far', subColor: 'var(--success)', icon: TrendingUp, iconBg: 'rgba(59, 130, 246, 0.15)', iconColor: '#3b82f6' },
+    { label: 'Completed Consults', value: completedVisits, sub: 'Clinical encounters logged', subColor: 'var(--success)', icon: CheckCircle, iconBg: 'var(--success-light)', iconColor: 'var(--success)' },
+    { label: 'Revenue Generated', value: revenueReport ? `₹${revenueReport.metrics.revenue.toLocaleString('en-IN')}` : '₹0', sub: 'Total paid transactions', subColor: 'var(--success)', icon: TrendingUp, iconBg: 'rgba(59, 130, 246, 0.15)', iconColor: '#3b82f6' },
     { label: 'Pending Follow-Ups', value: pendingFollowUps, sub: 'Needs attention', subColor: 'var(--warning)', icon: Clock, iconBg: 'var(--warning-light)', iconColor: 'var(--warning)' },
     { label: 'Emergency Cases', value: emergencyCases, sub: 'Priority attention', subColor: 'var(--danger)', icon: AlertTriangle, iconBg: 'var(--danger-light)', iconColor: 'var(--danger)' },
   ];

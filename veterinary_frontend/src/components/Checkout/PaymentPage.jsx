@@ -11,7 +11,7 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, success, failed
-  const [planDetails, setPlanDetails] = useState({ name: 'Pro Plan', amount: 199 });
+  const [planDetails, setPlanDetails] = useState({ name: 'Pro Plan', amount: 1299 });
 
   useEffect(() => {
     // Load Razorpay Script
@@ -143,7 +143,7 @@ export default function PaymentPage() {
           <div className="payment-details">
             <div className="plan-summary">
               <span className="plan-name">{planDetails.name}</span>
-              <span className="plan-price">${planDetails.amount}</span>
+              <span className="plan-price">₹{planDetails.amount}</span>
             </div>
             
             <div className="payment-security-badges">
@@ -156,7 +156,7 @@ export default function PaymentPage() {
               onClick={handlePayment} 
               disabled={processing}
             >
-              {processing ? <Loader2 className="spinner" size={20} /> : `Pay $${planDetails.amount} Securely`}
+              {processing ? <Loader2 className="spinner" size={20} /> : `Pay ₹${planDetails.amount} Securely`}
             </button>
             <p className="test-mode-text">Test Mode Active: No real money will be deducted.</p>
           </div>

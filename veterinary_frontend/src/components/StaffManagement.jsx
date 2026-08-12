@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import {
   UserCog, Stethoscope, Users, HeartHandshake, Shield, Plus, Search,
   Mail, Phone, CheckCircle, XCircle, ArrowLeft, Save, Pencil, Trash2,
-  User, Lock, Building2, Camera, Upload, AlertTriangle
+  User, Lock, Building2, Camera, Upload, AlertTriangle, MoreVertical
 } from 'lucide-react';
 import FormSelect from './FormSelect';
 
@@ -273,6 +273,7 @@ export default function StaffManagement() {
   const [editingId, setEditingId] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [activeMenuId, setActiveMenuId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchStaff = async () => {
@@ -422,7 +423,30 @@ export default function StaffManagement() {
   }
 
   return (
-    <div className="staff-page">
+    <div className="staff-page" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .staff-card-hover {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        }
+        .staff-card-hover:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -8px rgba(0, 0, 0, 0.05) !important;
+        }
+        .staff-row-hover {
+          transition: background-color 0.15s ease;
+        }
+        .staff-row-hover:hover {
+          background-color: var(--primary-teal-light) !important;
+        }
+        .dropdown-item {
+          transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .dropdown-item:hover {
+          background-color: var(--background) !important;
+          color: var(--primary-teal) !important;
+        }
+      `}</style>
+
       <div className="page-header">
         <div>
           <h1>Staff Management</h1>
@@ -433,7 +457,7 @@ export default function StaffManagement() {
         </button>
       </div>
 
-      <div className="kpi-grid-responsive">
+      <div className="kpi-grid-responsive" style={{ marginBottom: '1.5rem' }}>
         {[
           { label: 'Total Staff',   count: staffList.length,                                              color: 'var(--primary-teal)',   icon: UserCog },
           { label: 'Doctors',       count: staffList.filter((s) => s.role === 'Doctor').length,         color: 'var(--secondary-blue)', icon: Stethoscope },
@@ -442,7 +466,7 @@ export default function StaffManagement() {
           { label: 'Active Now',    count: staffList.filter((s) => s.status === 'Active').length,       color: 'var(--success)',        icon: CheckCircle },
           { label: 'On Leave',      count: staffList.filter((s) => s.status === 'On Leave').length,     color: '#f59e0b',               icon: Users },
         ].map(({ label, count, color, icon: Icon }) => (
-          <div key={label} className="card kpi-stat-card">
+          <div key={label} className="card kpi-stat-card staff-card-hover" style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}>
             <div className="kpi-icon" style={{ backgroundColor: `${color}18`, color }}>
               <Icon size={18} />
             </div>
@@ -454,33 +478,82 @@ export default function StaffManagement() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div style={{ position: 'relative', width: '100%' }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input
-            type="text"
-            placeholder="Search by name, email, or username..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="form-control"
-            style={{ paddingLeft: '2.25rem', width: '100%' }}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.5rem' }} className="hide-scrollbar">
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)', alignSelf: 'center', marginRight: '0.25rem', flexShrink: 0 }}>Role:</span>
-          {['All', ...ROLE_OPTIONS, 'Admin'].map((r) => (
-            <button key={r} onClick={() => setRoleFilter(r)} className={`btn btn-sm ${roleFilter === r ? 'btn-primary' : 'btn-secondary'}`} style={{ flexShrink: 0 }}>
-              {r}
+      {/* Unified Search & Filters Toolbar */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '0.75rem',
+          padding: '1rem',
+          backgroundColor: '#fff',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          boxShadow: 'var(--shadow-sm)',
+          marginBottom: '1.25rem'
+        }}
+      >
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+          {/* Search Input */}
+          <div style={{ position: 'relative', width: '280px', minWidth: '200px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search name, email, or username..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-control"
+              style={{ paddingLeft: '2.25rem', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--background)' }}
+            />
+          </div>
+
+          {/* Role Dropdown */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="form-control"
+              style={{ width: '180px', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', padding: '0 8px', backgroundColor: 'var(--background)', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }}
+            >
+              <option value="All">All Roles</option>
+              <option value="Doctor">Doctor ({staffList.filter(s => s.role === 'Doctor').length})</option>
+              <option value="Receptionist">Receptionist ({staffList.filter(s => s.role === 'Receptionist').length})</option>
+              <option value="Vet Assistant">Vet Assistant ({staffList.filter(s => s.role === 'Vet Assistant').length})</option>
+              <option value="Admin">Admin ({staffList.filter(s => s.role === 'Admin').length})</option>
+            </select>
+          </div>
+
+          {/* Status Dropdown */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="form-control"
+              style={{ width: '180px', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', padding: '0 8px', backgroundColor: 'var(--background)', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }}
+            >
+              <option value="All">All Statuses</option>
+              <option value="Active">Active ({staffList.filter(s => s.status === 'Active').length})</option>
+              <option value="On Leave">On Leave ({staffList.filter(s => s.status === 'On Leave').length})</option>
+              <option value="Terminated">Terminated ({staffList.filter(s => s.status === 'Terminated').length})</option>
+            </select>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(roleFilter !== 'All' || statusFilter !== 'All' || search !== '') && (
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter('All');
+                setStatusFilter('All');
+                setSearch('');
+              }}
+              className="btn btn-secondary"
+              style={{ height: '36px', padding: '0 12px', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--danger)', backgroundColor: '#fef2f2', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Clear Filters
             </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.5rem' }} className="hide-scrollbar">
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)', alignSelf: 'center', marginRight: '0.25rem', flexShrink: 0 }}>Status:</span>
-          {['All', 'Active', 'On Leave', 'Terminated'].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`btn btn-sm ${statusFilter === s ? 'btn-primary' : 'btn-secondary'}`} style={{ flexShrink: 0 }}>
-              {s}
-            </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -510,7 +583,7 @@ export default function StaffManagement() {
                   const cfg = roleConfig[staff.role] || { color: '#64748b', bg: '#f8fafc', icon: UserCog };
                   const RoleIcon = cfg.icon;
                   return (
-                    <tr key={staff.id}>
+                    <tr key={staff.id} className="staff-row-hover">
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <div style={{
@@ -539,15 +612,103 @@ export default function StaffManagement() {
                       <td style={{ fontSize: '0.85rem' }}>{staff.phone}</td>
                       <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{staff.username}</td>
                       <td><StatusBadge status={staff.status} /></td>
-                      <td>
-                        <div className="staff-table-actions">
-                          <button onClick={() => openEdit(staff)} className="btn btn-secondary btn-sm" title="Edit">
-                            <Pencil size={14} />
+                      <td style={{ position: 'relative', textAlign: 'right', padding: '1rem' }}>
+                        <div style={{ display: 'inline-block', position: 'relative' }}>
+                          <button 
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(activeMenuId === staff.id ? null : staff.id);
+                            }} 
+                            className="btn btn-secondary btn-sm" 
+                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Actions"
+                          >
+                            <MoreVertical size={16} />
                           </button>
-                          {staff.role !== 'Admin' && (
-                            <button onClick={() => handleDelete(staff.id)} className="btn btn-secondary btn-sm" title="Delete" style={{ color: 'var(--danger)' }}>
-                              <Trash2 size={14} />
-                            </button>
+                          
+                          {activeMenuId === staff.id && (
+                            <>
+                              {/* Overlay click catcher to close the dropdown */}
+                              <div 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveMenuId(null);
+                                }}
+                                style={{ position: 'fixed', inset: 0, zIndex: 99, background: 'transparent' }} 
+                              />
+                              <div style={{
+                                position: 'absolute',
+                                right: 0,
+                                top: '100%',
+                                marginTop: '4px',
+                                backgroundColor: '#fff',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                boxShadow: 'var(--shadow-lg)',
+                                zIndex: 100,
+                                minWidth: '140px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: '4px',
+                                boxSizing: 'border-box',
+                                textAlign: 'left'
+                              }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEdit(staff);
+                                    setActiveMenuId(null);
+                                  }}
+                                  className="dropdown-item"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    fontSize: '0.825rem',
+                                    color: 'var(--text-primary)',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    borderRadius: '6px',
+                                  }}
+                                >
+                                  <Pencil size={12} style={{ color: 'var(--secondary-blue)' }} /> Edit Staff
+                                </button>
+                                
+                                {staff.role !== 'Admin' && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDelete(staff.id);
+                                      setActiveMenuId(null);
+                                    }}
+                                    className="dropdown-item"
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
+                                      width: '100%',
+                                      padding: '8px 12px',
+                                      fontSize: '0.825rem',
+                                      color: 'var(--danger)',
+                                      border: 'none',
+                                      backgroundColor: 'transparent',
+                                      cursor: 'pointer',
+                                      textAlign: 'left',
+                                      borderRadius: '6px',
+                                    }}
+                                  >
+                                    <Trash2 size={12} style={{ color: 'var(--danger)' }} /> Remove
+                                  </button>
+                                )}
+                              </div>
+                            </>
                           )}
                         </div>
                       </td>

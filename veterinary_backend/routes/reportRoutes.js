@@ -7,6 +7,7 @@ const { protect } = require('../middlewares/authMiddleware');
 router.use(protect);
 
 // Report sub-endpoints
+router.get('/my-revenue', reportController.getMyRevenue);
 router.get('/revenue', reportController.getRevenue);
 router.get('/appointments', reportController.getAppointments);
 router.get('/doctors', reportController.getDoctors);

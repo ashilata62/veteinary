@@ -160,6 +160,80 @@ class ReportService {
         `);
         return rows;
     }
+
+    async getPersonalDoctorRevenue(clinic_id, doctor_id) {
+        // 1. Calculate metrics:
+        // Revenue (paid invoices where this doctor is assigned)
+        const [revenueRows] = await db.query(`
+            SELECT COALESCE(SUM(grand_total), 0) as totalRevenue 
+            FROM invoices 
+            WHERE doctor_id = ? AND clinic_id = ? AND status = 'Paid'
+        `, [doctor_id, clinic_id]);
+        
+        // Consultations completed (total encounters by this doctor)
+        const [consultationsRows] = await db.query(`
+            SELECT COUNT(*) as totalConsultations 
+            FROM clinical_encounters 
+            WHERE doctor_id = ? AND clinic_id = ?
+        `, [doctor_id, clinic_id]);
+        
+        // Treatments performed (encounters where treatment is non-empty)
+        const [treatmentsRows] = await db.query(`
+            SELECT COUNT(*) as totalTreatments 
+            FROM clinical_encounters 
+            WHERE doctor_id = ? AND clinic_id = ? AND treatment IS NOT NULL AND treatment != ''
+        `, [doctor_id, clinic_id]);
+
+        // Home visits completed
+        const [homeVisitsRows] = await db.query(`
+            SELECT COUNT(*) as totalHomeVisits 
+            FROM home_visits 
+            WHERE doctor_id = ? AND clinic_id = ? AND visit_status = 'Completed'
+        `, [doctor_id, clinic_id]);
+
+        // 2. Daily revenue trend (Past 30 days)
+        const [trendRows] = await db.query(`
+            SELECT 
+                DATE_FORMAT(invoice_date, '%d %b') as day,
+                SUM(grand_total) as revenue,
+                COUNT(id) as consultations
+            FROM invoices 
+            WHERE doctor_id = ? AND clinic_id = ? AND status = 'Paid'
+              AND invoice_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY invoice_date
+            ORDER BY invoice_date ASC
+        `, [doctor_id, clinic_id]);
+
+        // 3. Income breakdown by item category
+        const [breakdownRows] = await db.query(`
+            SELECT 
+                COALESCE(inv.category, 'Service') as name,
+                SUM(ili.total) as value
+            FROM invoice_line_items ili
+            JOIN invoices i ON ili.invoice_id = i.id
+            LEFT JOIN inventory inv ON ili.inventory_id = inv.id
+            WHERE i.doctor_id = ? AND i.clinic_id = ? AND i.status = 'Paid'
+            GROUP BY COALESCE(inv.category, 'Service')
+        `, [doctor_id, clinic_id]);
+
+        return {
+            metrics: {
+                revenue: parseFloat(revenueRows[0].totalRevenue) || 0,
+                consultations: parseInt(consultationsRows[0].totalConsultations) || 0,
+                treatments: parseInt(treatmentsRows[0].totalTreatments) || 0,
+                homeVisits: parseInt(homeVisitsRows[0].totalHomeVisits) || 0
+            },
+            trend: trendRows.map(r => ({
+                day: r.day,
+                revenue: parseFloat(r.revenue) || 0,
+                consultations: parseInt(r.consultations) || 0
+            })),
+            breakdown: breakdownRows.map(r => ({
+                name: r.name,
+                value: parseFloat(r.value) || 0
+            }))
+        };
+    }
 }
 
 module.exports = new ReportService();

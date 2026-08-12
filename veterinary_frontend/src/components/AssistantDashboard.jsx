@@ -1,10 +1,10 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Activity, CheckCircle, Clock, Stethoscope, ArrowRight, ClipboardList, UploadCloud, AlertTriangle, Navigation, Bell } from 'lucide-react';
-import { APPOINTMENTS } from '../data/mockData';
 
 export default function AssistantDashboard({ setCurrentTab, handleViewPet, attendanceStatus }) {
   const [appointments, setAppointments] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -12,7 +12,10 @@ export default function AssistantDashboard({ setCurrentTab, handleViewPet, atten
       try {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
-        const aptsRes = await apiFetch('http://localhost:5000/api/v1/appointments', { headers });
+        const [aptsRes, tasksRes] = await Promise.all([
+          apiFetch('/api/v1/appointments', { headers }),
+          apiFetch('/api/v1/assistance-tasks', { headers })
+        ]);
 
         if (aptsRes.ok) {
           const res = await aptsRes.json();
@@ -32,10 +35,18 @@ export default function AssistantDashboard({ setCurrentTab, handleViewPet, atten
                 doctorName: apt.doctorName || 'Unknown',
                 time: timeStr,
                 status: apt.status,
-                isHomeVisit: apt.appointment_type === 'Home Visit'
+                isHomeVisit: apt.appointment_type === 'Home Visit',
+                isEmergency: apt.appointment_type === 'Emergency'
               };
             });
             setAppointments(formatted);
+          }
+        }
+
+        if (tasksRes.ok) {
+          const res = await tasksRes.json();
+          if (res.status === 'success' && Array.isArray(res.data)) {
+            setTasks(res.data);
           }
         }
       } catch (err) {
@@ -48,19 +59,17 @@ export default function AssistantDashboard({ setCurrentTab, handleViewPet, atten
     fetchDashboardData();
   }, []);
 
-  const todayApts = appointments.length > 0
-    ? appointments.filter(a => ['Upcoming', 'Pending'].includes(a.status))
-    : APPOINTMENTS.filter(a => ['Upcoming', 'Pending'].includes(a.status));
-
-  const homeVisits = appointments.length > 0
-    ? appointments.filter(a => a.isHomeVisit && ['Upcoming', 'Pending', 'Scheduled'].includes(a.status))
-    : APPOINTMENTS.filter(a => a.isHomeVisit && a.status === 'Upcoming');
+  const activeApts = appointments.filter(a => ['Upcoming', 'Pending'].includes(a.status));
+  const homeVisits = appointments.filter(a => a.isHomeVisit && ['Upcoming', 'Pending', 'Scheduled'].includes(a.status));
+  const pendingTasks = tasks.filter(t => t.status === 'Pending');
+  const pendingUploads = tasks.filter(t => t.task_type === 'Lab Test' && t.status === 'Pending').length;
+  const emergencyAlerts = appointments.filter(a => a.isEmergency && ['Upcoming', 'Pending'].includes(a.status)).length;
 
   const kpis = [
-    { label: 'Assigned Tasks', value: todayApts.length > 0 ? todayApts.length : 8, sub: 'For today', subColor: 'var(--text-secondary)', IconComp: ClipboardList, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },
-    { label: 'Pending Uploads', value: 3, sub: 'Needs scanning', subColor: 'var(--warning)', IconComp: UploadCloud, iconBg: 'var(--warning-light)', iconColor: 'var(--warning)' },
+    { label: 'Assigned Tasks', value: pendingTasks.length, sub: 'Pending operations', subColor: 'var(--text-secondary)', IconComp: ClipboardList, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },
+    { label: 'Pending Uploads', value: pendingUploads, sub: 'Needs scanning', subColor: 'var(--warning)', IconComp: UploadCloud, iconBg: 'var(--warning-light)', iconColor: 'var(--warning)' },
     { label: 'Home Visits', value: homeVisits.length, sub: 'Assigned to you', subColor: 'var(--secondary-blue)', IconComp: Navigation, iconBg: 'var(--secondary-blue-light)', iconColor: 'var(--secondary-blue)' },
-    { label: 'Emergency Alerts', value: 1, sub: 'Immediate action', subColor: 'var(--danger)', IconComp: AlertTriangle, iconBg: 'var(--danger-light)', iconColor: 'var(--danger)' },
+    { label: 'Emergency Alerts', value: emergencyAlerts, sub: 'Requires action', subColor: 'var(--danger)', IconComp: AlertTriangle, iconBg: 'var(--danger-light)', iconColor: 'var(--danger)' },
   ];
 
   return (

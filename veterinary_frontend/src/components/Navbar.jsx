@@ -78,29 +78,44 @@ export default function Navbar({
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name[0].toUpperCase();
+  };
+
   const activeUser = (() => {
     try {
       const stored = localStorage.getItem('user');
       if (stored) {
         const parsed = JSON.parse(stored);
         let avatarUrl = parsed.profile_image || '';
+        const hasRealPhoto = !!avatarUrl;
         if (avatarUrl) {
           if (avatarUrl.startsWith('uploads') || avatarUrl.startsWith('/uploads')) {
             avatarUrl = `/${avatarUrl.startsWith('/') ? avatarUrl.substring(1) : avatarUrl}`;
           }
-        } else {
-          avatarUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150';
         }
         return {
           name: parsed.name || parsed.fullName || '',
           role: parsed.role || '',
-          avatar: avatarUrl
+          avatar: avatarUrl,
+          hasRealPhoto
         };
       }
     } catch (e) {
       console.error('Error parsing user session in Navbar:', e);
     }
-    return USERS.find((u) => u.role === currentRole) || USERS[0];
+    const fallback = USERS.find((u) => u.role === currentRole) || USERS[0];
+    return {
+      name: fallback.name || 'User',
+      role: fallback.role || currentRole || 'Staff',
+      avatar: '',
+      hasRealPhoto: false
+    };
   })();
   const unreadCount = notifications ? notifications.filter((n) => !n.read).length : 0;
 
@@ -277,14 +292,33 @@ export default function Navbar({
           className="app-navbar__profile"
           aria-label={`${activeUser.name}, ${activeUser.role}`}
           onClick={() => setShowProfileMenu(!showProfileMenu)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
-          <img 
-            src={activeUser.avatar} 
-            alt="" 
-            className="app-navbar__avatar" 
-            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150'; }}
-          />
-          <div className="navbar-user-name app-navbar__user-text">
+          {activeUser.hasRealPhoto ? (
+            <img 
+              src={activeUser.avatar} 
+              alt="" 
+              className="app-navbar__avatar" 
+            />
+          ) : (
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--primary-teal-light)',
+              color: 'var(--primary-teal)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              border: '2px solid var(--primary-teal-light)',
+              flexShrink: 0
+            }}>
+              {getInitials(activeUser.name)}
+            </div>
+          )}
+          <div className="navbar-user-name app-navbar__user-text" style={{ marginLeft: 0 }}>
             <span className="app-navbar__user-name">{activeUser.name}</span>
             <span className="app-navbar__user-role">{activeUser.role}</span>
           </div>

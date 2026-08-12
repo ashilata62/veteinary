@@ -91,7 +91,22 @@ export default function Attendance({ currentRole }) {
   const absentToday = dailyAttendance.filter(s => s.status === 'Absent' || s.status === 'On Leave').length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .attendance-card-hover {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        }
+        .attendance-card-hover:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -8px rgba(0, 0, 0, 0.05) !important;
+        }
+        .attendance-row-hover {
+          transition: background-color 0.15s ease;
+        }
+        .attendance-row-hover:hover {
+          background-color: var(--primary-teal-light) !important;
+        }
+      `}</style>
       
       {/* 1. Page Header */}
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1.5rem' }}>
@@ -126,78 +141,69 @@ export default function Attendance({ currentRole }) {
       ) : viewMode === 'hub' ? (
         <>
           {/* KPI Cards */}
-          <div className="kpi-grid-responsive">
-            <div className="card hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--success)', padding: '1.25rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--success-light)', color: 'var(--success)' }}><UserCheck size={24} /></div>
+          <div className="kpi-grid-responsive" style={{ marginBottom: '0.5rem' }}>
+            <div className="card hover-lift attendance-card-hover" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--success)', padding: '1.25rem', transition: 'all 0.2s ease', cursor: 'pointer' }}>
+              <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--success-light)', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserCheck size={24} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Present Today</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Present Today</p>
                 <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{presentToday} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ {dailyAttendance.length}</span></h3>
               </div>
             </div>
-            <div className="card hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--danger)', padding: '1.25rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}><UserX size={24} /></div>
+            <div className="card hover-lift attendance-card-hover" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--danger)', padding: '1.25rem', transition: 'all 0.2s ease', cursor: 'pointer' }}>
+              <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--danger-light)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserX size={24} /></div>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Absent / Leave</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Absent / Leave</p>
                 <h3 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '2px 0 0 0' }}>{absentToday}</h3>
               </div>
             </div>
           </div>
 
           {/* Daily Attendance Table */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <h3 className="font-bold text-lg" style={{ margin: 0 }}>Today's Staff Attendance & Productivity</h3>
-              <div style={{ width: '100%', maxWidth: '100%' }}>
-                <div style={{ display: 'flex', gap: '6px', backgroundColor: '#f1f5f9', padding: '5px', borderRadius: 'var(--radius-lg)', overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-                  {filterOptions.map(role => (
-                    <button 
-                      key={role}
-                      onClick={() => setFilterRole(role)}
-                      style={{ 
-                        flex: '0 0 auto',
-                        whiteSpace: 'nowrap',
-                        padding: '6px 14px', 
-                        fontSize: '0.78rem', 
-                        fontWeight: filterRole === role ? 700 : 500,
-                        backgroundColor: filterRole === role ? '#fff' : 'transparent',
-                        color: filterRole === role ? 'var(--primary-teal)' : 'var(--text-secondary)',
-                        border: 'none',
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer',
-                        boxShadow: filterRole === role ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      {role}
-                    </button>
-                  ))}
-                </div>
+          <div className="card" style={{ border: '1px solid var(--border)', borderRadius: '12px', boxShadow: 'var(--shadow-md)', padding: '1.5rem', backgroundColor: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+              <h3 className="font-bold text-lg" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                <Users size={20} style={{ color: 'var(--primary-teal)' }} /> Today's Staff Attendance & Productivity
+              </h3>
+              <div>
+                <select 
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="form-control"
+                  style={{ width: '180px', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', padding: '0 8px', backgroundColor: 'var(--background)', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }}
+                >
+                  <option value="All">All Roles</option>
+                  <option value="Doctor">Doctor ({dailyAttendance.filter(s => s.role === 'Doctor').length})</option>
+                  <option value="Receptionist">Receptionist ({dailyAttendance.filter(s => s.role === 'Receptionist').length})</option>
+                  <option value="Vet Assistant">Vet Assistant ({dailyAttendance.filter(s => s.role === 'Vet Assistant').length})</option>
+                  <option value="Manager">Manager ({dailyAttendance.filter(s => s.role === 'Manager').length})</option>
+                  <option value="Admin">Admin ({dailyAttendance.filter(s => s.role === 'Admin').length})</option>
+                </select>
               </div>
             </div>
             
             <div className="table-responsive">
-              <table className="custom-table">
+              <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr>
-                    <th>Staff Name</th>
-                    <th>Role</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th style={{ textAlign: 'center' }}>Total Hrs</th>
-                    <th style={{ textAlign: 'center' }}>Status</th>
-                    <th>Activity Summary</th>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ textAlign: 'left', padding: '0.85rem' }}>Staff Name</th>
+                    <th style={{ textAlign: 'left', padding: '0.85rem' }}>Role</th>
+                    <th style={{ textAlign: 'left', padding: '0.85rem' }}>Check In</th>
+                    <th style={{ textAlign: 'left', padding: '0.85rem' }}>Check Out</th>
+                    <th style={{ textAlign: 'center', padding: '0.85rem' }}>Total Hrs</th>
+                    <th style={{ textAlign: 'center', padding: '0.85rem' }}>Status</th>
+                    <th style={{ textAlign: 'left', padding: '0.85rem' }}>Activity Summary</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAttendance.map(staff => (
-                    <tr key={staff.id}>
-                      <td className="font-bold">{staff.name}</td>
-                      <td><span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{staff.role}</span></td>
-                      <td className="font-semibold" style={{ fontSize: '0.85rem' }}>{staff.checkIn}</td>
-                      <td className="font-semibold" style={{ fontSize: '0.85rem' }}>{staff.checkOut}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{staff.hours}h</td>
-                      <td style={{ textAlign: 'center' }}><span className={`badge ${getStatusBadge(staff.status)}`} style={{ fontSize: '0.7rem' }}>{staff.status}</span></td>
-                      <td style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{staff.activity}</td>
+                    <tr key={staff.id} className="attendance-row-hover" style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td className="font-bold" style={{ padding: '0.85rem' }}>{staff.name}</td>
+                      <td style={{ padding: '0.85rem' }}><span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{staff.role}</span></td>
+                      <td className="font-semibold" style={{ fontSize: '0.85rem', padding: '0.85rem' }}>{staff.checkIn}</td>
+                      <td className="font-semibold" style={{ fontSize: '0.85rem', padding: '0.85rem' }}>{staff.checkOut}</td>
+                      <td style={{ textAlign: 'center', fontWeight: 600, padding: '0.85rem' }}>{staff.hours}h</td>
+                      <td style={{ textAlign: 'center', padding: '0.85rem' }}><span className={`badge ${getStatusBadge(staff.status)}`} style={{ fontSize: '0.7rem' }}>{staff.status}</span></td>
+                      <td style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', padding: '0.85rem' }}>{staff.activity}</td>
                     </tr>
                   ))}
                   {filteredAttendance.length === 0 && (

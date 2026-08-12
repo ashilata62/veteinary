@@ -6,6 +6,14 @@ async function check() {
         const [rows] = await db.query('DESCRIBE clinics;');
         console.log("Clinics Table Schema:");
         console.table(rows);
+
+        const [subRows] = await db.query('DESCRIBE saas_subscriptions;');
+        console.log("SaaS Subscriptions Schema:");
+        console.table(subRows);
+
+        const [plans] = await db.query('SELECT * FROM saas_plans;');
+        console.log("SaaS Plans:");
+        console.table(plans);
     } catch (e) {
         console.error(e);
     }

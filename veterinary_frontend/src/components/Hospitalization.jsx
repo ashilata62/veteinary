@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../utils/api';
-import { Shield, Plus, HeartPulse, CheckSquare, Trash2, Calendar, Clipboard, Loader, Users, AlertTriangle } from 'lucide-react';
+import { Shield, Plus, HeartPulse, CheckSquare, Trash2, Calendar, Clipboard, Loader, Users, AlertTriangle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Hospitalization() {
@@ -8,87 +8,38 @@ export default function Hospitalization() {
   const [loading, setLoading] = useState(true);
   const [showAdmitModal, setShowAdmitModal] = useState(false);
   const [selectedCage, setSelectedCage] = useState(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+
+  const cageTemplates = [
+    { id: 'ICU-01', name: 'ICU Unit 1', type: 'ICU' },
+    { id: 'ICU-02', name: 'ICU Unit 2', type: 'ICU' },
+    { id: 'CAGE-A1', name: 'Cage A-1 (Large)', type: 'Standard Large' },
+    { id: 'CAGE-B2', name: 'Cage B-2 (Medium)', type: 'Standard Medium' },
+    { id: 'CAGE-C3', name: 'Cage C-3 (Small)', type: 'Standard Small' },
+    { id: 'CAGE-D4', name: 'Cage D-4 (Small)', type: 'Standard Small' }
+  ];
 
   // Form states
   const [selectedPetId, setSelectedPetId] = useState('');
   const [admissionReason, setAdmissionReason] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
 
-  // Main board cages state
-  const [cages, setCages] = useState([
-    {
-      id: 'ICU-01',
-      name: 'ICU Unit 1',
-      type: 'ICU',
-      status: 'Occupied',
-      petName: 'Bella',
-      breed: 'Persian Cat',
-      photo: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=200',
-      reason: 'Severe Dehydration & IV Fluids',
-      checkIn: '2026-08-08 10:20 AM',
-      flowsheet: { fed: true, meds: true, walk: false, eveningFed: false }
-    },
-    {
-      id: 'ICU-02',
-      name: 'ICU Unit 2',
-      type: 'ICU',
-      status: 'Vacant',
-      petName: '',
-      breed: '',
-      photo: '',
-      reason: '',
-      checkIn: '',
-      flowsheet: null
-    },
-    {
-      id: 'CAGE-A1',
-      name: 'Cage A-1 (Large)',
-      type: 'Standard Large',
-      status: 'Occupied',
-      petName: 'Rocky',
-      breed: 'German Shepherd',
-      photo: 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&q=80&w=200',
-      reason: 'Post-Op Fracture Recovery',
-      checkIn: '2026-08-09 08:30 AM',
-      flowsheet: { fed: true, meds: false, walk: true, eveningFed: false }
-    },
-    {
-      id: 'CAGE-B2',
-      name: 'Cage B-2 (Medium)',
-      type: 'Standard Medium',
-      status: 'Cleaning Needed',
-      petName: '',
-      breed: '',
-      photo: '',
-      reason: '',
-      checkIn: '',
-      flowsheet: null
-    },
-    {
-      id: 'CAGE-C3',
-      name: 'Cage C-3 (Small)',
-      type: 'Standard Small',
-      status: 'Vacant',
-      petName: '',
-      breed: '',
-      photo: '',
-      reason: '',
-      checkIn: '',
-      flowsheet: null
-    },
-    {
-      id: 'CAGE-D4',
-      name: 'Cage D-4 (Small)',
-      type: 'Standard Small',
-      status: 'Vacant',
-      petName: '',
-      breed: '',
-      photo: '',
-      reason: '',
-      checkIn: '',
-      flowsheet: null
+  // Main board cages state - persists in localStorage
+  const [cages, setCages] = useState(() => {
+    const saved = localStorage.getItem('vet_hospital_cages');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
     }
-  ]);
+    return []; // Start empty by default!
+  });
+
+  useEffect(() => {
+    localStorage.setItem('vet_hospital_cages', JSON.stringify(cages));
+  }, [cages]);
 
   useEffect(() => {
     const loadPets = async () => {
@@ -193,6 +144,53 @@ export default function Hospitalization() {
     toast.success('Cage sanitized & marked vacant.');
   };
 
+  const handleAddCage = () => {
+    if (!selectedTemplateId) {
+      toast.error('Please select a cage from the dropdown');
+      return;
+    }
+    const template = cageTemplates.find(t => t.id === selectedTemplateId);
+    if (!template) return;
+    
+    // Check if already on the board
+    const exists = cages.some(c => c.id === template.id);
+    if (exists) {
+      toast.error(`${template.name} is already added to the board.`);
+      return;
+    }
+    
+    const newCage = {
+      id: template.id,
+      name: template.name,
+      type: template.type,
+      status: 'Vacant',
+      petName: '',
+      breed: '',
+      photo: '',
+      reason: '',
+      checkIn: '',
+      flowsheet: null
+    };
+    
+    setCages(prev => [...prev, newCage]);
+    toast.success(`${template.name} added to the board.`);
+    setSelectedTemplateId('');
+  };
+
+  const handleRemoveCage = (cageId) => {
+    const cage = cages.find(c => c.id === cageId);
+    if (!cage) return;
+    if (cage.status === 'Occupied') {
+      toast.error('Cannot remove cage while it is occupied. Please discharge the patient first.');
+      return;
+    }
+    
+    if (window.confirm(`Are you sure you want to remove ${cage.name} from the board?`)) {
+      setCages(prev => prev.filter(c => c.id !== cageId));
+      toast.success(`${cage.name} removed from the board.`);
+    }
+  };
+
   const totalOccupied = cages.filter(c => c.status === 'Occupied').length;
   const totalVacant = cages.filter(c => c.status === 'Vacant').length;
   const totalCleaning = cages.filter(c => c.status === 'Cleaning Needed').length;
@@ -201,7 +199,7 @@ export default function Hospitalization() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
             Hospitalization & Boarding Cage Board
@@ -209,6 +207,29 @@ export default function Hospitalization() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '4px 0 0 0' }}>
             Live clinical view of ICU units, recovery cages, daily flowsheets, and cleaning statuses.
           </p>
+        </div>
+        
+        {/* Add Cage Dropdown & Button */}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <select 
+            value={selectedTemplateId} 
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            className="form-control"
+            style={{ width: '220px', height: '38px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)' }}
+          >
+            <option value="">-- Select Cage to Add --</option>
+            {cageTemplates.map(t => (
+              <option key={t.id} value={t.id}>{t.name} ({t.type})</option>
+            ))}
+          </select>
+          <button 
+            type="button" 
+            onClick={handleAddCage} 
+            className="btn btn-primary"
+            style={{ height: '38px', padding: '0 16px', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: '8px', fontSize: '0.85rem' }}
+          >
+            <Plus size={16} /> Add Cage
+          </button>
         </div>
       </div>
 
@@ -246,32 +267,53 @@ export default function Hospitalization() {
       </div>
 
       {/* Cages Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
-        {cages.map((cage) => {
-          const isOccupied = cage.status === 'Occupied';
-          const isCleaning = cage.status === 'Cleaning Needed';
+      {cages.length === 0 ? (
+        <div className="card text-center" style={{ padding: '4rem 2rem', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', borderRadius: '16px' }}>
+          <HeartPulse size={48} style={{ color: 'var(--text-muted)' }} />
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>No active cages on board</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0, maxWidth: '400px' }}>
+            Choose a cage or ICU unit from the dropdown at the top right, and click "Add Cage" to start monitoring patients.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+          {cages.map((cage) => {
+            const isOccupied = cage.status === 'Occupied';
+            const isCleaning = cage.status === 'Cleaning Needed';
 
-          return (
-            <div 
-              key={cage.id} 
-              className="card"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.25rem',
-                borderLeft: `5px solid ${isOccupied ? 'var(--danger)' : isCleaning ? '#f59e0b' : 'var(--primary-teal)'}`,
-                boxShadow: 'var(--shadow-sm)',
-                padding: '1.5rem',
-                transition: 'transform 0.2s',
-                position: 'relative'
-              }}
-            >
-              {/* Cage Title Row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ fontWeight: 800, fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)' }}>{cage.name}</h4>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Type: {cage.type}</span>
-                </div>
+            return (
+              <div 
+                key={cage.id} 
+                className="card"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem',
+                  borderLeft: `5px solid ${isOccupied ? 'var(--danger)' : isCleaning ? '#f59e0b' : 'var(--primary-teal)'}`,
+                  boxShadow: 'var(--shadow-sm)',
+                  padding: '1.5rem',
+                  transition: 'transform 0.2s',
+                  position: 'relative'
+                }}
+              >
+                {/* Cage Title Row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ fontWeight: 800, fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {cage.name}
+                      {cage.status !== 'Occupied' && (
+                        <button 
+                          type="button"
+                          onClick={() => handleRemoveCage(cage.id)} 
+                          style={{ border: 'none', backgroundColor: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                          title="Remove Cage from Board"
+                        >
+                          <X size={14} style={{ color: 'var(--danger)' }} />
+                        </button>
+                      )}
+                    </h4>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Type: {cage.type}</span>
+                  </div>
                 <span 
                   className={`badge ${isOccupied ? 'badge-danger' : isCleaning ? 'badge-warning' : 'badge-success'}`}
                   style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 'var(--radius-full)' }}
@@ -414,6 +456,7 @@ export default function Hospitalization() {
           );
         })}
       </div>
+      )}
 
       {/* Admittance Form Modal */}
       {showAdmitModal && selectedCage && (

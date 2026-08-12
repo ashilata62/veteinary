@@ -410,601 +410,621 @@ export default function Inventory() {
     return matchesSearch && matchesCategory && matchesStatus && matchesMinPrice && matchesMaxPrice;
   });
 
+  const uniqueCategories = Array.from(new Set(stock.map(item => item.category).filter(Boolean)));
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .table-row-hover {
+          transition: background-color 0.15s ease;
+        }
+        .table-row-hover:hover {
+          background-color: var(--primary-teal-light) !important;
+        }
+        .hover-lift {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        }
+        .hover-lift:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -8px rgba(0, 0, 0, 0.05) !important;
+          border-color: var(--primary-teal) !important;
+        }
+        .custom-table th {
+          border-bottom: 1.5px solid var(--border);
+        }
+        .custom-table td {
+          vertical-align: middle;
+        }
+      `}</style>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            Inventory Alerts & Stock Management
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.025em', margin: 0 }}>
+            Clinic Inventory Control
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            ERP-level control over pharmaceutical stock, batch tracking, and real-time alerts.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '4px 0 0 0' }}>
+            Real-time batch tracking, stock level monitoring, and expiration alerts.
           </p>
         </div>
-        {!showAddForm && (
-          <button onClick={() => setShowAddForm(true)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1.25rem', fontWeight: 600 }}>
-            <Plus size={16} /> Add Product
-          </button>
-        )}
+        <button 
+          onClick={() => setShowAddForm(true)} 
+          className="btn btn-primary" 
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1.25rem', fontWeight: 600, fontSize: '0.875rem', borderRadius: '8px', boxShadow: '0 4px 10px rgba(45, 212, 191, 0.15)' }}
+        >
+          <Plus size={16} /> Add Product
+        </button>
       </div>
 
-      {showAddForm ? (
-        /* Manual Stock Refill Flow Modal/Form */
-        <div className="card animate-fade-in" style={{ maxWidth: '850px', margin: '0 auto', width: '100%', borderTop: '4px solid var(--primary-teal)' }}>
-          <h3 className="font-bold text-lg mb-6" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Package size={20} className="text-primary" /> {editingItem ? 'Adjust Inventory Stock' : 'Manual Stock Refill'}
-          </h3>
-          <form onSubmit={handleAddStock}>
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Medicine Name *</label>
-                <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rabies Vaccine" required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Category *</label>
-                <FormSelect
-                  value={category}
-                  onChange={setCategory}
-                  placeholder="-- Choose Category --"
-                  required
-                  options={[
-                    { value: '', label: '-- Choose Category --' },
-                    { value: 'Medicine', label: 'Medicine' },
-                    { value: 'Vaccine', label: 'Vaccine' },
-                    { value: 'Accessories & Toys', label: 'Accessories & Toys' },
-                    { value: 'Hygiene Items', label: 'Hygiene Items' },
-                    { value: 'Food & Snacks', label: 'Food & Snacks' },
-                    { value: 'Vitamins', label: 'Vitamins' },
-                    { value: 'Parasiticide', label: 'Parasiticide' },
-                    { value: 'Consumables', label: 'Consumables' },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Batch Number *</label>
-                <input type="text" className="form-control" value={batchNumber} onChange={(e) => setBatchNumber(e.target.value)} placeholder="e.g. RB-9920K" required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Expiry Date *</label>
-                <input type="date" className="form-control" value={expiry} onChange={(e) => setExpiry(e.target.value)} required />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">New Quantity *</label>
-                <input type="number" className="form-control" value={qty} onChange={(e) => setQty(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Low Stock Limit *</label>
-                <input type="number" className="form-control" value={lowStockLimit} onChange={(e) => setLowStockLimit(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Measurement Unit</label>
-                <FormSelect
-                  value={unit}
-                  onChange={setUnit}
-                  options={[
-                    { value: 'Vials', label: 'Vials' },
-                    { value: 'Bottles', label: 'Bottles' },
-                    { value: 'Strips', label: 'Strips' },
-                    { value: 'Ampoules', label: 'Ampoules' },
-                    { value: 'Pairs', label: 'Pairs' },
-                    { value: 'Bags', label: 'Bags' },
-                    { value: 'Items', label: 'Items' },
-                    { value: 'Packets', label: 'Packets' },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Unit Price (Rs) *</label>
-                <input type="number" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Tax (%)</label>
-                <input type="number" className="form-control" value={tax} onChange={(e) => setTax(e.target.value)} placeholder="0" />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Supplier Brand</label>
-                <input type="text" className="form-control" value={supplier} onChange={(e) => setSupplier(e.target.value)} placeholder="e.g. Zoetis Sri Lanka" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Update Notes</label>
-                <input type="text" className="form-control" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Monthly refill from primary supplier" />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-              <button type="button" onClick={resetForm} className="btn btn-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle size={16} /> Update Stock
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        <>
-          {/* Top KPI Cards (Interactive Filters) */}
-          <div className="kpi-grid-responsive" style={{ marginBottom: '1.5rem' }}>
-            <div 
-              className="card hover-lift" 
-              onClick={() => setStatusFilter('')} 
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
-                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
-                outline: statusFilter === '' ? '2px solid var(--primary-teal)' : 'none',
-                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
-              }}
-              title="Click to view all items"
-            >
-              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)' }}><Package size={20} /></div>
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Total Medicines</p>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{totalItems}</h3>
-              </div>
-            </div>
-
-            <div 
-              className="card hover-lift" 
-              onClick={() => setStatusFilter(statusFilter === 'Low Stock' ? '' : 'Low Stock')} 
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
-                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
-                outline: statusFilter === 'Low Stock' ? '2px solid var(--warning)' : 'none',
-                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
-              }}
-              title="Click to filter low stock items"
-            >
-              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--warning-light)', color: 'var(--warning)' }}><Activity size={20} /></div>
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Low Stock Items</p>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{lowStockCount}</h3>
-              </div>
-            </div>
-
-            <div 
-              className="card hover-lift" 
-              onClick={() => setStatusFilter(statusFilter === 'Expiring Soon' ? '' : 'Expiring Soon')} 
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
-                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
-                outline: statusFilter === 'Expiring Soon' ? '2px solid #f59e0b' : 'none',
-                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
-              }}
-              title="Click to filter expiring soon items"
-            >
-              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: '#fef3c7', color: '#d97706' }}><Clock size={20} /></div>
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Expiring Soon</p>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{expiringSoonCount}</h3>
-              </div>
-            </div>
-
-            <div 
-              className="card hover-lift" 
-              onClick={() => setStatusFilter(statusFilter === 'Out of Stock' ? '' : 'Out of Stock')} 
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
-                cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
-                outline: statusFilter === 'Out of Stock' ? '2px solid var(--danger)' : 'none',
-                transition: 'all 0.2s', borderRadius: 'var(--radius-xl)'
-              }}
-              title="Click to filter out of stock items"
-            >
-              <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}><AlertTriangle size={20} /></div>
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Out of Stock</p>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{outOfStockCount}</h3>
-              </div>
-            </div>
+      {/* Top KPI Cards (Interactive Filters) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '0.5rem' }}>
+        {/* Card 1: Total medicines */}
+        <div 
+          className="card hover-lift" 
+          onClick={() => setStatusFilter('')} 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+            cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+            outline: statusFilter === '' ? '2px solid var(--primary-teal)' : 'none',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%)',
+            transition: 'all 0.2s ease', borderRadius: '12px'
+          }}
+          title="Click to view all items"
+        >
+          <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Package size={22} />
           </div>
+          <div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Total Items</p>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{totalItems}</h3>
+          </div>
+        </div>
 
-          {/* ERP Style Inventory Table */}
-          {(() => {
-            const renderTableCard = (inPortal = false) => (
+        {/* Card 2: Low Stock */}
+        <div 
+          className="card hover-lift" 
+          onClick={() => setStatusFilter('Low Stock')} 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+            cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+            outline: statusFilter === 'Low Stock' ? '2px solid var(--warning)' : 'none',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+            transition: 'all 0.2s ease', borderRadius: '12px'
+          }}
+          title="Click to filter low stock items"
+        >
+          <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--warning-light)', color: 'var(--warning)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Activity size={22} />
+          </div>
+          <div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Low Stock Alert</p>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{lowStockCount}</h3>
+          </div>
+        </div>
+
+        {/* Card 3: Expiring Soon */}
+        <div 
+          className="card hover-lift" 
+          onClick={() => setStatusFilter('Expiring Soon')} 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+            cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+            outline: statusFilter === 'Expiring Soon' ? '2px solid #f59e0b' : 'none',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+            transition: 'all 0.2s ease', borderRadius: '12px'
+          }}
+          title="Click to filter expiring soon items"
+        >
+          <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Clock size={22} />
+          </div>
+          <div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Expiring Soon</p>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{expiringSoonCount}</h3>
+          </div>
+        </div>
+
+        {/* Card 4: Out of Stock */}
+        <div 
+          className="card hover-lift" 
+          onClick={() => setStatusFilter('Out of Stock')} 
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem',
+            cursor: 'pointer', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+            outline: statusFilter === 'Out of Stock' ? '2px solid var(--danger)' : 'none',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)',
+            transition: 'all 0.2s ease', borderRadius: '12px'
+          }}
+          title="Click to filter out of stock items"
+        >
+          <div style={{ padding: '0.75rem', borderRadius: '12px', backgroundColor: 'var(--danger-light)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AlertTriangle size={22} />
+          </div>
+          <div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', margin: 0 }}>Out of Stock</p>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>{outOfStockCount}</h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Stock Table view */}
+      {(() => {
+        const renderTableCard = (inPortal = false) => (
+          <div 
+            className="card animate-fade-in-up" 
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '1rem',
+              boxShadow: 'var(--shadow-md)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              backgroundColor: '#fff',
+              ...(inPortal ? {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 9999999,
+                borderRadius: 0,
+                overflowY: 'auto',
+                backgroundColor: '#f8fafc',
+                padding: '1.5rem 2.5rem',
+                boxSizing: 'border-box'
+              } : {})
+            }}
+          >
+            {/* Unified Toolbar Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.5rem' }}>
+              {/* Left Side: Search & Filter Dropdowns */}
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Search Box */}
+                <div style={{ position: 'relative', width: '220px' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="Search name/SKU..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ paddingLeft: '2.25rem', backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.85rem', height: '36px' }}
+                  />
+                </div>
+
+                {/* Category Dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <select 
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="form-control"
+                    style={{ width: '170px', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', padding: '0 8px', backgroundColor: 'var(--background)', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }}
+                  >
+                    <option value="">All Categories</option>
+                    {uniqueCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat} ({stock.filter(i => i.category === cat).length})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status Dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <select 
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="form-control"
+                    style={{ width: '170px', height: '36px', fontSize: '0.85rem', borderRadius: '8px', border: '1px solid var(--border)', padding: '0 8px', backgroundColor: 'var(--background)', cursor: 'pointer', fontWeight: 600, color: 'var(--text-secondary)' }}
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="In Stock">In Stock ({stock.filter(item => getComputedStatus(item.qty, item.lowStockLimit, item.expiry) === 'In Stock').length})</option>
+                    <option value="Low Stock">Low Stock ({lowStockCount})</option>
+                    <option value="Out of Stock">Out of Stock ({outOfStockCount})</option>
+                    <option value="Expiring Soon">Expiring Soon ({expiringSoonCount})</option>
+                    <option value="Active">Active Only</option>
+                    <option value="Inactive">Inactive Only</option>
+                  </select>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="btn btn-secondary"
+                    style={{ height: '36px', padding: '0 12px', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--danger)', backgroundColor: '#fef2f2', fontWeight: 600 }}
+                  >
+                    <RotateCcw size={12} /> Clear Filters
+                  </button>
+                )}
+              </div>
+
+              {/* Right Side: Action Buttons */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowFilterDrawer(!showFilterDrawer)}
+                  className={`btn ${showFilterDrawer || minPrice || maxPrice ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 12px', fontSize: '0.8rem', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  <SlidersHorizontal size={14} />
+                  <span>Price Range</span>
+                  {(minPrice || maxPrice) && (
+                    <span style={{
+                      backgroundColor: '#fff',
+                      color: 'var(--primary-teal)',
+                      borderRadius: '50%',
+                      width: '16px',
+                      height: '16px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.65rem',
+                      fontWeight: 800
+                    }}>
+                      !
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowScannerModal(true)}
+                  className="btn btn-secondary"
+                  style={{ height: '36px', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 600 }}
+                  title="Scan Barcode using Webcam"
+                >
+                  <Camera size={15} style={{ color: 'var(--primary-teal)' }} />
+                  <span>Scan SKU</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="btn btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 12px', fontSize: '0.8rem', borderRadius: '8px', fontWeight: 600 }}
+                >
+                  {inPortal ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                  <span>{inPortal ? "Exit Fullscreen" : "Full Screen"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Advanced Price Filter Drawer */}
+            {showFilterDrawer && (
               <div 
-                className="card animate-fade-in-up" 
-                style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: '1.25rem',
-                  ...(inPortal ? {
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    zIndex: 9999999,
-                    borderRadius: 0,
-                    overflowY: 'auto',
-                    backgroundColor: '#f8fafc',
-                    padding: '1.5rem 2.5rem',
-                    boxSizing: 'border-box'
-                  } : {})
+                className="animate-fade-in-up"
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid var(--border)',
+                  borderRadius: '10px',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 className="font-bold text-lg" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--text-primary)' }}>
-                      <Package size={20} style={{ color: 'var(--primary-teal)' }} /> Clinic Stock
-                    </h3>
-                    <span className="badge badge-secondary" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-                      {filteredStock.length} total
-                    </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                    <Filter size={14} /> Price Range Search Filters
+                  </h4>
+                  <button type="button" onClick={() => setShowFilterDrawer(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Minimum Price (Rs)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      placeholder="e.g. 100"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      style={{ height: '36px', fontSize: '0.85rem' }}
+                    />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {/* Compact Search Input with Webcam Barcode scanner */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <div style={{ position: 'relative', width: '200px' }}>
-                        <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          placeholder="Search name/sku..." 
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          style={{ paddingLeft: '2.25rem', backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.85rem', height: '36px' }}
-                        />
-                      </div>
-                      
-                      <button
-                        type="button"
-                        onClick={() => setShowScannerModal(true)}
-                        className="btn btn-secondary btn-sm"
-                        style={{ padding: '0 10px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border)' }}
-                        title="Scan Barcode using Webcam"
-                      >
-                        <Camera size={16} style={{ color: 'var(--primary-teal)' }} />
-                      </button>
-                    </div>
-
-                    {/* Advanced Filter Button */}
-                    <button
-                      type="button"
-                      onClick={() => setShowFilterDrawer(!showFilterDrawer)}
-                      className={`btn btn-sm ${showFilterDrawer || activeFilterCount > 0 ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', height: '36px', borderRadius: '8px', fontWeight: 600 }}
-                    >
-                      <SlidersHorizontal size={14} />
-                      <span>Filter</span>
-                      {activeFilterCount > 0 && (
-                        <span style={{
-                          backgroundColor: showFilterDrawer || activeFilterCount > 0 ? '#fff' : 'var(--primary-teal)',
-                          color: showFilterDrawer || activeFilterCount > 0 ? 'var(--primary-teal)' : '#fff',
-                          borderRadius: '50%',
-                          width: '18px',
-                          height: '18px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.65rem',
-                          fontWeight: 800
-                        }}>
-                          {activeFilterCount}
-                        </span>
-                      )}
-                    </button>
-
-                    {/* Full Screen Toggle Button */}
-                    <button
-                      type="button"
-                      onClick={() => setIsFullScreen(!isFullScreen)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem', height: '36px', borderRadius: '8px', fontWeight: 600 }}
-                      title={inPortal ? "Exit Fullscreen View" : "View Table in Fullscreen"}
-                    >
-                      {inPortal ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                      <span>{inPortal ? "Exit Fullscreen" : "Full Screen"}</span>
-                    </button>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Maximum Price (Rs)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      placeholder="e.g. 5000"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      style={{ height: '36px', fontSize: '0.85rem' }}
+                    />
                   </div>
                 </div>
 
-                {/* Primary Category Division Navigation Tabs (Scrollable on Mobile) */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', paddingTop: '0.5rem', maxWidth: '100%' }}>
-                  {[
-                    { id: '', label: 'All Items', icon: '📦', count: categoryCounts['All'] },
-                    { id: 'Medicine', label: 'Medicine', icon: '💊', count: categoryCounts['Medicine'] },
-                    { id: 'Accessories & Toys', label: 'Accessories & Toys', icon: '🧸', count: categoryCounts['Accessories & Toys'] },
-                    { id: 'Food & Snacks', label: 'Food & Snacks', icon: '🥩', count: categoryCounts['Food & Snacks'] },
-                    { id: 'Service', label: 'Services', icon: '🩺', count: categoryCounts['Service'] },
-                    { id: 'Vitamins & Supplements', label: 'Vitamins', icon: '🧪', count: categoryCounts['Vitamins & Supplements'] },
-                    { id: 'Hygiene Items', label: 'Hygiene Items', icon: '🧼', count: categoryCounts['Hygiene Items'] },
-                  ].map(cat => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setCategoryFilter(categoryFilter === cat.id ? '' : cat.id)}
-                      className={`btn ${categoryFilter === cat.id ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '0.8rem',
-                        fontWeight: categoryFilter === cat.id ? 700 : 500,
-                        padding: '6px 14px',
-                        borderRadius: 'var(--radius-lg)',
-                        transition: 'all 0.15s'
-                      }}
-                    >
-                      <span>{cat.icon} {cat.label}</span>
-                      <span style={{
-                        backgroundColor: categoryFilter === cat.id ? '#fff' : 'var(--primary-teal-light)',
-                        color: 'var(--primary-teal)',
-                        borderRadius: '9999px',
-                        padding: '1px 7px',
-                        fontSize: '0.72rem',
-                        fontWeight: 800
-                      }}>
-                        {cat.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Quick Status Filter Pills Row (Scrollable on Mobile) */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch', alignItems: 'center', paddingTop: '0.25rem', maxWidth: '100%', marginBottom: '0.25rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginRight: '4px' }}>Quick Filter:</span>
-                  {[
-                    { id: '', label: 'All Items' },
-                    { id: 'In Stock', label: 'In Stock' },
-                    { id: 'Low Stock', label: 'Low Stock' },
-                    { id: 'Out of Stock', label: 'Out of Stock' },
-                    { id: 'Expiring Soon', label: 'Expiring Soon' },
-                    { id: 'Active', label: 'Active Only' },
-                    { id: 'Inactive', label: 'Inactive Only' },
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setStatusFilter(statusFilter === tab.id ? '' : tab.id)}
-                      className={`btn btn-sm ${statusFilter === tab.id ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-
-                  {activeFilterCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={resetAllFilters}
-                      className="btn btn-sm"
-                      style={{ border: '1px border var(--border)', color: 'var(--danger)', background: '#fef2f2', padding: '4px 10px', fontSize: '0.75rem', borderRadius: 'var(--radius-full)', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}
-                    >
-                      <RotateCcw size={12} /> Clear Filters
-                    </button>
-                  )}
-                </div>
-
-                {/* Advanced Filter Drawer */}
-                {showFilterDrawer && (
-                  <div 
-                    className="animate-fade-in-up"
-                    style={{
-                      backgroundColor: '#fff',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '1.25rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '1rem',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h4 style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Filter size={16} /> Advanced Inventory Search Filters
-                      </h4>
-                      <button type="button" onClick={() => setShowFilterDrawer(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                        <X size={18} />
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Stock Availability Status</label>
-                        <FormSelect
-                          value={statusFilter}
-                          onChange={setStatusFilter}
-                          options={[
-                            { value: '', label: 'All Statuses' },
-                            { value: 'In Stock', label: 'In Stock' },
-                            { value: 'Low Stock', label: 'Low Stock / Critical' },
-                            { value: 'Out of Stock', label: 'Out of Stock' },
-                            { value: 'Expiring Soon', label: 'Expiring Soon' },
-                            { value: 'Active', label: 'Active Items' },
-                            { value: 'Inactive', label: 'Inactive / Non-Selling' },
-                          ]}
-                        />
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Minimum Price (Rs)</label>
-                        <input 
-                          type="number" 
-                          className="form-control" 
-                          placeholder="e.g. 100"
-                          value={minPrice}
-                          onChange={(e) => setMinPrice(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Maximum Price (Rs)</label>
-                        <input 
-                          type="number" 
-                          className="form-control" 
-                          placeholder="e.g. 5000"
-                          value={maxPrice}
-                          onChange={(e) => setMaxPrice(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
-                      <button type="button" onClick={resetAllFilters} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <RotateCcw size={14} /> Reset Filters
-                      </button>
-                      <button type="button" onClick={() => setShowFilterDrawer(false)} className="btn btn-primary btn-sm">
-                        Apply Filters ({filteredStock.length} Results)
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Table Responsive Scroll View */}
-                <div className="table-responsive" style={{ maxHeight: inPortal ? 'calc(100vh - 240px)' : '550px', overflowY: 'auto', overflowX: 'auto' }}>
-                  <table className="custom-table" style={{ width: '100%', minWidth: '950px' }}>
-                    <thead style={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
-                      <tr>
-                        <th style={{ padding: '0.75rem 1rem' }}>Medicine Name</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Category</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Batch No.</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Quantity</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Price</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Expiry Date</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Supplier</th>
-                        <th style={{ padding: '0.75rem 1rem' }}>Status</th>
-                        <th style={{ textAlign: 'right', padding: '0.75rem 1rem' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading ? (
-                        <tr>
-                          <td colSpan="9" style={{ textAlign: 'center', padding: '3rem' }}>
-                            <Loader size={32} className="animate-spin text-primary" style={{ margin: '0 auto', color: 'var(--primary-teal)' }} />
-                            <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Loading inventory data...</p>
-                          </td>
-                        </tr>
-                      ) : filteredStock.length === 0 ? (
-                        <tr>
-                          <td colSpan="9" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                            No items found matching your criteria.
-                          </td>
-                        </tr>
-                      ) : filteredStock.map((item) => {
-                        const statusText = getComputedStatus(item.qty, item.lowStockLimit, item.expiry);
-                        const isAlert = statusText === 'Out of Stock' || statusText === 'Low Stock' || statusText === 'Critical Stock';
-                        return (
-                          <tr key={item.id} style={{ transition: 'all 0.2s' }}>
-                            <td style={{ padding: '1rem' }}><span className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>{item.name}</span></td>
-                            <td style={{ padding: '1rem' }}>{getCategoryBadge(item.category)}</td>
-                            <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.batchNumber}</td>
-                            <td style={{ padding: '1rem', color: isAlert ? 'var(--danger)' : 'var(--text-primary)', fontWeight: 700, fontSize: '0.95rem' }}>
-                              {item.qty} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)' }}>{item.unit}</span>
-                            </td>
-                            <td style={{ padding: '1rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--primary-teal)' }}>{formatCurrency(item.price)}</td>
-                            <td style={{ padding: '1rem', color: statusText === 'Expiring Soon' ? '#d97706' : 'var(--text-primary)', fontWeight: statusText === 'Expiring Soon' ? 700 : 500 }}>{item.expiry}</td>
-                            <td style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.supplier || '-'}</td>
-                            <td style={{ padding: '1rem' }}>{getStatusBadge(statusText)}</td>
-                            <td style={{ textAlign: 'right', padding: '1rem' }}>
-                              <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
-                                <button 
-                                  onClick={() => {
-                                    setRefillModalItem(item);
-                                    setAddQtyInput(10);
-                                    setNewRefillExpiry(item.expiry || '');
-                                    setRefillNotes('');
-                                  }} 
-                                  className="btn btn-secondary btn-sm" 
-                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-                                  title="Add Quantity / Refill Stock"
-                                >
-                                  <Plus size={14} style={{ color: 'var(--primary-teal)' }} />
-                                </button>
-                                <button 
-                                  onClick={() => handleEditClick(item)} 
-                                  className="btn btn-secondary btn-sm" 
-                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-                                  title="Adjust Stock"
-                                >
-                                  <Edit3 size={14} style={{ color: 'var(--secondary-blue)' }} />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteClick(item.id)} 
-                                  className="btn btn-secondary btn-sm" 
-                                  style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-                                  title="Remove Item"
-                                >
-                                  <Trash2 size={14} style={{ color: 'var(--danger)' }} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+                  <button type="button" onClick={resetAllFilters} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', height: '30px' }}>
+                    <RotateCcw size={12} /> Reset
+                  </button>
+                  <button type="button" onClick={() => setShowFilterDrawer(false)} className="btn btn-primary btn-sm" style={{ fontSize: '0.75rem', height: '30px' }}>
+                    Apply Filters ({filteredStock.length} Results)
+                  </button>
                 </div>
               </div>
-            );
+            )}
 
-            if (isFullScreen) {
-              return (
-                <>
-                  <div className="card" style={{ padding: '2.5rem', textAlign: 'center', backgroundColor: '#f1f5f9', borderRadius: 'var(--radius-lg)' }}>
-                    <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 0.5rem 0' }}>
-                      📺 Inventory Table is currently active in Full Screen Mode
-                    </p>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '0 0 1rem 0' }}>
-                      Table is displayed edge-to-edge covering the full browser window.
-                    </p>
-                    <button onClick={() => setIsFullScreen(false)} className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <Minimize2 size={16} /> Exit Full Screen
-                    </button>
-                  </div>
-                  {createPortal(renderTableCard(true), document.body)}
-                </>
-              );
-            }
+            {/* Table Responsive Scroll View */}
+            <div className="table-responsive" style={{ maxHeight: inPortal ? 'calc(100vh - 240px)' : '550px', overflowY: 'auto', overflowX: 'auto', border: '1px solid var(--border)', borderRadius: '8px' }}>
+              <table className="custom-table" style={{ width: '100%', minWidth: '950px', borderCollapse: 'collapse' }}>
+                <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f8fafc', zIndex: 10, borderBottom: '2px solid var(--border)' }}>
+                  <tr>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Medicine / Product Name</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Category</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Batch No.</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Quantity</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Price</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Expiry Date</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Supplier</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Status</th>
+                    <th style={{ textAlign: 'right', padding: '1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="9" style={{ textAlign: 'center', padding: '4rem' }}>
+                        <Loader size={32} className="animate-spin" style={{ margin: '0 auto', color: 'var(--primary-teal)' }} />
+                        <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Loading inventory records...</p>
+                      </td>
+                    </tr>
+                  ) : filteredStock.length === 0 ? (
+                    <tr>
+                      <td colSpan="9" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                        No inventory items found matching your criteria.
+                      </td>
+                    </tr>
+                  ) : filteredStock.map((item) => {
+                    const statusText = getComputedStatus(item.qty, item.lowStockLimit, item.expiry);
+                    const isAlert = statusText === 'Out of Stock' || statusText === 'Low Stock' || statusText === 'Critical Stock';
+                    return (
+                      <tr key={item.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '1rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>{item.name}</span>
+                        </td>
+                        <td style={{ padding: '1rem' }}>{getCategoryBadge(item.category)}</td>
+                        <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.batchNumber}</td>
+                        <td style={{ padding: '1rem', color: isAlert ? 'var(--danger)' : 'var(--text-primary)', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {item.qty} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)' }}>{item.unit}</span>
+                        </td>
+                        <td style={{ padding: '1rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--primary-teal)', fontSize: '0.875rem' }}>{formatCurrency(item.price)}</td>
+                        <td style={{ padding: '1rem', color: statusText === 'Expiring Soon' ? '#d97706' : 'var(--text-primary)', fontWeight: statusText === 'Expiring Soon' ? 700 : 500, fontSize: '0.85rem' }}>{item.expiry}</td>
+                        <td style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.supplier || '-'}</td>
+                        <td style={{ padding: '1rem' }}>{getStatusBadge(statusText)}</td>
+                        <td style={{ textAlign: 'right', padding: '1rem' }}>
+                          <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                            <button 
+                              onClick={() => {
+                                setRefillModalItem(item);
+                                setAddQtyInput(10);
+                                setNewRefillExpiry(item.expiry || '');
+                                setRefillNotes('');
+                              }} 
+                              className="btn btn-secondary btn-sm" 
+                              style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                              title="Refill Stock"
+                            >
+                              <Plus size={14} style={{ color: 'var(--primary-teal)' }} />
+                            </button>
+                            <button 
+                              onClick={() => handleEditClick(item)} 
+                              className="btn btn-secondary btn-sm" 
+                              style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                              title="Edit Item"
+                            >
+                              <Edit3 size={14} style={{ color: 'var(--secondary-blue)' }} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteClick(item.id)} 
+                              className="btn btn-secondary btn-sm" 
+                              style={{ padding: '6px', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                              title="Delete Item"
+                            >
+                              <Trash2 size={14} style={{ color: 'var(--danger)' }} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
 
-            return renderTableCard(false);
-          })()}
-        </>
+        if (isFullScreen) {
+          return (
+            <>
+              <div className="card" style={{ padding: '2.5rem', textAlign: 'center', backgroundColor: '#f1f5f9', borderRadius: '12px' }}>
+                <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 0.5rem 0' }}>
+                  📺 Full Screen Mode Active
+                </p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '0 0 1rem 0' }}>
+                  The inventory stock database is expanded to fill your viewport.
+                </p>
+                <button onClick={() => setIsFullScreen(false)} className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Minimize2 size={16} /> Exit Full Screen
+                </button>
+              </div>
+              {createPortal(renderTableCard(true), document.body)}
+            </>
+          );
+        }
+
+        return renderTableCard(false);
+      })()}
+
+      {/* Manual Add / Edit Product Modal */}
+      {showAddForm && createPortal(
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          zIndex: 999999999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem',
+          backdropFilter: 'blur(6px)',
+        }}>
+          <div className="animate-fade-in-up" style={{
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '2rem',
+            width: '100%',
+            maxWidth: '750px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+            borderTop: '5px solid var(--primary-teal)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Package size={22} style={{ color: 'var(--primary-teal)' }} /> {editingItem ? 'Adjust Product Details' : 'Add New Inventory Item'}
+              </h3>
+              <button onClick={resetForm} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={22} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddStock}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Medicine Name *</label>
+                  <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rabies Vaccine" required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Category *</label>
+                  <FormSelect
+                    value={category}
+                    onChange={setCategory}
+                    placeholder="-- Choose Category --"
+                    required
+                    options={[
+                      { value: '', label: '-- Choose Category --' },
+                      { value: 'Medicine', label: 'Medicine' },
+                      { value: 'Vaccine', label: 'Vaccine' },
+                      { value: 'Accessories & Toys', label: 'Accessories & Toys' },
+                      { value: 'Hygiene Items', label: 'Hygiene Items' },
+                      { value: 'Food & Snacks', label: 'Food & Snacks' },
+                      { value: 'Vitamins', label: 'Vitamins' },
+                      { value: 'Parasiticide', label: 'Parasiticide' },
+                      { value: 'Consumables', label: 'Consumables' },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Batch Number / SKU *</label>
+                  <input type="text" className="form-control" value={batchNumber} onChange={(e) => setBatchNumber(e.target.value)} placeholder="e.g. RB-9920K" required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Expiry Date *</label>
+                  <input type="date" className="form-control" value={expiry} onChange={(e) => setExpiry(e.target.value)} required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Available Quantity *</label>
+                  <input type="number" className="form-control" value={qty} onChange={(e) => setQty(e.target.value)} required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Low Stock Alert Limit *</label>
+                  <input type="number" className="form-control" value={lowStockLimit} onChange={(e) => setLowStockLimit(e.target.value)} required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Measurement Unit</label>
+                  <FormSelect
+                    value={unit}
+                    onChange={setUnit}
+                    options={[
+                      { value: 'Vials', label: 'Vials' },
+                      { value: 'Bottles', label: 'Bottles' },
+                      { value: 'Strips', label: 'Strips' },
+                      { value: 'Ampoules', label: 'Ampoules' },
+                      { value: 'Pairs', label: 'Pairs' },
+                      { value: 'Bags', label: 'Bags' },
+                      { value: 'Pieces', label: 'Pieces' },
+                      { value: 'Packets', label: 'Packets' },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Selling Price (Rs) *</label>
+                  <input type="number" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} required style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>GST Tax (%)</label>
+                  <input type="number" className="form-control" value={tax} onChange={(e) => setTax(e.target.value)} placeholder="0" style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.75rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Supplier Brand</label>
+                  <input type="text" className="form-control" value={supplier} onChange={(e) => setSupplier(e.target.value)} placeholder="e.g. Zoetis India" style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Update Notes</label>
+                  <input type="text" className="form-control" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Refill from supplier" style={{ height: '38px', fontSize: '0.9rem' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                <button type="button" onClick={resetForm} className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.55rem 1.5rem', fontWeight: 700 }}>
+                  <CheckCircle size={16} /> Confirm Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Custom Delete Confirmation Modal */}
       {deleteConfirmId && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(4px)' }}>
-          <div className="animate-fade-in-up" style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '400px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(4px)' }}>
+          <div className="animate-fade-in-up" style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1rem' }}>
-              <div style={{ padding: '1rem', backgroundColor: 'var(--danger-light)', borderRadius: '50%', color: 'var(--danger)' }}>
+              <div style={{ padding: '1rem', backgroundColor: 'var(--danger-light)', borderRadius: '50%', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <AlertTriangle size={32} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>Remove Item</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                  Are you sure you want to delete this inventory item? This action cannot be undone.
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>Remove Product</h3>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
+                  Are you sure you want to delete this product? This action will permanently remove it from the clinic stock.
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
                 <button 
                   onClick={() => setDeleteConfirmId(null)} 
                   className="btn btn-secondary" 
-                  style={{ flex: 1, padding: '0.75rem', fontWeight: 600 }}
+                  style={{ flex: 1, padding: '0.65rem', fontWeight: 600 }}
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={confirmDelete} 
                   className="btn" 
-                  style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--danger)', color: '#fff', fontWeight: 600, border: 'none' }}
+                  style={{ flex: 1, padding: '0.65rem', backgroundColor: 'var(--danger)', color: '#fff', fontWeight: 600, border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                 >
-                  Yes, Remove
+                  Yes, Delete
                 </button>
               </div>
             </div>
@@ -1015,14 +1035,14 @@ export default function Inventory() {
       {/* Dedicated Stock Refill / Quantity Addition Modal */}
       {refillModalItem && createPortal(
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', zIndex: 999999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(6px)' }}>
-          <div className="animate-fade-in-up" style={{ backgroundColor: '#fff', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '540px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', borderTop: '5px solid var(--primary-teal)' }}>
+          <div className="animate-fade-in-up" style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '540px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', borderTop: '5px solid var(--primary-teal)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
               <div>
-                <div style={{ marginBottom: '4px' }}>{getCategoryBadge(refillModalItem.category)}</div>
+                <div style={{ marginBottom: '6px' }}>{getCategoryBadge(refillModalItem.category)}</div>
                 <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-                  Add Stock Quantity
+                  Refill Stock Quantity
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
                   {refillModalItem.name} <span style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>(Batch: {refillModalItem.batchNumber || 'N/A'})</span>
                 </p>
               </div>
@@ -1032,21 +1052,21 @@ export default function Inventory() {
             </div>
 
             {/* Inventory Item Quick Summary Box */}
-            <div style={{ backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Current Price</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary-teal)' }}>{formatCurrency(refillModalItem.price)}</span>
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Supplier</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{refillModalItem.supplier || 'Aldo Pet'}</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{refillModalItem.supplier || '-'}</span>
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Expiry Date</span>
                 <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{refillModalItem.expiry || 'Not set'}</span>
               </div>
               <div>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Current Available Stock</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Current Stock</span>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: refillModalItem.qty === 0 ? 'var(--danger)' : 'var(--text-primary)' }}>
                   {refillModalItem.qty} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{refillModalItem.unit || 'Units'}</span>
                 </span>
@@ -1056,24 +1076,22 @@ export default function Inventory() {
             <form onSubmit={handleConfirmRefill} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Quantity to Add Input */}
               <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.875rem' }}>
                   Quantity to Add ({refillModalItem.unit || 'Units'}) *
                 </label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    min="1" 
-                    value={addQtyInput} 
-                    onChange={(e) => setAddQtyInput(e.target.value)} 
-                    required 
-                    style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-teal)', padding: '0.6rem 1rem' }}
-                  />
-                </div>
+                <input 
+                  type="number" 
+                  className="form-control" 
+                  min="1" 
+                  value={addQtyInput} 
+                  onChange={(e) => setAddQtyInput(e.target.value)} 
+                  required 
+                  style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-teal)', padding: '0.6rem 1rem', height: '44px' }}
+                />
               </div>
 
               {/* Live Calculation Preview Box */}
-              <div style={{ backgroundColor: 'var(--primary-teal-light)', border: '1.5px dashed var(--primary-teal)', borderRadius: 'var(--radius-md)', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ backgroundColor: 'var(--primary-teal-light)', border: '1.5px dashed var(--primary-teal)', borderRadius: '8px', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary-teal)', textTransform: 'uppercase' }}>NEW TOTAL STOCK PREVIEW</span>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
@@ -1087,12 +1105,13 @@ export default function Inventory() {
 
               {/* Optional Expiry Update */}
               <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Updated Expiry Date (Optional)</label>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Updated Expiry Date (Optional)</label>
                 <input 
                   type="date" 
                   className="form-control" 
                   value={newRefillExpiry} 
                   onChange={(e) => setNewRefillExpiry(e.target.value)} 
+                  style={{ height: '38px' }}
                 />
               </div>
 
@@ -1102,7 +1121,7 @@ export default function Inventory() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <Plus size={18} /> Confirm Stock Addition
+                  <Plus size={18} /> Confirm Stock
                 </button>
               </div>
             </form>
@@ -1114,7 +1133,7 @@ export default function Inventory() {
       {/* Webcam Barcode Scanner Modal */}
       {showScannerModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.75)', zIndex: 99999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(4px)' }}>
-          <div className="animate-fade-in-up" style={{ backgroundColor: '#1e293b', color: '#f8fafc', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155' }}>
+          <div className="animate-fade-in-up" style={{ backgroundColor: '#1e293b', color: '#f8fafc', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #334155' }}>
             
             {/* Inject Laser Scanning Animation CSS */}
             <style>{`
@@ -1126,7 +1145,7 @@ export default function Inventory() {
             `}</style>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Camera size={20} style={{ color: 'var(--primary-teal)' }} /> Webcam Barcode Scanner
               </h3>
               <button onClick={closeScanner} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}>
@@ -1178,7 +1197,7 @@ export default function Inventory() {
                     type="button"
                     onClick={() => handleBarcodeSuccess(item.sku)}
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600 }}
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600, borderRadius: '6px', cursor: 'pointer' }}
                   >
                     🔍 {item.name.split(' ')[0]} ({item.sku})
                   </button>
@@ -1188,7 +1207,7 @@ export default function Inventory() {
                     type="button"
                     onClick={() => handleBarcodeSuccess('RB-9920K')}
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600 }}
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', backgroundColor: '#1e293b', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600, borderRadius: '6px', cursor: 'pointer' }}
                   >
                     🔍 Rabies Vaccine (RB-9920K)
                   </button>
@@ -1202,7 +1221,7 @@ export default function Inventory() {
                 type="button" 
                 onClick={closeScanner} 
                 className="btn btn-secondary btn-sm"
-                style={{ backgroundColor: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
+                style={{ backgroundColor: 'transparent', border: '1px solid #334155', color: '#94a3b8', borderRadius: '6px', cursor: 'pointer' }}
               >
                 Close Scanner
               </button>

@@ -56,7 +56,7 @@ class UserService {
         const { fullName, email, phone, username, password, role, department, status, photoUrl } = userData;
         
         let query = 'UPDATE users SET name=?, email=?, role=?, phone=?, username=?, department=?, status=?, profile_image=?';
-        let params = [fullName, email, role, phone, username, department, photoUrl || null, status];
+        let params = [fullName, email, role, phone, username, department, status, photoUrl || null];
         
         if (password && password.trim() !== '') {
             const salt = await bcrypt.genSalt(10);

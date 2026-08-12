@@ -2,7 +2,6 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, CreditCard, AlertCircle, ArrowRight, UserPlus, FilePlus, PackageSearch, LayoutDashboard, Clock, CheckCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { APPOINTMENTS, PET_OWNERS, INVOICES, INVENTORY, ANALYTICS_APPOINTMENTS } from '../data/mockData';
 
 export default function ReceptionistDashboard({ setCurrentTab, attendanceStatus }) {
   const [appointments, setAppointments] = useState([]);
@@ -53,33 +52,32 @@ export default function ReceptionistDashboard({ setCurrentTab, attendanceStatus 
   const d = new Date();
   const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const todaysApts = appointments.length > 0
-    ? appointments.filter(a => {
-        const datePart = a.date || a.appointment_date || '';
-        return datePart.split('T')[0] === todayStr && ['Upcoming', 'Pending'].includes(a.status);
-      }).length
-    : APPOINTMENTS.filter(a => ['Upcoming', 'Pending'].includes(a.status)).length;
+  const todaysApts = appointments.filter(a => {
+    const datePart = a.date || a.appointment_date || '';
+    return datePart.split('T')[0] === todayStr && ['Upcoming', 'Pending'].includes(a.status);
+  }).length;
 
-  const homeVisits = appointments.length > 0
-    ? appointments.filter(a => (a.isHomeVisit || a.appointment_type === 'Home Visit') && ['Upcoming', 'Pending'].includes(a.status)).length
-    : APPOINTMENTS.filter(a => a.isHomeVisit && ['Upcoming', 'Pending'].includes(a.status)).length || 1;
+  const homeVisits = appointments.filter(a => 
+    (a.isHomeVisit || a.appointment_type === 'Home Visit') && ['Upcoming', 'Pending', 'Scheduled'].includes(a.status)
+  ).length;
 
-  const walkInPatients = 5;
+  const walkInPatients = appointments.filter(a => {
+    const datePart = a.date || a.appointment_date || '';
+    return datePart.split('T')[0] === todayStr && a.appointment_type === 'Walk-In';
+  }).length;
 
-  const pendingBills = invoices.length > 0
-    ? invoices.filter(inv => inv.status !== 'Paid').length
-    : INVOICES.filter(inv => inv.status !== 'Paid').length || 2;
+  const pendingBills = invoices.filter(inv => inv.status !== 'Paid' && inv.status !== 'Cancelled').length;
 
-  const lowStockItems = inventory.length > 0
-    ? inventory.filter(inv => inv.status === 'Low Stock' || inv.status === 'Out of Stock' || (inv.quantity !== null && inv.quantity <= (inv.low_stock_threshold || 5))).length
-    : INVENTORY.filter(inv => inv.status === 'Low Stock' || inv.status === 'Out of Stock').length;
+  const lowStockItems = inventory.filter(inv => 
+    inv.status === 'Low Stock' || 
+    inv.status === 'Out of Stock' || 
+    (inv.quantity !== null && inv.quantity <= (inv.low_stock_threshold || 5))
+  ).length;
 
-  const dailyRevenue = invoices.length > 0
-    ? invoices.filter(inv => {
-        const invDate = inv.invoice_date || '';
-        return invDate.split('T')[0] === todayStr && inv.status === 'Paid';
-      }).reduce((sum, inv) => sum + parseFloat(inv.grand_total || 0), 0)
-    : INVOICES.filter(inv => inv.status === 'Paid').reduce((sum, inv) => sum + inv.grandTotal, 0) || 45000;
+  const dailyRevenue = invoices.filter(inv => {
+    const invDate = inv.invoice_date || '';
+    return invDate.split('T')[0] === todayStr && inv.status === 'Paid';
+  }).reduce((sum, inv) => sum + parseFloat(inv.grand_total || 0), 0);
 
   const kpis = [
     { label: "Today's Appointments", value: todaysApts, sub: 'Scheduled visits', subColor: 'var(--text-secondary)', icon: Calendar, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },

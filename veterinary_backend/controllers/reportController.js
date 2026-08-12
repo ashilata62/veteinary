@@ -50,3 +50,15 @@ exports.getInventory = async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Failed to fetch inventory reports' });
     }
 };
+
+exports.getMyRevenue = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const clinicId = req.user.clinic_id;
+        const data = await reportService.getPersonalDoctorRevenue(clinicId, doctorId);
+        res.status(200).json({ status: 'success', data });
+    } catch (error) {
+        console.error('Error fetching doctor personal revenue:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to fetch personal revenue analytics' });
+    }
+};

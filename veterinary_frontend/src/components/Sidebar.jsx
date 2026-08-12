@@ -47,7 +47,7 @@ export default function Sidebar({
     'Vet Assistant': 'Kara Danvers'
   }[currentRole] || currentRole;
 
-  const isActive = (id) => currentTab === id || (id === 'medical' && (currentTab === 'reports-uploads' || currentTab === 'prescriptions'));
+  const isActive = (id) => currentTab === id;
 
   // Custom multi-color logic based on item id to mimic the screenshot
   const getIconColor = (id, active) => {

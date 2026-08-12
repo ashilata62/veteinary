@@ -259,8 +259,9 @@ export default function PatientRecords({
   }, [selectedPetId, pets]);
 
   React.useEffect(() => {
-    if (externalTab && externalTab !== 'Overview' && !sessionStorage.getItem('patientRecordsActiveTab')) {
-      handleTabChange(externalTab);
+    if (externalTab) {
+      setActiveTab(externalTab);
+      sessionStorage.setItem('patientRecordsActiveTab', externalTab);
     }
   }, [externalTab]);
 
@@ -383,6 +384,30 @@ export default function PatientRecords({
     );
   }
 
+  const getHeaderInfo = () => {
+    if (externalTab === 'Prescriptions') {
+      return {
+        title: 'Patient Prescriptions',
+        description: 'View and manage active formulas, dosages, and past medications prescribed to the patient.',
+        iconColor: 'var(--secondary-blue)'
+      };
+    } else if (externalTab === 'Reports') {
+      return {
+        title: 'Diagnostic Reports & Uploads',
+        description: 'Upload and access blood tests, X-rays, ultrasound scans, and clinical PDFs.',
+        iconColor: 'var(--primary-teal)'
+      };
+    } else {
+      return {
+        title: 'Clinical Records & Medical Charts',
+        description: 'Select a pet profile to view their full timeline, diagnostics, prescriptions, and billing.',
+        iconColor: 'var(--primary-teal)'
+      };
+    }
+  };
+  
+  const headerInfo = getHeaderInfo();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -399,15 +424,15 @@ export default function PatientRecords({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)' }}>
+          <div style={{ padding: '0.75rem', borderRadius: '50%', backgroundColor: 'var(--primary-teal-light)', color: headerInfo.iconColor }}>
             <FileHeart size={28} />
           </div>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-              Clinical Records & Medical Charts
+              {headerInfo.title}
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
-              Select a pet profile to view their full timeline, diagnostics, prescriptions, and billing.
+              {headerInfo.description}
             </p>
           </div>
         </div>
@@ -417,7 +442,7 @@ export default function PatientRecords({
             value={activePet.id}
             onChange={(id) => {
               setSelectedPetId(id);
-              setActiveTab('Overview');
+              setActiveTab(externalTab || 'Overview');
               setShowAddVisitForm(false);
             }}
             options={pets.map((p) => ({
@@ -480,7 +505,7 @@ export default function PatientRecords({
         </div>
 
         {/* Action Button for Doctor/Assistant */}
-        {(currentRole === 'Doctor' || currentRole === 'Vet Assistant' || currentRole === 'Admin') && (
+        {(currentRole === 'Doctor' || currentRole === 'Vet Assistant' || currentRole === 'Admin') && (!externalTab || externalTab === 'Overview') && (
           <button
             onClick={() => setShowAddVisitForm(!showAddVisitForm)}
             className="btn btn-primary"
@@ -632,44 +657,46 @@ export default function PatientRecords({
       ) : (
         /* Tabs Dashboard view */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Tab buttons */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            {canScrollLeft && (
-              <div
-                className="mobile-only-scroll-indicator scroll-left"
-                onClick={() => tabContainerRef.current.scrollBy({ left: -150, behavior: 'smooth' })}
-              >
-                <ChevronLeft size={16} />
-              </div>
-            )}
-
-            <div
-              className="tab-container"
-              ref={tabContainerRef}
-              onScroll={handleTabScroll}
-              style={{ flex: 1, marginBottom: 0, paddingBottom: '0.5rem', scrollBehavior: 'smooth' }}
-            >
-              {['Overview', 'History', 'Vitals & Growth', 'Prescriptions', 'Reports', 'Vaccinations', 'Billing'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => handleTabChange(tab)}
-                  className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+          {/* Tab buttons - only show if accessing general Medical Records view */}
+          {(!externalTab || externalTab === 'Overview') && (
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {canScrollLeft && (
+                <div
+                  className="mobile-only-scroll-indicator scroll-left"
+                  onClick={() => tabContainerRef.current.scrollBy({ left: -150, behavior: 'smooth' })}
                 >
-                  {tab}
-                </button>
-              ))}
+                  <ChevronLeft size={16} />
+                </div>
+              )}
 
-            </div>
-
-            {canScrollRight && (
               <div
-                className="mobile-only-scroll-indicator scroll-right"
-                onClick={() => tabContainerRef.current.scrollBy({ left: 150, behavior: 'smooth' })}
+                className="tab-container"
+                ref={tabContainerRef}
+                onScroll={handleTabScroll}
+                style={{ flex: 1, marginBottom: 0, paddingBottom: '0.5rem', scrollBehavior: 'smooth' }}
               >
-                <ChevronRight size={16} />
+                {['Overview', 'History', 'Vitals & Growth', 'Prescriptions', 'Reports', 'Vaccinations', 'Billing'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => handleTabChange(tab)}
+                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+
               </div>
-            )}
-          </div>
+
+              {canScrollRight && (
+                <div
+                  className="mobile-only-scroll-indicator scroll-right"
+                  onClick={() => tabContainerRef.current.scrollBy({ left: 150, behavior: 'smooth' })}
+                >
+                  <ChevronRight size={16} />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tab content renders based on selection */}
           <div style={{ minHeight: '300px' }}>

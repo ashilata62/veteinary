@@ -21,55 +21,51 @@ import Support from './Support';
 
 const PLANS = [
   {
-    id: 'basic',
-    name: 'Basic',
-    price: 999,
+    id: 'starter',
+    name: 'Starter',
+    price: 599,
     period: 'month',
     badge: null,
     color: '#3b82f6',
     gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     features: [
-      'Up to 3 Staff Members',
-      'Pet & Owner Management',
-      'Appointments (100/month)',
-      'Basic Reports',
-      'Email Support',
+      'Basic clinic management',
+      'Up to 100 active pets',
+      'Email appointment reminders',
+      'Billing & POS invoice creation',
+      'Standard email support',
     ],
   },
   {
-    id: 'pro',
-    name: 'Pro',
-    price: 1999,
+    id: 'standard',
+    name: 'Standard',
+    price: 799,
     period: 'month',
     badge: 'Most Popular',
     color: '#14b8a6',
     gradient: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
     features: [
-      'Unlimited Staff Members',
-      'Complete Patient Records',
-      'Unlimited Appointments',
-      'Billing & Inventory',
-      'Advanced Analytics & Reports',
-      'WhatsApp Reminders',
-      'Priority Support',
+      'Complete features for growing clinics',
+      'Up to 500 active pets',
+      'WhatsApp + Email reminders',
+      'Inventory & Pharmacy tracking',
+      'Priority 24/7 support',
     ],
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 4999,
+    id: 'pro',
+    name: 'Pro',
+    price: 1299,
     period: 'month',
-    badge: 'Best Value',
+    badge: 'Unlimited',
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
     features: [
-      'Everything in Pro',
-      'Multi-Branch Support',
-      'Custom Integrations',
-      'Dedicated Account Manager',
-      'Custom Branding',
-      'SLA Guarantee',
-      '24/7 Phone Support',
+      'Advanced multi-clinic management',
+      'Unlimited active pet records',
+      'Custom reports & financial analytics',
+      'WhatsApp, SMS & Email alerts',
+      'Dedicated account manager',
     ],
   },
 ];
@@ -237,9 +233,9 @@ export default function TrialExpired({ onLogout }) {
                           className="trial-plan-icon"
                           style={{ background: plan.gradient }}
                         >
-                          {plan.id === 'basic' && <Shield size={20} />}
-                          {plan.id === 'pro' && <Zap size={20} />}
-                          {plan.id === 'enterprise' && <Star size={20} />}
+                          {plan.id === 'starter' && <Shield size={20} />}
+                          {plan.id === 'standard' && <Zap size={20} />}
+                          {plan.id === 'pro' && <Star size={20} />}
                         </div>
                         <h3 className="trial-plan-name">{plan.name}</h3>
                       </div>

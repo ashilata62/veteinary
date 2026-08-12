@@ -141,19 +141,43 @@ const registerUser = async (req, res) => {
         const trialExpiryDate = new Date();
         trialExpiryDate.setDate(trialStartDate.getDate() + 7);
 
-        // 6. Insert Clinic into Clinics Table and User into Users Table
-        const subdomain = businessName.trim().toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
-        await db.query(
-            `INSERT INTO clinics (id, name, subdomain, trial_end_date, subscription_status) VALUES (?, ?, ?, ?, 'trial')`,
-            [tenantId, businessName.trim(), subdomain, trialExpiryDate]
-        );
+        // 6. Insert Clinic, Admin User, and Subscription records into Database (using transaction for consistency)
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
 
-        const username = email.split('@')[0].toLowerCase() + Math.floor(Math.random() * 100);
-        await db.query(
-            `INSERT INTO users (id, name, email, phone, role, username, password_hash, status, clinic_id) 
-             VALUES (?, ?, ?, ?, 'Admin', ?, ?, 'Active', ?)`,
-            [userId, adminName.trim(), email.trim().toLowerCase(), mobileClean, username, passwordHash, tenantId]
-        );
+            // Insert Clinic
+            await connection.query(
+                `INSERT INTO clinics (id, clinic_name, email, phone, status) VALUES (?, ?, ?, ?, 'TRIAL')`,
+                [tenantId, businessName.trim(), email.trim().toLowerCase(), mobileClean]
+            );
+
+            // Insert Admin User
+            const username = email.split('@')[0].toLowerCase() + Math.floor(Math.random() * 100);
+            await connection.query(
+                `INSERT INTO users (id, name, email, phone, role, username, password_hash, status, clinic_id) 
+                 VALUES (?, ?, ?, ?, 'Admin', ?, ?, 'Active', ?)`,
+                [userId, adminName.trim(), email.trim().toLowerCase(), mobileClean, username, passwordHash, tenantId]
+            );
+
+            // Map selectedPlan key to plan_id in DB
+            const planId = selectedPlan.startsWith('plan-') ? selectedPlan : `plan-${selectedPlan}`;
+            const subscriptionId = crypto.randomUUID ? crypto.randomUUID() : `sub-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+            // Insert SaaS Subscription
+            await connection.query(
+                `INSERT INTO saas_subscriptions (id, clinic_id, clinic_admin_id, plan_id, status, start_date, end_date) 
+                 VALUES (?, ?, ?, ?, 'Trial', ?, ?)`,
+                [subscriptionId, tenantId, userId, planId, 'Trial', trialStartDate, trialExpiryDate]
+            );
+
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            throw err;
+        } finally {
+            connection.release();
+        }
 
         // Send Welcome email using Brevo
         try {

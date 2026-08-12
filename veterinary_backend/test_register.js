@@ -4,8 +4,9 @@ const data = JSON.stringify({
   adminName: 'Test Admin',
   businessName: 'Test Clinic',
   email: 'test' + Date.now() + '@test.com',
-  mobile: '1234567890',
-  password: 'Owner@123'
+  mobile: '9' + String(Date.now()).slice(-9),
+  password: 'Owner@123',
+  confirmPassword: 'Owner@123'
 });
 
 const options = {

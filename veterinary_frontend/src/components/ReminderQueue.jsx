@@ -2,6 +2,7 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Loader, Mail, Calendar, User, Search, Eye, CheckCircle2, AlertTriangle, Send, X } from 'lucide-react';
+import FormSelect from './FormSelect';
 
 export default function ReminderQueue() {
   const [reminders, setReminders] = useState([]);
@@ -150,35 +151,78 @@ No. 45, Temple Road, Colombo 07`;
         </div>
       </div>
 
-      {/* Tabs and Search */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div className="calendar-view-toggle" style={{ margin: 0 }}>
-          {['All', 'Tomorrow', 'Day After', 'Later'].map((tab) => {
-            const label = tab === 'Day After' ? 'Day After Tomorrow' : tab;
-            return (
-              <button
-                key={tab}
-                type="button"
-                className={filterTab === tab ? 'active' : ''}
-                onClick={() => setFilterTab(tab)}
-              >
-                {label}
-              </button>
-            );
-          })}
+      {/* Tabs and Search Selector */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '1rem',
+          backgroundColor: '#fff',
+          padding: '1rem',
+          borderRadius: '12px',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+      >
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+          {/* Search Input */}
+          <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Search pet or owner..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="app-navbar__search-input"
+              style={{ width: '100%', paddingLeft: '2.25rem', height: '38px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.85rem' }}
+            />
+          </div>
+
+          {/* Time Filter Dropdown */}
+          <div style={{ width: '100%', maxWidth: '240px' }}>
+            <FormSelect
+              value={filterTab}
+              onChange={(val) => setFilterTab(val)}
+              options={[
+                { value: 'All', label: 'All Days' },
+                { value: 'Tomorrow', label: 'Tomorrow' },
+                { value: 'Day After', label: 'Day After Tomorrow' },
+                { value: 'Later', label: 'Later' }
+              ]}
+              placeholder="Filter by time range"
+            />
+          </div>
         </div>
 
-        <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
-          <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-          <input
-            type="text"
-            placeholder="Search pet or owner..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="app-navbar__search-input"
-            style={{ width: '100%', paddingLeft: '2.25rem' }}
-          />
-        </div>
+        {/* Clear Filters Button */}
+        {(filterTab !== 'All' || searchQuery !== '') && (
+          <button
+            type="button"
+            onClick={() => {
+              setFilterTab('All');
+              setSearchQuery('');
+            }}
+            className="btn btn-secondary"
+            style={{ 
+              height: '38px', 
+              padding: '0 12px', 
+              fontSize: '0.8rem', 
+              borderRadius: '8px', 
+              border: '1px solid var(--border)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              color: 'var(--danger)', 
+              backgroundColor: '#fef2f2', 
+              fontWeight: 600, 
+              cursor: 'pointer' 
+            }}
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -241,7 +285,7 @@ No. 45, Temple Road, Colombo 07`;
                               <CheckCircle2 size={12} /> Sent
                             </span>
                           ) : (
-                            <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>
+                            <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: '#fff7ed', color: '#ea580c', border: '1px solid #ffedd5', fontWeight: 600 }}>
                               Pending
                             </span>
                           )}
@@ -297,7 +341,7 @@ No. 45, Temple Road, Colombo 07`;
                             <CheckCircle2 size={12} /> Sent
                           </span>
                         ) : (
-                          <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>
+                          <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: '#fff7ed', color: '#ea580c', border: '1px solid #ffedd5', fontWeight: 600 }}>
                             Pending
                           </span>
                         )}
