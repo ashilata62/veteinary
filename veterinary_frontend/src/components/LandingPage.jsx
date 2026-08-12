@@ -31,6 +31,7 @@ import './LandingPage.css';
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isAuthenticated = !!localStorage.getItem('token');
 
   const handleAdminLogin = () => {
     navigate('/login');
@@ -453,24 +454,26 @@ export default function LandingPage() {
         </div>
 
         <div className="vet-pricing-grid">
-          {/* Plan 1: Free Trial */}
-          <div className="vet-price-card free-trial">
-            <div>
-              <div className="vet-plan-name" style={{ color: '#10b981' }}>Free Trial</div>
-              <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹0</span>
-                <span className="vet-plan-unit">for 7 Days</span>
+          {/* Plan 1: Free Trial — hidden when logged in */}
+          {!isAuthenticated && (
+            <div className="vet-price-card free-trial">
+              <div>
+                <div className="vet-plan-name" style={{ color: '#10b981' }}>Free Trial</div>
+                <div className="vet-plan-price-row">
+                  <span className="vet-plan-price">₹0</span>
+                  <span className="vet-plan-unit">for 7 Days</span>
+                </div>
+                <ul className="vet-plan-features">
+                  <li className="vet-plan-feature-item"><Check size={16} /> Full access for 7 days</li>
+                  <li className="vet-plan-feature-item"><Check size={16} /> No credit card required</li>
+                  <li className="vet-plan-feature-item"><Check size={16} /> Quick 2-minute setup</li>
+                </ul>
               </div>
-              <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} /> Full access for 7 days</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> No credit card required</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Quick 2-minute setup</li>
-              </ul>
+              <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
+                Start Free Trial
+              </button>
             </div>
-            <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
-              Start Free Trial
-            </button>
-          </div>
+          )}
 
           {/* Plan 2: Starter */}
           <div className="vet-price-card">
@@ -487,8 +490,8 @@ export default function LandingPage() {
                 <li className="vet-plan-feature-item"><Check size={16} /> Standard support</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => handleRegister('starter')}>
-              Get Started
+            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-starter') : handleRegister('starter')}>
+              {isAuthenticated ? 'Buy Now' : 'Get Started'}
             </button>
           </div>
 
@@ -508,8 +511,8 @@ export default function LandingPage() {
                 <li className="vet-plan-feature-item"><Check size={16} /> Priority support</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => handleRegister('standard')}>
-              Get Started
+            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-standard') : handleRegister('standard')}>
+              {isAuthenticated ? 'Buy Now' : 'Get Started'}
             </button>
           </div>
 
@@ -529,8 +532,8 @@ export default function LandingPage() {
                 <li className="vet-plan-feature-item"><Check size={16} /> Dedicated account manager</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => handleRegister('pro')}>
-              Get Started
+            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-pro') : handleRegister('pro')}>
+              {isAuthenticated ? 'Buy Now' : 'Get Started'}
             </button>
           </div>
         </div>
