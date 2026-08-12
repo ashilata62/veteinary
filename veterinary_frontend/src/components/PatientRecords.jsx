@@ -441,7 +441,7 @@ export default function PatientRecords({
           borderLeft: '5px solid var(--primary-teal)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+        <div className="pet-profile-header-meta" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
           {activePet.photo ? (
             <img
               src={activePet.photo}
