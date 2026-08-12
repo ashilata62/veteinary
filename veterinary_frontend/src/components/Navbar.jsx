@@ -44,7 +44,7 @@ export default function Navbar({
       const token = localStorage.getItem('token');
       if (isCheckedIn) {
         // Check Out
-        const res = await apiFetch('http://localhost:5000/api/v1/attendance/checkout', {
+        const res = await apiFetch('/api/v1/attendance/checkout', {
           method: 'POST',
           
         });
@@ -59,7 +59,7 @@ export default function Navbar({
         }
       } else {
         // Check In
-        const res = await apiFetch('http://localhost:5000/api/v1/attendance/checkin', {
+        const res = await apiFetch('/api/v1/attendance/checkin', {
           method: 'POST',
           
         });
@@ -86,7 +86,7 @@ export default function Navbar({
         let avatarUrl = parsed.profile_image || '';
         if (avatarUrl) {
           if (avatarUrl.startsWith('uploads') || avatarUrl.startsWith('/uploads')) {
-            avatarUrl = `http://localhost:5000/${avatarUrl.startsWith('/') ? avatarUrl.substring(1) : avatarUrl}`;
+            avatarUrl = `/${avatarUrl.startsWith('/') ? avatarUrl.substring(1) : avatarUrl}`;
           }
         } else {
           avatarUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150';

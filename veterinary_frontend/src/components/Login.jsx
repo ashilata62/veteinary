@@ -9,7 +9,7 @@ import {
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
 
-export default function Login({ setIsAuthenticated, setCurrentRole }) {
+export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSuccess }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('admin@vetcarepro.com');
   const [password, setPassword] = useState('password123');

@@ -319,14 +319,14 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
           notifRes, 
           attRes
         ] = await Promise.all([
-          apiFetch('http://localhost:5000/api/v1/reports/revenue', { headers }),
-          apiFetch('http://localhost:5000/api/v1/reports/appointments', { headers }),
-          apiFetch('http://localhost:5000/api/v1/reports/doctors', { headers }),
-          apiFetch('http://localhost:5000/api/v1/reports/patients', { headers }),
-          apiFetch('http://localhost:5000/api/v1/reports/inventory', { headers }),
-          apiFetch('http://localhost:5000/api/v1/pets', { headers }),
-          apiFetch('http://localhost:5000/api/v1/notifications', { headers }),
-          apiFetch('http://localhost:5000/api/v1/attendance', { headers })
+          apiFetch('/api/v1/dashboard/revenue', { headers }),
+          apiFetch('/api/v1/dashboard/appointments', { headers }),
+          apiFetch('/api/v1/dashboard/doctors', { headers }),
+          apiFetch('/api/v1/dashboard/patients', { headers }),
+          apiFetch('/api/v1/dashboard/inventory', { headers }),
+          apiFetch('/api/v1/dashboard/recent-pets', { headers }),
+          apiFetch('/api/v1/dashboard/notifications', { headers }),
+          apiFetch('/api/v1/dashboard/attendance', { headers })
         ]);
 
         const [

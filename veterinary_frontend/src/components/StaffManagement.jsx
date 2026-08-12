@@ -278,7 +278,7 @@ export default function StaffManagement() {
   const fetchStaff = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await apiFetch('http://localhost:5000/api/v1/users');
+      const res = await apiFetch('/api/v1/users');
       const json = await res.json();
       if (json.status === 'success') {
         const mapped = json.data.map(u => ({
@@ -357,8 +357,8 @@ export default function StaffManagement() {
     try {
       const token = localStorage.getItem('token');
       const url = editingId 
-        ? `http://localhost:5000/api/v1/users/${editingId}`
-        : 'http://localhost:5000/api/v1/users';
+        ? `/api/v1/users/${editingId}`
+        : '/api/v1/users';
       const method = editingId ? 'PUT' : 'POST';
       
       const res = await apiFetch(url, {
@@ -391,7 +391,7 @@ export default function StaffManagement() {
     if (deleteConfirmId) {
       try {
         const token = localStorage.getItem('token');
-        const res = await apiFetch(`http://localhost:5000/api/v1/users/${deleteConfirmId}`, {
+        const res = await apiFetch(`/api/v1/users/${deleteConfirmId}`, {
           method: 'DELETE',
           
         });

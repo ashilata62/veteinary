@@ -68,7 +68,7 @@ export default function Inventory() {
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await apiFetch('http://localhost:5000/api/v1/inventory');
+      const response = await apiFetch('/api/v1/inventory');
       const data = await response.json();
       if (data.status === 'success') {
         const formattedStock = data.data.map(item => ({
@@ -174,7 +174,7 @@ export default function Inventory() {
 
     try {
       if (editingItem) {
-        const response = await apiFetch(`http://localhost:5000/api/v1/inventory/${editingItem.id}`, {
+        const response = await apiFetch(`/api/v1/inventory/${editingItem.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(payload)
@@ -189,7 +189,7 @@ export default function Inventory() {
           toast.error(data.message || 'Failed to update stock. Note: Only Admins & Managers can do this.');
         }
       } else {
-        const response = await apiFetch('http://localhost:5000/api/v1/inventory', {
+        const response = await apiFetch('/api/v1/inventory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(payload)
@@ -234,7 +234,7 @@ export default function Inventory() {
     if (deleteConfirmId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await apiFetch(`http://localhost:5000/api/v1/inventory/${deleteConfirmId}`, {
+        const response = await apiFetch(`/api/v1/inventory/${deleteConfirmId}`, {
           method: 'DELETE',
           
         });
@@ -282,7 +282,7 @@ export default function Inventory() {
     };
 
     try {
-      const response = await apiFetch(`http://localhost:5000/api/v1/inventory/${refillModalItem.id}`, {
+      const response = await apiFetch(`/api/v1/inventory/${refillModalItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)

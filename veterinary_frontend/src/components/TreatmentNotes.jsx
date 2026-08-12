@@ -18,7 +18,7 @@ export default function TreatmentNotes() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await apiFetch('http://localhost:5000/api/v1/pets');
+      const res = await apiFetch('/api/v1/pets');
       const data = await res.json();
       if (data.status === 'success') {
         setPets(data.data);
@@ -39,7 +39,7 @@ export default function TreatmentNotes() {
     try {
       setFetchingNotes(true);
       const token = localStorage.getItem('token');
-      const res = await apiFetch(`http://localhost:5000/api/v1/treatment-notes?petId=${petId}`);
+      const res = await apiFetch(`/api/v1/treatment-notes?petId=${petId}`);
       const data = await res.json();
       if (res.ok) {
         setNotes(data);
@@ -77,7 +77,7 @@ export default function TreatmentNotes() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await apiFetch('http://localhost:5000/api/v1/treatment-notes', {
+      const res = await apiFetch('/api/v1/treatment-notes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

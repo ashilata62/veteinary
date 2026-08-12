@@ -16,9 +16,9 @@ export default function DoctorDashboard({ setCurrentTab, setSelectedPetId, handl
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
         const [aptRes, encRes, hvRes] = await Promise.all([
-          apiFetch('http://localhost:5000/api/v1/appointments', { headers }),
-          apiFetch('http://localhost:5000/api/v1/encounters', { headers }),
-          apiFetch('http://localhost:5000/api/v1/home-visits', { headers })
+          apiFetch('/api/v1/appointments', { headers }),
+          apiFetch('/api/v1/encounters', { headers }),
+          apiFetch('/api/v1/home-visits', { headers })
         ]);
         const [apts, encs, hvs] = await Promise.all([aptRes.json(), encRes.json(), hvRes.json()]);
         

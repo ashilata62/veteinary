@@ -36,7 +36,7 @@ export default function Notifications({ notifications: propNotifs, setNotificati
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await apiFetch('http://localhost:5000/api/v1/notifications');
+      const res = await apiFetch('/api/v1/notifications');
       const data = await res.json();
       if (data.status === 'success') {
         setNotifs(data.data || []);
@@ -55,7 +55,7 @@ export default function Notifications({ notifications: propNotifs, setNotificati
 
   const markRead = async (id) => {
     try {
-      await apiFetch(`http://localhost:5000/api/v1/notifications/${id}/read`, { method: 'PUT' });
+      await apiFetch(`/api/v1/notifications/${id}/read`, { method: 'PUT' });
       const updated = notifs.map(n => n.id === id ? { ...n, is_read: true } : n);
       setNotifs(updated);
       if (setPropNotifs) setPropNotifs(updated);
@@ -66,7 +66,7 @@ export default function Notifications({ notifications: propNotifs, setNotificati
 
   const dismiss = async (id) => {
     try {
-      await apiFetch(`http://localhost:5000/api/v1/notifications/${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/v1/notifications/${id}`, { method: 'DELETE' });
       const updated = notifs.filter(n => n.id !== id);
       setNotifs(updated);
       if (setPropNotifs) setPropNotifs(updated);
@@ -79,7 +79,7 @@ export default function Notifications({ notifications: propNotifs, setNotificati
 
   const markAllRead = async () => {
     try {
-      await apiFetch('http://localhost:5000/api/v1/notifications/read-all', { method: 'PUT' });
+      await apiFetch('/api/v1/notifications/read-all', { method: 'PUT' });
       const updated = notifs.map(n => ({ ...n, is_read: true }));
       setNotifs(updated);
       if (setPropNotifs) setPropNotifs(updated);

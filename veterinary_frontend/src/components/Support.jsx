@@ -20,7 +20,7 @@ export default function Support() {
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      const res = await apiFetch('http://localhost:5000/api/v1/support-tickets');
+      const res = await apiFetch('/api/v1/support-tickets');
       if (res.ok) {
         const json = await res.json();
         if (json.status === 'success' && Array.isArray(json.data)) {
@@ -43,7 +43,7 @@ export default function Support() {
     if (!replyText.trim() || !selectedTicket) return;
 
     try {
-      const res = await apiFetch(`http://localhost:5000/api/v1/support-tickets/${selectedTicket.id}/reply`, {
+      const res = await apiFetch(`/api/v1/support-tickets/${selectedTicket.id}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: replyText })
@@ -67,7 +67,7 @@ export default function Support() {
     if (!newSubject.trim() || !newDescription.trim()) return;
 
     try {
-      const res = await apiFetch('http://localhost:5000/api/v1/support-tickets', {
+      const res = await apiFetch('/api/v1/support-tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

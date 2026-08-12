@@ -117,7 +117,7 @@ export default function PatientRecords({
     } catch (err) {}
 
     try {
-      const res = await apiFetch('http://localhost:5000/api/v1/encounters/reports', {
+      const res = await apiFetch('/api/v1/encounters/reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,8 +200,8 @@ export default function PatientRecords({
       setLoading(true);
       const token = localStorage.getItem('token');
       const [petsRes, ownersRes] = await Promise.all([
-        apiFetch('http://localhost:5000/api/v1/pets'),
-        apiFetch('http://localhost:5000/api/v1/owners')
+        apiFetch('/api/v1/pets'),
+        apiFetch('/api/v1/owners')
       ]);
       const petsData = await petsRes.json();
       const ownersData = await ownersRes.json();
@@ -218,7 +218,7 @@ export default function PatientRecords({
     try {
       setFetchingEncounters(true);
       const token = localStorage.getItem('token');
-      const res = await apiFetch(`http://localhost:5000/api/v1/encounters?petId=${petId}`);
+      const res = await apiFetch(`/api/v1/encounters?petId=${petId}`);
       const data = await res.json();
       setEncounters(data);
     } catch (error) {
@@ -231,7 +231,7 @@ export default function PatientRecords({
   const fetchBillingHistory = async (petId) => {
     try {
       setLoadingBilling(true);
-      const res = await apiFetch(`http://localhost:5000/api/v1/invoices/pet/${petId}`);
+      const res = await apiFetch(`/api/v1/invoices/pet/${petId}`);
       if (res.ok) {
         const data = await res.json();
         setBillingHistory(data);
@@ -336,7 +336,7 @@ export default function PatientRecords({
 
     try {
       const token = localStorage.getItem('token');
-      const res = await apiFetch('http://localhost:5000/api/v1/encounters', {
+      const res = await apiFetch('/api/v1/encounters', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

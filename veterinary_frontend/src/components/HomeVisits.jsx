@@ -18,10 +18,10 @@ export default function HomeVisits({ currentRole }) {
       const headers = { Authorization: `Bearer ${token}` };
       
       const [visitsRes, ownersRes, petsRes, usersRes] = await Promise.all([
-        apiFetch('http://localhost:5000/api/v1/home-visits', { headers }),
-        apiFetch('http://localhost:5000/api/v1/owners', { headers }),
-        apiFetch('http://localhost:5000/api/v1/pets', { headers }),
-        apiFetch('http://localhost:5000/api/v1/users', { headers })
+        apiFetch('/api/v1/home-visits', { headers }),
+        apiFetch('/api/v1/owners', { headers }),
+        apiFetch('/api/v1/pets', { headers }),
+        apiFetch('/api/v1/users', { headers })
       ]);
       
       const visitsData = await visitsRes.json();
@@ -138,7 +138,7 @@ export default function HomeVisits({ currentRole }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await apiFetch('http://localhost:5000/api/v1/home-visits', {
+      const response = await apiFetch('/api/v1/home-visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -166,7 +166,7 @@ export default function HomeVisits({ currentRole }) {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await apiFetch(`http://localhost:5000/api/v1/home-visits/${assignAptId}`, {
+      const response = await apiFetch(`/api/v1/home-visits/${assignAptId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ doctorId: assignDoctorId })
@@ -193,7 +193,7 @@ export default function HomeVisits({ currentRole }) {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await apiFetch(`http://localhost:5000/api/v1/home-visits/${travelAptId}`, {
+      const response = await apiFetch(`/api/v1/home-visits/${travelAptId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ travelFee: newTravelFee })
@@ -218,7 +218,7 @@ export default function HomeVisits({ currentRole }) {
     try {
       const token = localStorage.getItem('token');
       if (newStatus === 'Cancelled') {
-        const res = await apiFetch(`http://localhost:5000/api/v1/home-visits/${aptId}`, {
+        const res = await apiFetch(`/api/v1/home-visits/${aptId}`, {
           method: 'DELETE',
           
         });
@@ -230,7 +230,7 @@ export default function HomeVisits({ currentRole }) {
           toast.error(data.message || 'Failed to cancel');
         }
       } else {
-        const res = await apiFetch(`http://localhost:5000/api/v1/home-visits/${aptId}`, {
+        const res = await apiFetch(`/api/v1/home-visits/${aptId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ visitStatus: newStatus })

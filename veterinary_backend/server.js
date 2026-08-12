@@ -79,6 +79,7 @@ const assistanceTaskRoutes = require('./routes/assistanceTaskRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const supportTicketRoutes = require('./routes/supportTicketRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -98,6 +99,7 @@ app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRo
 app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
 app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
 app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicketRoutes);
+app.use('/api/v1/dashboard', protect, subscriptionMiddleware, dashboardRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
 

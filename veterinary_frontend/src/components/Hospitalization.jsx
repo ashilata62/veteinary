@@ -93,7 +93,7 @@ export default function Hospitalization() {
   useEffect(() => {
     const loadPets = async () => {
       try {
-        const res = await apiFetch('http://localhost:5000/api/v1/pets');
+        const res = await apiFetch('/api/v1/pets');
         const data = await res.json();
         if (data.status === 'success') {
           setPets(data.data);
