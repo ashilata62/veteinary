@@ -153,6 +153,14 @@ a {
 }
 
 @media (max-width: 1024px) {
+  .app-navbar__menu-toggle {
+    display: inline-flex !important;
+  }
+
+  .sidebar-collapse-btn {
+    display: none !important;
+  }
+
   .sidebar-overlay {
     display: block;
     position: fixed;

@@ -119,7 +119,26 @@ export default function Navbar({
 
   return (
     <header className="app-navbar" style={{ padding: '0 1rem' }}>
-      <div className="app-navbar__left">
+      <div className="app-navbar__left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <button
+          type="button"
+          className="app-navbar__menu-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle Sidebar"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '6px',
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-primary)',
+            borderRadius: '50%'
+          }}
+        >
+          <Menu size={20} />
+        </button>
         <div className="navbar-search app-navbar__search-desktop">
           <Search size={16} className="app-navbar__search-icon" />
           <input
