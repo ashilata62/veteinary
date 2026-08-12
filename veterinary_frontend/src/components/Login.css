@@ -2,11 +2,11 @@
 
 .login-premium-page {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
   position: relative;
   font-family: var(--font-family);
-  overflow: hidden;
+  overflow-y: auto;
   background-color: #000;
   color: #fff;
 }
@@ -483,34 +483,71 @@
 }
 
 /* Responsiveness */
-@media (max-width: 1024px) {
+.login-mobile-brand {
+  display: none;
+}
+
+@media (max-width: 960px) {
   .login-premium-layout {
     flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
   }
   .login-hero-side {
-    padding: 2rem;
-    flex: none;
-    align-items: center;
-    text-align: center;
+    display: none;
   }
-  .login-title-premium {
-    font-size: 2.5rem;
-  }
-  .login-feature-list {
+  .login-form-side {
+    flex: 1;
+    width: 100%;
+    padding: 1.5rem;
+    display: flex;
     align-items: center;
+    justify-content: center;
+  }
+  .glass-login-card {
+    max-width: 480px;
+    padding: 2rem 1.5rem;
+  }
+  .login-mobile-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.50rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .login-brand-logo-mobile {
+    height: 36px;
+    object-fit: contain;
+  }
+  .login-back-btn-premium {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
   }
   .floating-stats-container {
     display: none;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .login-form-side {
     padding: 1rem;
   }
   .glass-login-card {
-    padding: 2rem 1.5rem;
-    border-radius: 20px;
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+  }
+  .role-chips {
+    gap: 0.4rem;
+  }
+  .role-chip {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
   }
 }
 

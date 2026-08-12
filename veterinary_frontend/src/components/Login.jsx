@@ -160,6 +160,13 @@ export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSucce
               Back to Home
             </button>
 
+            <div className="login-mobile-brand">
+              <img src="/kt-logo.png" alt="Logo" className="login-brand-logo-mobile" />
+              <span>
+                VetCare <span className="text-gradient">Pro</span>
+              </span>
+            </div>
+
             <div className="login-header-text">
               <h2>👋 Welcome Back<span className="cursor-blink"></span></h2>
               <p>Sign in to your VetCare Pro Dashboard.</p>
