@@ -137,7 +137,7 @@ const checkClinicStatus = async (req, res, next) => {
             const [subscriptions] = await db.query(
                 `SELECT id, status, start_date, end_date, plan_id 
                  FROM saas_subscriptions 
-                 WHERE clinic_id = ? AND status IN ('Active', 'Pending') 
+                 WHERE clinic_id = ? AND status IN ('Active', 'Trial', 'Pending') 
                  ORDER BY start_date DESC 
                  LIMIT 1`,
                 [clinicId]
