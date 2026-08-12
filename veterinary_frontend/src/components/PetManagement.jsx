@@ -497,9 +497,9 @@ export default function PetManagement({ searchQuery, handleViewPet }) {
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        {pet.photo_url ? (
+                        {(pet.photo_url || pet.photo) ? (
                           <img 
-                            src={pet.photo_url} 
+                            src={pet.photo_url || pet.photo} 
                             alt={pet.name} 
                             style={{
                               width: '42px',
