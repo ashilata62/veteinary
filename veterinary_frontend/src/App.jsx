@@ -38,17 +38,13 @@ import { Toaster } from 'react-hot-toast';
 
 import api from './utils/api';
 
-// Helper: check if clinic trial has expired
 const checkTrialExpired = () => {
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    // backend stores trial_end_date on the user/clinic object
+    if (user.role || user.isPaidPlan || user.subscription_status === 'active' || user.plan === 'paid') return false;
     const trialEnd = user.trial_end_date || user.trialEndDate || user.trial_expires_at;
-    if (!trialEnd) return false; // no trial info → not expired (paid or no restriction)
-    const isExpired = new Date(trialEnd) < new Date();
-    // Also respect an explicit plan flag
-    if (user.subscription_status === 'active' || user.plan === 'paid') return false;
-    return isExpired;
+    if (!trialEnd) return false;
+    return new Date(trialEnd) < new Date();
   } catch (e) {
     return false;
   }
