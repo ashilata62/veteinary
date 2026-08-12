@@ -200,6 +200,10 @@ export default function App() {
     return <PaymentPage />;
   }
 
+  if (location.pathname === '/landing') {
+    return <LandingPage />;
+  }
+
   if (location.pathname.startsWith('/super-admin')) {
     if (!isSuperAdmin) {
       if (location.pathname === '/super-admin/login') {
