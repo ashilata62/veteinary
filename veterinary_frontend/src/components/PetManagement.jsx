@@ -134,7 +134,7 @@ export default function PetManagement({ searchQuery, handleViewPet }) {
     setLastVaccination(pet.last_vaccination ? pet.last_vaccination.split('T')[0] : '');
     setLastDeworming(pet.last_deworming ? pet.last_deworming.split('T')[0] : '');
     setPrevHistory(pet.previous_medical_history || '');
-    setPhoto(pet.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300');
+    setPhoto(pet.photo_url || '');
     setShowAddForm(true);
   };
 
@@ -413,7 +413,7 @@ export default function PetManagement({ searchQuery, handleViewPet }) {
                       src={photo} 
                       alt="Preview" 
                       style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} 
-                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=100'; }}
+                      onError={(e) => { e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; }}
                     />
                     <button 
                       type="button" 
@@ -497,17 +497,35 @@ export default function PetManagement({ searchQuery, handleViewPet }) {
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <img 
-                          src={pet.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'} 
-                          alt={pet.name} 
-                          style={{
+                        {pet.photo_url ? (
+                          <img 
+                            src={pet.photo_url} 
+                            alt={pet.name} 
+                            style={{
+                              width: '42px',
+                              height: '42px',
+                              borderRadius: 'var(--radius-md)',
+                              objectFit: 'cover',
+                              border: '1px solid var(--border)'
+                            }} 
+                          />
+                        ) : (
+                          <div style={{
                             width: '42px',
                             height: '42px',
                             borderRadius: 'var(--radius-md)',
-                            objectFit: 'cover',
-                            border: '1px solid var(--border)'
-                          }} 
-                        />
+                            backgroundColor: 'var(--primary-teal-light)',
+                            color: 'var(--primary-teal)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '0.95rem',
+                            border: '1px solid var(--primary-teal-light)'
+                          }}>
+                            {pet.name ? pet.name.charAt(0).toUpperCase() : 'P'}
+                          </div>
+                        )}
                         <div>
                           <span className="font-bold text-base" style={{ display: 'block' }}>{pet.name}</span>
                           <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{pet.gender} | {pet.age} {pet.neutered_status ? '(Neutered/Spayed)' : ''}</span>

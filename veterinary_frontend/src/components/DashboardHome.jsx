@@ -601,10 +601,16 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
                     <td className="font-semibold" style={{ color: 'var(--primary-teal)' }}>{pet.id}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <img src={pet.photo_url || pet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=100'} 
-                             alt={pet.name} 
-                             style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} 
-                             onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=100'; }} />
+                        {pet.photo_url || pet.photo ? (
+                          <img src={pet.photo_url || pet.photo} 
+                               alt={pet.name} 
+                               style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} 
+                               onError={(e) => { e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; }} />
+                        ) : (
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: 'var(--primary-teal-light)', color: 'var(--primary-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.6rem' }}>
+                            {pet.name ? pet.name.charAt(0).toUpperCase() : 'P'}
+                          </div>
+                        )}
                         <span className="font-semibold">{pet.name}</span>
                       </div>
                     </td>

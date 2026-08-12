@@ -83,10 +83,18 @@ export default function Navbar({
       const stored = localStorage.getItem('user');
       if (stored) {
         const parsed = JSON.parse(stored);
+        let avatarUrl = parsed.profile_image || '';
+        if (avatarUrl) {
+          if (avatarUrl.startsWith('uploads') || avatarUrl.startsWith('/uploads')) {
+            avatarUrl = `http://localhost:5000/${avatarUrl.startsWith('/') ? avatarUrl.substring(1) : avatarUrl}`;
+          }
+        } else {
+          avatarUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150';
+        }
         return {
           name: parsed.name || parsed.fullName || '',
           role: parsed.role || '',
-          avatar: parsed.profile_image || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150'
+          avatar: avatarUrl
         };
       }
     } catch (e) {
@@ -251,7 +259,12 @@ export default function Navbar({
           aria-label={`${activeUser.name}, ${activeUser.role}`}
           onClick={() => setShowProfileMenu(!showProfileMenu)}
         >
-          <img src={activeUser.avatar} alt="" className="app-navbar__avatar" />
+          <img 
+            src={activeUser.avatar} 
+            alt="" 
+            className="app-navbar__avatar" 
+            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150'; }}
+          />
           <div className="navbar-user-name app-navbar__user-text">
             <span className="app-navbar__user-name">{activeUser.name}</span>
             <span className="app-navbar__user-role">{activeUser.role}</span>

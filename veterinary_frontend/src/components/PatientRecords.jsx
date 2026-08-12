@@ -277,7 +277,7 @@ export default function PatientRecords({
   const baseActivePet = pets.find(p => p.id === selectedPetId) || pets[0] || {};
   const activePet = {
     ...baseActivePet,
-    photo: baseActivePet.photo_url || baseActivePet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300',
+    photo: baseActivePet.photo_url || baseActivePet.photo || null,
     microchip: baseActivePet.microchip_number || baseActivePet.microchip || 'N/A',
     lastDeworming: formatDateSafely(baseActivePet.last_deworming, baseActivePet.lastDeworming || 'N/A'),
     lastVaccination: formatDateSafely(baseActivePet.last_vaccination, baseActivePet.lastVaccination || 'N/A'),
@@ -442,11 +442,29 @@ export default function PatientRecords({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          <img
-            src={activePet.photo}
-            alt={activePet.name}
-            style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-xl)', objectFit: 'cover', border: '2px solid var(--primary-teal-light)' }}
-          />
+          {activePet.photo ? (
+            <img
+              src={activePet.photo}
+              alt={activePet.name}
+              style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-xl)', objectFit: 'cover', border: '2px solid var(--primary-teal-light)' }}
+            />
+          ) : (
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: 'var(--radius-xl)',
+              backgroundColor: 'var(--primary-teal-light)',
+              color: 'var(--primary-teal)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: '1.75rem',
+              border: '2px solid var(--primary-teal-light)'
+            }}>
+              {activePet.name ? activePet.name.charAt(0).toUpperCase() : 'P'}
+            </div>
+          )}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '4px' }}>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{activePet.name}</h2>
