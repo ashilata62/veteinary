@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ArrowLeft, Send, MessageSquare, Clipboard, User, Mail, Filter, RotateCcw, CheckCircle2 } from "lucide-react";
 
 export default function SuperAdminTickets() {
@@ -9,52 +9,34 @@ export default function SuperAdminTickets() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyText, setReplyText] = useState("");
 
-  const [tickets, setTickets] = useState([
-    {
-      id: "TKT-1786006334931-390",
-      subject: "Payment Issue",
-      clinic: "Anytime Fitness Vet",
-      adminName: "Rahul Sharma",
-      email: "anytimefitness@gmail.com",
-      priority: "Medium",
-      category: "Billing",
-      status: "Replied",
-      updated: "8 Aug 2026",
-      messages: [
-        { sender: "Admin", text: "There is an issue with the payment gateway. It shows error on checkout.", time: "06/08/26, 2:22 pm", isUser: true },
-        { sender: "Superadmin", text: "We have identified the issue. It will be resolved within 24 hours.", time: "06/08/26, 2:27 pm", isUser: false }
-      ]
-    },
-    {
-      id: "TKT-1892017382103-512",
-      subject: "Login Issue",
-      clinic: "Paws & Claws Care",
-      adminName: "Dr. John Doe",
-      email: "john.doe@pawsclaws.com",
-      priority: "High",
-      category: "Technical",
-      status: "Open",
-      updated: "7 Aug 2026",
-      messages: [
-        { sender: "Admin", text: "Dashboard is loading slow today and showing connection timeout errors repeatedly.", time: "07/08/26, 10:15 am", isUser: true }
-      ]
-    },
-    {
-      id: "TKT-1634891290342-108",
-      subject: "Invoice Download",
-      clinic: "Happy Pets Clinic",
-      adminName: "Dr. Sarah Connor",
-      email: "sarah.connor@happypets.com",
-      priority: "Low",
-      category: "Billing",
-      status: "Closed",
-      updated: "5 Aug 2026",
-      messages: [
-        { sender: "Admin", text: "How do I download duplicate copies of receipts from the billing section?", time: "05/08/26, 11:30 am", isUser: true },
-        { sender: "Superadmin", text: "You can go to Billing & POS and click the download icon next to any invoice.", time: "05/08/26, 11:45 am", isUser: false }
-      ]
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("sa_token");
+      const res = await fetch("http://localhost:5000/api/super-admin/tickets", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === "success" && Array.isArray(json.data)) {
+          setTickets(json.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching super admin tickets:", err);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const totalTickets = tickets.length;
   const openCount    = tickets.filter(t => t.status === "Open").length;
@@ -66,30 +48,59 @@ export default function SuperAdminTickets() {
     setStatusFilter("All"); setPriorityFilter("All");
     setAppliedFilters({ status: "All", priority: "All" }); setSearch("");
   };
-  const handleStatusChange = (ticketId, newStatus) => {
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketId) {
-        const updated = { ...t, status: newStatus, updated: "Just now" };
-        if (selectedTicket?.id === ticketId) setSelectedTicket(updated);
-        return updated;
+
+  const handleStatusChange = async (ticketId, newStatus) => {
+    try {
+      const token = localStorage.getItem("sa_token");
+      const res = await fetch(`http://localhost:5000/api/super-admin/tickets/${ticketId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setTickets(prev => prev.map(t => {
+          if (t.id === ticketId) {
+            const updated = { ...t, status: newStatus, updated: "Just now" };
+            if (selectedTicket?.id === ticketId) setSelectedTicket(updated);
+            return updated;
+          }
+          return t;
+        }));
       }
-      return t;
-    }));
+    } catch (err) {
+      console.error("Error updating ticket status:", err);
+    }
   };
-  const handleSendReply = (e) => {
+
+  const handleSendReply = async (e) => {
     e.preventDefault();
     if (!replyText.trim() || !selectedTicket) return;
-    const now = new Date();
-    const time = `${String(now.getDate()).padStart(2,"0")}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getFullYear()).substring(2)}, ${now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}).toLowerCase()}`;
-    const newMsg = { sender: "Superadmin", text: replyText.trim(), time, isUser: false };
-    setTickets(prev => prev.map(t => {
-      if (t.id === selectedTicket.id) {
-        const updated = { ...t, status: "Replied", updated: "Just now", messages: [...t.messages, newMsg] };
-        setSelectedTicket(updated); return updated;
+
+    try {
+      const token = localStorage.getItem("sa_token");
+      const res = await fetch(`http://localhost:5000/api/super-admin/tickets/${selectedTicket.id}/reply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ text: replyText })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === "success") {
+          const updated = json.data;
+          setTickets(prev => prev.map(t => t.id === selectedTicket.id ? updated : t));
+          setSelectedTicket(updated);
+          setReplyText("");
+        }
       }
-      return t;
-    }));
-    setReplyText("");
+    } catch (err) {
+      console.error("Error replying to ticket:", err);
+    }
   };
 
   const filteredTickets = tickets.filter(t => {

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Plus, Send, HelpCircle, Tag, Clock, AlertTriangle } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function Support() {
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -12,88 +13,86 @@ export default function Support() {
   const [newCategory, setNewCategory] = useState('Technical');
   const [newDescription, setNewDescription] = useState('');
 
-  // Admin's tickets matching screenshot data
-  const [tickets, setTickets] = useState([
-    {
-      id: 'TKT-1786006334931-390',
-      subject: 'Payment',
-      priority: 'Medium',
-      category: 'Technical',
-      status: 'Replied',
-      updated: '06/08/26',
-      messages: [
-        { sender: 'Admin', text: 'this issee', time: '06/08/26, 2:22 pm', isUser: true },
-        { sender: 'Superadmin', text: 'hyyy', time: '06/08/26, 2:27 pm', isUser: false }
-      ]
-    },
-    {
-      id: 'TKT-1658392102910-441',
-      subject: 'Account Limits Extension',
-      priority: 'Low',
-      category: 'Billing',
-      status: 'Open',
-      updated: '07/08/26',
-      messages: [
-        { sender: 'Admin', text: 'Can we add 2 more staff seats on this basic trial plan?', time: '07/08/26, 09:30 am', isUser: true }
-      ]
-    }
-  ]);
+  // Admin's tickets matching database
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSendReply = (e) => {
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await apiFetch('http://localhost:5000/api/v1/support-tickets');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'success' && Array.isArray(json.data)) {
+          setTickets(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching support tickets:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const handleSendReply = async (e) => {
     e.preventDefault();
     if (!replyText.trim() || !selectedTicket) return;
 
-    const now = new Date();
-    const formattedTime = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getFullYear()).substring(2)}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase()}`;
-
-    const newMsg = {
-      sender: 'Admin',
-      text: replyText.trim(),
-      time: formattedTime,
-      isUser: true
-    };
-
-    const updated = {
-      ...selectedTicket,
-      status: 'Open', // Changes back to open when admin replies
-      messages: [...selectedTicket.messages, newMsg]
-    };
-
-    setTickets(prev => prev.map(t => t.id === selectedTicket.id ? updated : t));
-    setSelectedTicket(updated);
-    setReplyText('');
+    try {
+      const res = await apiFetch(`http://localhost:5000/api/v1/support-tickets/${selectedTicket.id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: replyText })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'success') {
+          const updated = json.data;
+          setTickets(prev => prev.map(t => t.id === selectedTicket.id ? updated : t));
+          setSelectedTicket(updated);
+          setReplyText('');
+        }
+      }
+    } catch (err) {
+      console.error('Error replying to ticket:', err);
+    }
   };
 
-  const handleCreateTicket = (e) => {
+  const handleCreateTicket = async (e) => {
     e.preventDefault();
     if (!newSubject.trim() || !newDescription.trim()) return;
 
-    const randomId = `TKT-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
-    const now = new Date();
-    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getFullYear()).substring(2)}`;
-    const formattedTime = `${formattedDate}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase()}`;
-
-    const newTicket = {
-      id: randomId,
-      subject: newSubject,
-      priority: newPriority,
-      category: newCategory,
-      status: 'Open',
-      updated: formattedDate,
-      messages: [
-        { sender: 'Admin', text: newDescription, time: formattedTime, isUser: true }
-      ]
-    };
-
-    setTickets([newTicket, ...tickets]);
-    setSelectedTicket(newTicket);
-    setShowCreateForm(false);
-    
-    // Clear inputs
-    setNewSubject('');
-    setNewDescription('');
-    setNewPriority('Medium');
-    setNewCategory('Technical');
+    try {
+      const res = await apiFetch('http://localhost:5000/api/v1/support-tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: newSubject,
+          description: newDescription,
+          priority: newPriority,
+          category: newCategory
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'success') {
+          const newTicket = json.data;
+          setTickets(prev => [newTicket, ...prev]);
+          setSelectedTicket(newTicket);
+          setShowCreateForm(false);
+          setNewSubject('');
+          setNewDescription('');
+          setNewPriority('Medium');
+          setNewCategory('Technical');
+        }
+      }
+    } catch (err) {
+      console.error('Error creating ticket:', err);
+    }
   };
 
   return (

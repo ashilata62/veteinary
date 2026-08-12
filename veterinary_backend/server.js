@@ -18,11 +18,8 @@ const authLimiter = rateLimit({
 const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5174', 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        // Allow mobile app requests (no origin or exp:// or any local IP)
+        callback(null, true);
     }
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -54,6 +51,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const assistanceTaskRoutes = require('./routes/assistanceTaskRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const supportTicketRoutes = require('./routes/supportTicketRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -71,6 +69,7 @@ app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/assistance-tasks', assistanceTaskRoutes);
+app.use('/api/v1/support-tickets', supportTicketRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentRoutes);
 
