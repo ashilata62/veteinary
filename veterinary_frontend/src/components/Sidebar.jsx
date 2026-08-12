@@ -85,7 +85,7 @@ export default function Sidebar({
       )}
 
       <aside 
-        className="sidebar-premium"
+        className={`sidebar-premium ${sidebarOpen ? 'open' : 'closed'}`}
         style={{ width: sidebarOpen ? '280px' : '80px' }}
       >
         <div className="sidebar-brand-container">
