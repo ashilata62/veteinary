@@ -2,7 +2,7 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Loader } from 'lucide-react';
-import { Calendar, Plus, Check, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Plus, Check, XCircle, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { APPOINTMENTS, PET_OWNERS, PETS, USERS } from '../data/mockData';
 import FormSelect from './FormSelect';
 
