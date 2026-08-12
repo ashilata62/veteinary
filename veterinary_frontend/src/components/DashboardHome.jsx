@@ -450,26 +450,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
           </p>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setCurrentTab('appointments')}
-            className="btn"
-            style={{ backgroundColor: '#fff', color: '#0f766e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.7rem 1.5rem', borderRadius: 'var(--radius-md)', boxShadow: '0 4px 14px rgba(0,0,0,0.15)', transition: 'transform 0.15s ease' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <Calendar size={16} /> Book Appointment
-          </button>
-          <button
-            onClick={() => setCurrentTab('reports')}
-            className="btn"
-            style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.7rem 1.25rem', borderRadius: 'var(--radius-md)', backdropFilter: 'blur(4px)', transition: 'transform 0.15s ease' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <TrendingUp size={16} /> View Reports
-          </button>
-        </div>
+        {/* Action buttons removed from banner per user request */}
       </div>
 
       {/* KPI Cards with stagger animations */}
