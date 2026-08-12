@@ -647,10 +647,15 @@ export default function Appointments({ currentRole }) {
           onClick={() => setShowBookingModal(false)}
         >
           <div className="card animate-fade-in modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-lg modal-title">
-              <Calendar size={22} style={{ color: 'var(--primary-teal)' }} />
-              Schedule Veterinary Consultation
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Calendar size={22} style={{ color: 'var(--primary-teal)' }} />
+                Schedule Veterinary Consultation
+              </h3>
+              <button type="button" onClick={() => setShowBookingModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleBookAppointment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-row">
                 <div className="form-group">

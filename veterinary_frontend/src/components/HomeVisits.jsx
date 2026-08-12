@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Home, Plus, Check, XCircle, MapPin, User, Clock, AlertCircle, FileText, Calendar, Navigation, Navigation2, Loader, Activity } from 'lucide-react';
+import { Home, Plus, Check, XCircle, MapPin, User, Clock, AlertCircle, FileText, Calendar, Navigation, Navigation2, Loader, Activity, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FormSelect from './FormSelect';
 
@@ -478,9 +478,14 @@ export default function HomeVisits({ currentRole }) {
       {showBookingModal && (
         <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
           <div className="card animate-fade-in modal-content" style={{ maxWidth: '650px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Home size={22} style={{ color: 'var(--primary-teal)' }} /> Schedule Home Visit
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Home size={22} style={{ color: 'var(--primary-teal)' }} /> Schedule Home Visit
+              </h3>
+              <button type="button" onClick={() => setShowBookingModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
             
             <form onSubmit={handleBook} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-row">
@@ -544,9 +549,14 @@ export default function HomeVisits({ currentRole }) {
       {showAssignModal && (
         <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
           <div className="card animate-fade-in modal-content" style={{ maxWidth: '500px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <User size={22} style={{ color: 'var(--primary-teal)' }} /> Assign Doctor to Route
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <User size={22} style={{ color: 'var(--primary-teal)' }} /> Assign Doctor to Route
+              </h3>
+              <button type="button" onClick={() => setShowAssignModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleAssignDoctor} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Select Active Dispatch *</label>
@@ -568,9 +578,14 @@ export default function HomeVisits({ currentRole }) {
       {showTravelModal && (
         <div className="modal-overlay" onClick={() => setShowTravelModal(false)}>
           <div className="card animate-fade-in modal-content" style={{ maxWidth: '500px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MapPin size={22} style={{ color: 'var(--primary-teal)' }} /> Update Travel Charges
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <MapPin size={22} style={{ color: 'var(--primary-teal)' }} /> Update Travel Charges
+              </h3>
+              <button type="button" onClick={() => setShowTravelModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleUpdateTravelFee} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Select Active Visit *</label>
@@ -592,9 +607,14 @@ export default function HomeVisits({ currentRole }) {
       {showHistoryModal && (
         <div className="modal-overlay" onClick={() => setShowHistoryModal(false)}>
           <div className="card animate-fade-in modal-content" style={{ maxWidth: '800px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
-              <FileText size={22} style={{ color: 'var(--primary-teal)' }} /> Detailed Visit History
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 className="font-bold text-lg modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <FileText size={22} style={{ color: 'var(--primary-teal)' }} /> Detailed Visit History
+              </h3>
+              <button type="button" onClick={() => setShowHistoryModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
             {pastVisits.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)' }}>No historical data found.</p>
             ) : (
