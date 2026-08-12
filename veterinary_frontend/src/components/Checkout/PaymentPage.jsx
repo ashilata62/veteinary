@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, CircleCheck, AlertCircle, Loader2 } from 'lucide-react';
-import { apiFetch } from '../../utils/api';
 import './PaymentPage.css';
 
 export default function PaymentPage() {
@@ -21,11 +20,9 @@ export default function PaymentPage() {
     script.onload = () => setLoading(false);
     document.body.appendChild(script);
 
-    // Map plan IDs to names and amounts
-    if (planId === 'plan-starter' || planId === 'starter') setPlanDetails({ name: 'Starter Plan', amount: 599 });
-    if (planId === 'plan-standard' || planId === 'standard') setPlanDetails({ name: 'Standard Plan', amount: 799 });
-    if (planId === 'plan-pro' || planId === 'pro') setPlanDetails({ name: 'Pro Plan', amount: 1299 });
-    if (planId === 'plan-testing' || planId === 'testing') setPlanDetails({ name: 'Testing Plan', amount: 1 });
+    // Mock fetching plan details based on ID
+    if (planId === 'basic') setPlanDetails({ name: 'Basic Plan', amount: 99 });
+    if (planId === 'enterprise') setPlanDetails({ name: 'Enterprise Plan', amount: 1999 });
 
     return () => {
       document.body.removeChild(script);
@@ -43,8 +40,9 @@ export default function PaymentPage() {
         if (parsed && typeof parsed === 'object') user = parsed;
       } catch(e) {}
       
-      const orderRes = await apiFetch('/api/payment/create-order', {
+      const orderRes = await fetch('http://localhost:5001/api/payment/create-order', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: planId || 'pro',
           amount: planDetails.amount,
@@ -67,8 +65,9 @@ export default function PaymentPage() {
         handler: async function (response) {
           // 3. Verify Payment Signature
           try {
-            const verifyRes = await apiFetch('/api/payment/verify', {
+            const verifyRes = await fetch('http://localhost:5001/api/payment/verify', {
               method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

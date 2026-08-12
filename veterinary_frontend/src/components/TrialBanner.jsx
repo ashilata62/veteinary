@@ -9,19 +9,21 @@ export default function TrialBanner() {
   if (!userStr) return null;
   const user = JSON.parse(userStr);
 
-  if (!user || !user.trial_end_date) return null;
-  if (user.subscription_status !== 'Trial') return null; // Only show for Trial
+  if (!user) return null;
+  const status = (user.subscription_status || '').toLowerCase();
+  if (status !== 'trial' && status !== 'active') return null;
 
-  const today = new Date();
-  const endDate = new Date(user.trial_end_date);
+  const isTrial = status === 'trial';
+  let diffDays = 0;
+  let isExpiringSoon = false;
   
-  // Calculate remaining days
-  const diffTime = endDate - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays <= 0) return null; // Handled by TrialExpired modal
-  
-  const isExpiringSoon = diffDays <= 3;
+  if (isTrial && user.trial_end_date) {
+    const today = new Date();
+    const endDate = new Date(user.trial_end_date);
+    diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return null; // Handled by TrialExpired modal
+    isExpiringSoon = diffDays <= 3;
+  }
   
   return (
     <div style={{
@@ -50,11 +52,17 @@ export default function TrialBanner() {
         </div>
         <div>
           <h4 style={{ margin: 0, color: '#1e293b', fontSize: '15px', fontWeight: '600' }}>
-            Your 7-day free trial is currently active
+            {isTrial ? 'Your 7-day free trial is currently active' : 'Your current plan is Active'}
           </h4>
           <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13px' }}>
-            You have <strong>{diffDays} days remaining</strong> in your trial. 
-            {isExpiringSoon && ' To ensure uninterrupted access, please upgrade your plan.'}
+            {isTrial ? (
+              <>
+                You have <strong>{diffDays} days remaining</strong> in your trial. 
+                {isExpiringSoon && ' To ensure uninterrupted access, please upgrade your plan.'}
+              </>
+            ) : (
+              'Want to unlock more premium features? Explore our available plans and upgrade today.'
+            )}
           </p>
         </div>
       </div>
@@ -62,11 +70,7 @@ export default function TrialBanner() {
       <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
         <button 
           onClick={() => {
-            navigate('/landing');
-            setTimeout(() => {
-              const el = document.getElementById('pricing');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+            navigate('/plans');
           }}
           style={{
             backgroundColor: 'transparent',
@@ -85,11 +89,7 @@ export default function TrialBanner() {
         </button>
         <button 
           onClick={() => {
-            navigate('/landing');
-            setTimeout(() => {
-              const el = document.getElementById('pricing');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+            navigate('/plans');
           }}
           style={{
             backgroundColor: isExpiringSoon ? '#ef4444' : '#22c55e',
@@ -106,7 +106,7 @@ export default function TrialBanner() {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}
         >
-          Buy Plan Now <ArrowRight size={16} />
+          {isTrial ? 'Buy Plan Now' : 'Upgrade Plan'} <ArrowRight size={16} />
         </button>
       </div>
     </div>
