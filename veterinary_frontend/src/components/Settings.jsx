@@ -253,7 +253,7 @@ export default function SettingsPage({ currentRole }) {
     <div className="responsive-grid">
       
       {/* Personal Profile Details Card */}
-      <div className="card animate-fade-in" style={{ margin: 0, padding: '1.25rem', position: 'sticky', top: '20px', alignSelf: 'start' }}>
+      <div className="card animate-fade-in" style={{ margin: 0, padding: '1.25rem' }}>
         <h3 className="font-bold text-base mb-4" style={{ display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
           <User size={18} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
           Personal Profile
