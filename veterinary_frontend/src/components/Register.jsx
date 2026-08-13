@@ -650,31 +650,6 @@ export default function Register() {
               </button>
             </form>
 
-            {/* Security Badges Row below button */}
-            <div className="trust-indicators">
-              <div className="trust-item">
-                <ShieldCheck size={16} />
-                <span>SSL Secured</span>
-              </div>
-              <div className="trust-item">
-                <Shield size={16} />
-                <span>HIPAA Ready</span>
-              </div>
-            </div>
-
-            {/* Already have an account link footer */}
-            <div className="register-footer-redirect">
-              <p>
-                Already have an account?{' '}
-                <span
-                  onClick={() => navigate('/login')}
-                  className="register-link-btn"
-                >
-                  Login here
-                </span>
-              </p>
-            </div>
-
           </div>
         </div>
 
