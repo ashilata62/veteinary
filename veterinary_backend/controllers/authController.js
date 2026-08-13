@@ -42,6 +42,22 @@ const loginUser = async (req, res) => {
             { expiresIn: '8h' }
         );
 
+        // Fetch subscription info
+        let subscription_status = 'active';
+        let trial_end_date = null;
+        if (user.clinic_id) {
+            const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
+            if (subs.length > 0) {
+                const sub = subs[0];
+                if (sub.plan_id === 'plan-free-trial') {
+                    subscription_status = 'trial';
+                } else {
+                    subscription_status = sub.status === 'Active' ? 'active' : 'expired';
+                }
+                trial_end_date = sub.end_date;
+            }
+        }
+
         // Send response
         res.json({
             status: 'success',
@@ -53,7 +69,9 @@ const loginUser = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     profile_image: user.profile_image,
-                    clinic_id: user.clinic_id
+                    clinic_id: user.clinic_id,
+                    subscription_status,
+                    trial_end_date
                 }
             }
         });
@@ -141,13 +159,13 @@ const registerUser = async (req, res) => {
         const trialExpiryDate = new Date();
         trialExpiryDate.setDate(trialStartDate.getDate() + 7);
 
-        // 6. Insert Clinic into Clinics Table and User into Users Table
-        const subdomain = businessName.trim().toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+        // 6. Insert Clinic into Clinics Table
         await db.query(
-            `INSERT INTO clinics (id, name, subdomain, trial_end_date, subscription_status) VALUES (?, ?, ?, ?, 'trial')`,
-            [tenantId, businessName.trim(), subdomain, trialExpiryDate]
+            `INSERT INTO clinics (id, clinic_name, email, phone, status) VALUES (?, ?, ?, ?, 'ACTIVE')`,
+            [tenantId, businessName.trim(), email.trim().toLowerCase(), mobileClean]
         );
 
+        // 7. Insert User into Users Table
         const username = email.split('@')[0].toLowerCase() + Math.floor(Math.random() * 100);
         await db.query(
             `INSERT INTO users (id, name, email, phone, role, username, password_hash, status, clinic_id) 
@@ -155,61 +173,112 @@ const registerUser = async (req, res) => {
             [userId, adminName.trim(), email.trim().toLowerCase(), mobileClean, username, passwordHash, tenantId]
         );
 
-        // Send Welcome email using Brevo
+        // 8. Insert Free Trial Subscription
+        const subId = crypto.randomUUID ? crypto.randomUUID() : `SUB-${Date.now()}`;
+        await db.query(
+            `INSERT INTO saas_subscriptions (id, clinic_admin_id, clinic_id, plan_id, status, start_date, end_date) 
+             VALUES (?, ?, ?, 'plan-free-trial', 'Active', ?, ?)`,
+            [subId, userId, tenantId, trialStartDate, trialExpiryDate]
+        );
+
+        // Send Welcome email with credentials + plan details
         try {
-            const formattedExpiry = trialExpiryDate.toLocaleDateString('en-GB');
+            const formattedExpiry = trialExpiryDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+            const loginUrl = (process.env.FRONTEND_URL || 'http://localhost:5174') + '/login';
+            const saNotifyEmail = process.env.SUPERADMIN_NOTIFY_EMAIL || 'info@kiaantechnology.com';
+
             const welcomeHtml = `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                  <div style="background-color: #0f172a; padding: 1.5rem; text-align: center;">
-                    <span style="color: #ffffff; font-weight: 800; font-size: 1.25rem; letter-spacing: 0.5px;">KIAAN</span>
-                    <span style="color: #2dd4bf; font-weight: 800; font-size: 1.25rem; letter-spacing: 0.5px;">VETERINARY</span>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #f8fafc;">
+                  <div style="background-color: #0d9488; padding: 1.5rem; color: #ffffff;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 1.5rem;">🐾</span>
+                      <strong style="font-size: 1.25rem;">Kiaan Veterinary</strong>
+                    </div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-top: 4px;">Official Notification</div>
                   </div>
-                  <div style="padding: 2rem;">
-                    <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 1rem;">Welcome to Kiaan Veterinary!</h2>
-                    <p style="color: #475569; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">Hello ${adminName.trim()}, thank you for registering your clinic <strong>${businessName.trim()}</strong>. Your 7-Day Free Trial has been activated successfully!</p>
+                  <div style="padding: 2rem; background-color: #ffffff;">
+                    <h3 style="color: #1e293b; font-size: 1.15rem; margin-top: 0; margin-bottom: 1.5rem;">Welcome to Kiaan Veterinary - Your Account is Ready</h3>
                     
-                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
-                      <h3 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 0.95rem; color: #0f172a; font-weight: 700;">Your Account Details:</h3>
-                      <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <tr>
-                          <td style="padding: 0.35rem 0; color: #64748b;">Admin ID:</td>
-                          <td style="padding: 0.35rem 0; color: #334155; font-weight: 600; font-family: monospace;">${adminId}</td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 0.35rem 0; color: #64748b;">Registered Email:</td>
-                          <td style="padding: 0.35rem 0; color: #334155; font-weight: 600;">${email.trim().toLowerCase()}</td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 0.35rem 0; color: #64748b;">Selected Plan:</td>
-                          <td style="padding: 0.35rem 0; color: #334155; font-weight: 600;">Free Trial</td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 0.35rem 0; color: #64748b;">Trial Expiry Date:</td>
-                          <td style="padding: 0.35rem 0; color: #b45309; font-weight: 600;">${formattedExpiry}</td>
-                        </tr>
-                      </table>
+                    <p style="color: #334155; margin-bottom: 1.25rem; font-size: 0.9rem;">Hello ${adminName.trim()},</p>
+                    <p style="color: #334155; margin-bottom: 1.25rem; font-size: 0.9rem;">Welcome to Kiaan Veterinary.</p>
+                    <p style="color: #334155; margin-bottom: 2rem; font-size: 0.9rem;">Your account and plan subscription have been successfully activated.</p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                      <p style="color: #475569; font-size: 0.9rem; margin-bottom: 0.75rem;">Account Details:</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Name: ${adminName.trim()}</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Email / Login ID: <a href="mailto:${email.trim().toLowerCase()}" style="color: #3b82f6; text-decoration: none;">${email.trim().toLowerCase()}</a></p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Password: ${password}</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Software: Kiaan Veterinary</p>
                     </div>
 
-                    <div style="text-align: center; margin-top: 1.5rem; margin-bottom: 1.5rem;">
-                      <a href="http://localhost:5174/login" style="display: inline-block; background-color: #14b8a6; color: #ffffff; text-decoration: none; padding: 0.75rem 1.75rem; border-radius: 8px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);">Login to Portal</a>
+                    <div style="margin-bottom: 1.5rem;">
+                      <p style="color: #475569; font-size: 0.9rem; margin-bottom: 0.75rem;">Plan Details:</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Plan: 7-Day Free Trial</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Price: ₹0.00</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Duration: 7 Days</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Start Date: ${trialStartDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      <p style="color: #334155; font-size: 0.9rem; margin: 0.4rem 0;">Expiry Date: ${trialExpiryDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
 
-                    <p style="color: #64748b; font-size: 0.8rem; line-height: 1.5; margin-bottom: 0;">Need to change your password? You can reset it anytime from your profile settings after logging in.</p>
+                    <div style="margin-bottom: 1.5rem;">
+                      <p style="color: #475569; font-size: 0.9rem; margin-bottom: 0.75rem;">Login:</p>
+                      <p style="margin: 0.4rem 0; font-size: 0.9rem;"><a href="${loginUrl}" style="color: #3b82f6; text-decoration: none;">${loginUrl}</a></p>
+                    </div>
+
+                    <p style="color: #334155; margin-bottom: 1.5rem; font-size: 0.9rem;">Please keep your login credentials secure.</p>
+                    
+                    <p style="color: #334155; font-size: 0.9rem; margin: 0;">Thank you,</p>
+                    <p style="color: #334155; font-size: 0.9rem; margin: 0.2rem 0 0 0;">Kiaan Technology Pvt Ltd</p>
                   </div>
-                  <div style="background-color: #f8fafc; padding: 1rem; text-align: center; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 0.75rem;">
-                    © 2026 Kiaan Veterinary SaaS Platform. All rights reserved.
+                  <div style="background-color: #f1f5f9; padding: 1rem; color: #94a3b8; font-size: 0.75rem; text-align: left;">
+                    This is an automated message from Kiaan Veterinary. Please do not reply.
                   </div>
                 </div>
             `;
 
+            // 1. Welcome email to new admin
             await emailService.sendEmail({
                 to: email.trim().toLowerCase(),
-                subject: 'Welcome to Kiaan Veterinary - Free Trial Activated',
-                text: `Welcome to Kiaan Veterinary, ${adminName.trim()}! Your registration is successful. Admin ID: ${adminId}. Expiry Date: ${formattedExpiry}`,
+                bcc: saNotifyEmail,
+                subject: `Welcome to Kiaan Veterinary - Your Account is Ready`,
+                text: `Welcome ${adminName.trim()}! Your account is ready.\nEmail: ${email.trim().toLowerCase()}\nPassword: ${password}\nTrial Expires: ${formattedExpiry}\nLogin at: ${loginUrl}`,
                 html: welcomeHtml
             });
+
+            // 2. Notify super admin about new registration
+            const saNotifyHtml = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                  <div style="background: #0f172a; padding: 1.25rem; text-align: center;">
+                    <span style="color: #fff; font-weight: 800; font-size: 1.1rem;">KIAAN <span style="color: #2dd4bf;">VETERINARY</span> — Admin Panel</span>
+                  </div>
+                  <div style="padding: 1.5rem;">
+                    <h2 style="color: #0f172a; font-size: 1.1rem; margin-top: 0;">🆕 New Clinic Registration Alert</h2>
+                    <p style="color: #475569; font-size: 0.9rem;">A new clinic admin has registered on the platform:</p>
+                    <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse; background: #f8fafc; border-radius: 8px;">
+                      <tr><td style="padding: 8px 12px; color: #64748b;">Admin Name:</td><td style="padding: 8px 12px; font-weight: 700; color: #0f172a;">${adminName.trim()}</td></tr>
+                      <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Email:</td><td style="padding: 8px 12px; color: #0f172a;">${email.trim().toLowerCase()}</td></tr>
+                      <tr><td style="padding: 8px 12px; color: #64748b;">Clinic Name:</td><td style="padding: 8px 12px; font-weight: 700; color: #0f172a;">${businessName.trim()}</td></tr>
+                      <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Mobile:</td><td style="padding: 8px 12px; color: #0f172a;">${mobileClean}</td></tr>
+                      <tr><td style="padding: 8px 12px; color: #64748b;">Plan:</td><td style="padding: 8px 12px; color: #b45309; font-weight: 700;">7-Day Free Trial</td></tr>
+                      <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Trial Expires:</td><td style="padding: 8px 12px; color: #dc2626; font-weight: 700;">${formattedExpiry}</td></tr>
+                      <tr><td style="padding: 8px 12px; color: #64748b;">Admin ID:</td><td style="padding: 8px 12px; font-family: monospace; color: #334155;">${adminId}</td></tr>
+                      <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Registered At:</td><td style="padding: 8px 12px; color: #0f172a;">${new Date().toLocaleString('en-IN')}</td></tr>
+                    </table>
+                  </div>
+                  <div style="background: #f8fafc; padding: 0.75rem; text-align: center; color: #94a3b8; font-size: 0.75rem;">
+                    Kiaan Veterinary SaaS Platform — Super Admin Notification
+                  </div>
+                </div>
+            `;
+            await emailService.sendEmail({
+                to: saNotifyEmail,
+                subject: `🆕 New Clinic Registered: ${businessName.trim()} — ${new Date().toLocaleDateString('en-IN')}`,
+                text: `New clinic registered: ${businessName.trim()} by ${adminName.trim()} (${email.trim().toLowerCase()}). Trial expires: ${formattedExpiry}`,
+                html: saNotifyHtml
+            });
+
         } catch (emailErr) {
-            console.error('Failed to send welcome email to registered admin:', emailErr);
+            console.error('Failed to send registration emails:', emailErr);
         }
 
         // 7. Return Structured Response

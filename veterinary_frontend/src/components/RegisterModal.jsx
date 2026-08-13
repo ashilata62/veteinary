@@ -7,9 +7,10 @@ import api from '../utils/api';
 const PLANS = {
   'free-trial': { name: 'Free Trial', price: '₹0', cycle: '7 Days Free' },
   'testing':    { name: 'Testing Plan', price: '₹1', cycle: '/test' },
-  'starter':    { name: 'Starter',    price: '₹599', cycle: '/month' },
-  'standard':   { name: 'Standard',   price: '₹799', cycle: '/month' },
-  'pro':        { name: 'Pro',        price: '₹1,299', cycle: '/month' },
+  'starter':    { name: 'Starter',    price: '₹999', cycle: '/month' },
+  'standard':   { name: 'Standard',   price: '₹1,299', cycle: '/month' },
+  'pro':        { name: 'Pro',        price: '₹1,499', cycle: '/month' },
+  'custom':     { name: 'Custom Plan', price: 'Custom', cycle: '/tailored' },
 };
 
 export default function RegisterModal({ plan = 'free-trial', onClose }) {

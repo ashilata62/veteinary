@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, CircleCheck, AlertCircle, Loader2 } from 'lucide-react';
 import './PaymentPage.css';
+import { apiFetch } from '../../utils/api';
 
 export default function PaymentPage() {
   const location = useLocation();
@@ -20,9 +21,19 @@ export default function PaymentPage() {
     script.onload = () => setLoading(false);
     document.body.appendChild(script);
 
-    // Mock fetching plan details based on ID
-    if (planId === 'basic') setPlanDetails({ name: 'Basic Plan', amount: 99 });
-    if (planId === 'enterprise') setPlanDetails({ name: 'Enterprise Plan', amount: 1999 });
+    const PLANS = {
+      'starter': { name: 'Starter Plan', amount: 999 },
+      'standard': { name: 'Standard Plan', amount: 1299 },
+      'pro': { name: 'Pro Plan', amount: 1499 },
+      'custom': { name: 'Custom Plan', amount: 0 },
+      'free-trial': { name: '7-Day Free Trial', amount: 0 }
+    };
+    
+    if (PLANS[planId]) {
+      setPlanDetails(PLANS[planId]);
+    } else {
+      setPlanDetails({ name: 'Pro Plan', amount: 1499 });
+    }
 
     return () => {
       document.body.removeChild(script);
@@ -40,7 +51,7 @@ export default function PaymentPage() {
         if (parsed && typeof parsed === 'object') user = parsed;
       } catch(e) {}
       
-      const orderRes = await fetch('http://localhost:5001/api/payment/create-order', {
+      const orderRes = await apiFetch('/api/payment/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,7 +76,7 @@ export default function PaymentPage() {
         handler: async function (response) {
           // 3. Verify Payment Signature
           try {
-            const verifyRes = await fetch('http://localhost:5001/api/payment/verify', {
+            const verifyRes = await apiFetch('/api/payment/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -142,7 +153,7 @@ export default function PaymentPage() {
           <div className="payment-details">
             <div className="plan-summary">
               <span className="plan-name">{planDetails.name}</span>
-              <span className="plan-price">${planDetails.amount}</span>
+              <span className="plan-price">₹{planDetails.amount}</span>
             </div>
             
             <div className="payment-security-badges">
@@ -155,7 +166,7 @@ export default function PaymentPage() {
               onClick={handlePayment} 
               disabled={processing}
             >
-              {processing ? <Loader2 className="spinner" size={20} /> : `Pay $${planDetails.amount} Securely`}
+              {processing ? <Loader2 className="spinner" size={20} /> : `Pay ₹${planDetails.amount} Securely`}
             </button>
             <p className="test-mode-text">Test Mode Active: No real money will be deducted.</p>
           </div>

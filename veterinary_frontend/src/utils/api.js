@@ -30,13 +30,12 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      const isSuperAdminRoute = error.config && error.config.url && error.config.url.includes('/api/super-admin');
-      
-      if (isSuperAdminRoute) {
+      const url = error.config && error.config.url ? error.config.url : '';
+      // Don't redirect on login endpoints — let the form handle the error
+      const isLoginEndpoint = url.includes('/login');
+      if (!isLoginEndpoint) {
         localStorage.removeItem('sa_token');
         localStorage.removeItem('sa_user');
-        window.location.href = '/super-admin/login';
-      } else {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('user');

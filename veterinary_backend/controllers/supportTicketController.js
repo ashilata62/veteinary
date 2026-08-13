@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const emailService = require('../services/emailService');
 
 // Helper to format date
 const getFormattedDate = () => {
@@ -69,6 +70,63 @@ const createTicket = async (req, res) => {
                 messages
             }
         });
+
+        // Send email notification to support team (non-blocking)
+        const supportEmail = process.env.SUPPORT_EMAIL || 'support@kiaantechnology.com';
+        const priorityColor = priority === 'High' ? '#dc2626' : priority === 'Medium' ? '#d97706' : '#16a34a';
+        const priorityBg = priority === 'High' ? '#fee2e2' : priority === 'Medium' ? '#fef3c7' : '#dcfce7';
+
+        const ticketHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+              <div style="background-color: #0f172a; padding: 2.5rem 1rem; text-align: center;">
+                <span style="color: #ffffff; font-weight: 800; font-size: 1.5rem; letter-spacing: 1px;">SUPPORT <span style="color: #3b82f6;">TICKET</span></span>
+              </div>
+              <div style="padding: 2.5rem 2rem;">
+                <h2 style="color: #0f172a; font-size: 1.4rem; font-weight: 600; margin-top: 0; margin-bottom: 1rem;">New Support Request</h2>
+                <p style="color: #64748b; font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.5;">A new support ticket has been submitted. Here are the details:</p>
+                
+                <table style="width: 100%; font-size: 0.95rem; border-collapse: collapse; margin-bottom: 2.5rem;">
+                  <tr>
+                    <td style="padding: 1.25rem 0; color: #475569; font-weight: 600; border-bottom: 1px solid #f1f5f9; width: 40%;">Clinic Name</td>
+                    <td style="padding: 1.25rem 0; color: #0f172a; font-weight: 700; border-bottom: 1px solid #f1f5f9;">${clinicName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 1.25rem 0; color: #475569; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Admin Name</td>
+                    <td style="padding: 1.25rem 0; border-bottom: 1px solid #f1f5f9;"><a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 1.25rem 0; color: #475569; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Email Address</td>
+                    <td style="padding: 1.25rem 0; border-bottom: 1px solid #f1f5f9;"><a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 1.25rem 0; color: #475569; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Category</td>
+                    <td style="padding: 1.25rem 0; color: #334155; border-bottom: 1px solid #f1f5f9;">${category}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 1.25rem 0; color: #475569; font-weight: 600;">Priority</td>
+                    <td style="padding: 1.25rem 0;">
+                      <span style="background-color: ${priorityBg}; color: ${priorityColor}; padding: 0.3rem 0.8rem; border-radius: 9999px; font-weight: 600; font-size: 0.85rem;">${priority}</span>
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 1rem;">
+                  <h3 style="color: #0f172a; font-size: 1rem; font-weight: 600; margin-top: 0; margin-bottom: 0.75rem;">Issue Description</h3>
+                  <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0; white-space: pre-wrap;">${description}</p>
+                </div>
+              </div>
+              <div style="background-color: #f1f5f9; padding: 1.25rem; text-align: center; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0;">
+                This is an automated message from the Kiaan Veterinary System.
+              </div>
+            </div>
+        `;
+        emailService.sendEmail({
+            to: supportEmail,
+            subject: `New Support Ticket: ${subject}`,
+            text: `New ticket from ${adminName} (${clinicName}). Subject: ${subject}. Description: ${description}`,
+            html: ticketHtml
+        }).catch(err => console.error('Failed to send ticket notification email:', err));
+
     } catch (err) {
         console.error('Error creating ticket:', err);
         res.status(500).json({ status: 'error', message: 'Server error while raising ticket.', error: err.message });
