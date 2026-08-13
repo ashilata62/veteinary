@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 class ReportService {
-    async getRevenueAnalytics(startDate, endDate) {
+    async getRevenueAnalytics(clinic_id, startDate, endDate) {
         // Daily revenue trend (defaults to last 30 days)
         const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         const end = endDate || new Date().toISOString().split('T')[0];
@@ -13,11 +13,11 @@ class ReportService {
                 DATE_FORMAT(invoice_date, '%Y-%m') as sortKey,
                 SUM(grand_total) as revenue
             FROM invoices
-            WHERE status = 'Paid'
+            WHERE status = 'Paid' AND clinic_id = ?
             GROUP BY DATE_FORMAT(invoice_date, '%b'), DATE_FORMAT(invoice_date, '%Y-%m')
             ORDER BY sortKey ASC
             LIMIT 12
-        `);
+        `, [clinic_id]);
 
         // If no records, return a minimal fallback structure
         const revenueTrend = monthlyRows.length > 0 ? monthlyRows.map(r => ({
@@ -34,12 +34,12 @@ class ReportService {
                 COALESCE(SUM(grand_total) / NULLIF(COUNT(id), 0), 0) as averageTicket,
                 COUNT(id) as totalInvoices
             FROM invoices
-            WHERE status = 'Paid'
-        `);
+            WHERE status = 'Paid' AND clinic_id = ?
+        `, [clinic_id]);
 
         const [activePatientsRows] = await db.query(`
-            SELECT COUNT(*) as count FROM pets
-        `);
+            SELECT COUNT(*) as count FROM pets WHERE clinic_id = ?
+        `, [clinic_id]);
 
         return {
             revenueTrend,
@@ -50,7 +50,7 @@ class ReportService {
         };
     }
 
-    async getAppointmentAnalytics() {
+    async getAppointmentAnalytics(clinic_id) {
         const [rows] = await db.query(`
             SELECT 
                 WEEKDAY(appointment_date) as weekdayIdx,
@@ -58,10 +58,10 @@ class ReportService {
                 SUM(CASE WHEN status IN ('Upcoming', 'Confirmed', 'Pending') THEN 1 ELSE 0 END) as upcoming,
                 SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled
             FROM appointments
-            WHERE appointment_date IS NOT NULL
+            WHERE appointment_date IS NOT NULL AND clinic_id = ?
             GROUP BY WEEKDAY(appointment_date)
             ORDER BY weekdayIdx ASC
-        `);
+        `, [clinic_id]);
 
         const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const weekdayMap = {};
@@ -84,16 +84,17 @@ class ReportService {
     }
 
 
-    async getPatientDemographics() {
-        const [totalRows] = await db.query('SELECT COUNT(*) as total FROM pets');
+    async getPatientDemographics(clinic_id) {
+        const [totalRows] = await db.query('SELECT COUNT(*) as total FROM pets WHERE clinic_id = ?', [clinic_id]);
         const total = totalRows[0].total || 1;
 
         const [rows] = await db.query(`
             SELECT species, COUNT(*) as count 
             FROM pets 
+            WHERE clinic_id = ?
             GROUP BY species 
             ORDER BY count DESC
-        `);
+        `, [clinic_id]);
 
         const colors = {
             'Dog': '#3b82f6',
@@ -116,19 +117,19 @@ class ReportService {
         return mapped;
     }
 
-    async getDoctorAudit() {
+    async getDoctorAudit(clinic_id) {
         const [rows] = await db.query(`
             SELECT 
                 u.name,
-                COALESCE((SELECT COUNT(DISTINCT pet_id) FROM clinical_encounters WHERE doctor_id = u.id), 0) as patients,
-                COALESCE((SELECT COUNT(*) FROM clinical_encounters WHERE doctor_id = u.id), 0) as consultations,
-                COALESCE((SELECT COUNT(*) FROM home_visits WHERE doctor_id = u.id AND visit_status = 'Completed'), 0) as home_visits,
-                COALESCE((SELECT SUM(grand_total) FROM invoices WHERE doctor_id = u.id AND status = 'Paid'), 0) as revenue,
-                COALESCE((SELECT SUM(working_hours) FROM attendance WHERE user_id = u.id AND status = 'Present'), 0) as hours
+                COALESCE((SELECT COUNT(DISTINCT pet_id) FROM clinical_encounters WHERE doctor_id = u.id AND clinic_id = ?), 0) as patients,
+                COALESCE((SELECT COUNT(*) FROM clinical_encounters WHERE doctor_id = u.id AND clinic_id = ?), 0) as consultations,
+                COALESCE((SELECT COUNT(*) FROM home_visits WHERE doctor_id = u.id AND visit_status = 'Completed' AND clinic_id = ?), 0) as home_visits,
+                COALESCE((SELECT SUM(grand_total) FROM invoices WHERE doctor_id = u.id AND status = 'Paid' AND clinic_id = ?), 0) as revenue,
+                COALESCE((SELECT SUM(working_hours) FROM attendance WHERE user_id = u.id AND status = 'Present' AND clinic_id = ?), 0) as hours
             FROM users u
-            WHERE u.role = 'Doctor' AND u.status = 'Active'
+            WHERE u.role = 'Doctor' AND u.status = 'Active' AND u.clinic_id = ?
             ORDER BY consultations DESC, home_visits DESC
-        `);
+        `, [clinic_id, clinic_id, clinic_id, clinic_id, clinic_id, clinic_id]);
 
         return rows.map(r => ({
             name: r.name,
@@ -141,7 +142,7 @@ class ReportService {
         }));
     }
 
-    async getInventoryResourceAlerts() {
+    async getInventoryResourceAlerts(clinic_id) {
         const [rows] = await db.query(`
             SELECT 
                 id as sku,
@@ -155,9 +156,9 @@ class ReportService {
                     ELSE 'Low Stock'
                 END as status
             FROM inventory
-            WHERE quantity <= low_stock_threshold OR expiry_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+            WHERE (quantity <= low_stock_threshold OR expiry_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AND clinic_id = ?
             ORDER BY quantity ASC
-        `);
+        `, [clinic_id]);
         return rows;
     }
 

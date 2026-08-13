@@ -2,8 +2,9 @@ const reportService = require('../services/reportService');
 
 exports.getRevenue = async (req, res) => {
     try {
+        const clinicId = req.user.clinic_id;
         const { startDate, endDate } = req.query;
-        const data = await reportService.getRevenueAnalytics(startDate, endDate);
+        const data = await reportService.getRevenueAnalytics(clinicId, startDate, endDate);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching revenue reports:', error);
@@ -13,7 +14,8 @@ exports.getRevenue = async (req, res) => {
 
 exports.getAppointments = async (req, res) => {
     try {
-        const data = await reportService.getAppointmentAnalytics();
+        const clinicId = req.user.clinic_id;
+        const data = await reportService.getAppointmentAnalytics(clinicId);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching appointment reports:', error);
@@ -23,7 +25,8 @@ exports.getAppointments = async (req, res) => {
 
 exports.getDoctors = async (req, res) => {
     try {
-        const data = await reportService.getDoctorAudit();
+        const clinicId = req.user.clinic_id;
+        const data = await reportService.getDoctorAudit(clinicId);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching doctor performance reports:', error);
@@ -33,7 +36,8 @@ exports.getDoctors = async (req, res) => {
 
 exports.getPatients = async (req, res) => {
     try {
-        const data = await reportService.getPatientDemographics();
+        const clinicId = req.user.clinic_id;
+        const data = await reportService.getPatientDemographics(clinicId);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching patient demographics reports:', error);
@@ -43,7 +47,8 @@ exports.getPatients = async (req, res) => {
 
 exports.getInventory = async (req, res) => {
     try {
-        const data = await reportService.getInventoryResourceAlerts();
+        const clinicId = req.user.clinic_id;
+        const data = await reportService.getInventoryResourceAlerts(clinicId);
         res.status(200).json({ status: 'success', data });
     } catch (error) {
         console.error('Error fetching inventory reports:', error);

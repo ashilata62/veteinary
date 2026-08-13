@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 export default function Hospitalization() {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cagesLoading, setCagesLoading] = useState(true);
   const [showAdmitModal, setShowAdmitModal] = useState(false);
   const [selectedCage, setSelectedCage] = useState(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -24,38 +25,34 @@ export default function Hospitalization() {
   const [admissionReason, setAdmissionReason] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
 
-  // Main board cages state - persists in localStorage
-  const [cages, setCages] = useState(() => {
-    const saved = localStorage.getItem('vet_hospital_cages');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return []; // Start empty by default!
-  });
+  // Main board cages state - synced with backend
+  const [cages, setCages] = useState([]);
 
   useEffect(() => {
-    localStorage.setItem('vet_hospital_cages', JSON.stringify(cages));
-  }, [cages]);
-
-  useEffect(() => {
-    const loadPets = async () => {
+    const loadInitialData = async () => {
       try {
-        const res = await apiFetch('/api/v1/pets');
-        const data = await res.json();
-        if (data.status === 'success') {
-          setPets(data.data);
+        // Load Pets
+        const petsRes = await apiFetch('/api/v1/pets');
+        const petsData = await petsRes.json();
+        if (petsData.status === 'success') {
+          setPets(petsData.data);
+        }
+
+        // Load Cages
+        const cagesRes = await apiFetch('/api/v1/hospitalization/cages');
+        const cagesData = await cagesRes.json();
+        if (cagesData.status === 'success') {
+          setCages(cagesData.data);
         }
       } catch (err) {
-        console.error('Failed to load pets registry for hospitalization:', err);
+        console.error('Failed to load initial hospitalization data:', err);
+        toast.error('Failed to sync board with backend.');
       } finally {
         setLoading(false);
+        setCagesLoading(false);
       }
     };
-    loadPets();
+    loadInitialData();
   }, []);
 
   const handleAdmitClick = (cage) => {
@@ -66,7 +63,7 @@ export default function Hospitalization() {
     setShowAdmitModal(true);
   };
 
-  const handleAdmitSubmit = (e) => {
+  const handleAdmitSubmit = async (e) => {
     e.preventDefault();
     if (!selectedPetId || !admissionReason) {
       toast.error('Please choose a pet and provide a reason for hospitalization');
@@ -76,75 +73,134 @@ export default function Hospitalization() {
     const chosenPet = pets.find(p => p.id === selectedPetId);
     if (!chosenPet) return;
 
-    // Update cage
-    setCages(prev => prev.map(c => {
-      if (c.id === selectedCage.id) {
-        return {
-          ...c,
-          status: 'Occupied',
-          petName: chosenPet.name,
-          breed: chosenPet.breed,
-          photo: chosenPet.photo_url || chosenPet.photo || '',
-          reason: admissionReason,
-          checkIn: new Date().toLocaleString(),
-          flowsheet: { fed: false, meds: false, walk: false, eveningFed: false }
-        };
+    try {
+      const res = await apiFetch(`/api/v1/hospitalization/cages/${selectedCage.id}/admit`, {
+        method: 'POST',
+        body: JSON.stringify({ petId: selectedPetId, reason: admissionReason })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setCages(prev => prev.map(c => {
+          if (c.id === selectedCage.id) {
+            return {
+              ...c,
+              status: 'Occupied',
+              pet_id: selectedPetId,
+              petName: chosenPet.name,
+              breed: chosenPet.breed,
+              photo: chosenPet.photo_url || chosenPet.photo || '',
+              reason: admissionReason,
+              checkIn: data.data.checkIn,
+              flowsheet: data.data.flowsheet
+            };
+          }
+          return c;
+        }));
+        toast.success(`${chosenPet.name} admitted to ${selectedCage.name} successfully.`);
+        setShowAdmitModal(false);
+      } else {
+        toast.error(data.message || 'Failed to admit patient.');
       }
-      return c;
-    }));
-
-    toast.success(`${chosenPet.name} admitted to ${selectedCage.name} successfully.`);
-    setShowAdmitModal(false);
-  };
-
-  const handleDischarge = (cageId) => {
-    if (window.confirm('Are you sure you want to discharge this patient?')) {
-      setCages(prev => prev.map(c => {
-        if (c.id === cageId) {
-          return {
-            ...c,
-            status: 'Cleaning Needed',
-            petName: '',
-            breed: '',
-            photo: '',
-            reason: '',
-            checkIn: '',
-            flowsheet: null
-          };
-        }
-        return c;
-      }));
-      toast.success('Patient discharged. Cage status marked as: Cleaning Needed.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error admitting patient.');
     }
   };
 
-  const toggleFlowsheetItem = (cageId, task) => {
-    setCages(prev => prev.map(c => {
-      if (c.id === cageId && c.flowsheet) {
-        return {
-          ...c,
-          flowsheet: {
-            ...c.flowsheet,
-            [task]: !c.flowsheet[task]
+  const handleDischarge = async (cageId) => {
+    if (window.confirm('Are you sure you want to discharge this patient?')) {
+      try {
+        const res = await apiFetch(`/api/v1/hospitalization/cages/${cageId}/discharge`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          setCages(prev => prev.map(c => {
+            if (c.id === cageId) {
+              return {
+                ...c,
+                status: 'Cleaning Needed',
+                pet_id: null,
+                petName: '',
+                breed: '',
+                photo: '',
+                reason: '',
+                checkIn: '',
+                flowsheet: null
+              };
+            }
+            return c;
+          }));
+          toast.success('Patient discharged. Cage status marked as: Cleaning Needed.');
+        } else {
+          toast.error(data.message || 'Failed to discharge patient.');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Network error discharging patient.');
+      }
+    }
+  };
+
+  const toggleFlowsheetItem = async (cageId, task) => {
+    const cage = cages.find(c => c.id === cageId);
+    if (!cage || !cage.flowsheet) return;
+
+    const updatedFlowsheet = {
+      ...cage.flowsheet,
+      [task]: !cage.flowsheet[task]
+    };
+
+    try {
+      const res = await apiFetch(`/api/v1/hospitalization/cages/${cageId}/flowsheet`, {
+        method: 'PUT',
+        body: JSON.stringify({ flowsheet: updatedFlowsheet })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setCages(prev => prev.map(c => {
+          if (c.id === cageId) {
+            return {
+              ...c,
+              flowsheet: updatedFlowsheet
+            };
           }
-        };
+          return c;
+        }));
+        toast.success('Flowsheet task checklist updated');
+      } else {
+        toast.error(data.message || 'Failed to update flowsheet.');
       }
-      return c;
-    }));
-    toast.success('Flowsheet task checklist updated');
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error updating flowsheet.');
+    }
   };
 
-  const markCleaned = (cageId) => {
-    setCages(prev => prev.map(c => {
-      if (c.id === cageId) {
-        return { ...c, status: 'Vacant' };
+  const markCleaned = async (cageId) => {
+    try {
+      const res = await apiFetch(`/api/v1/hospitalization/cages/${cageId}/clean`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setCages(prev => prev.map(c => {
+          if (c.id === cageId) {
+            return { ...c, status: 'Vacant' };
+          }
+          return c;
+        }));
+        toast.success('Cage sanitized & marked vacant.');
+      } else {
+        toast.error(data.message || 'Failed to clean cage.');
       }
-      return c;
-    }));
-    toast.success('Cage sanitized & marked vacant.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error cleaning cage.');
+    }
   };
 
-  const handleAddCage = () => {
+  const handleAddCage = async () => {
     if (!selectedTemplateId) {
       toast.error('Please select a cage from the dropdown');
       return;
@@ -163,21 +219,37 @@ export default function Hospitalization() {
       id: template.id,
       name: template.name,
       type: template.type,
-      status: 'Vacant',
-      petName: '',
-      breed: '',
-      photo: '',
-      reason: '',
-      checkIn: '',
-      flowsheet: null
+      status: 'Vacant'
     };
     
-    setCages(prev => [...prev, newCage]);
-    toast.success(`${template.name} added to the board.`);
-    setSelectedTemplateId('');
+    try {
+      const res = await apiFetch('/api/v1/hospitalization/cages', {
+        method: 'POST',
+        body: JSON.stringify(newCage)
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setCages(prev => [...prev, { 
+          ...newCage, 
+          petName: '', 
+          breed: '', 
+          photo: '', 
+          reason: '', 
+          checkIn: '', 
+          flowsheet: null 
+        }]);
+        toast.success(`${template.name} added to the board.`);
+        setSelectedTemplateId('');
+      } else {
+        toast.error(data.message || 'Failed to add cage.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error adding cage.');
+    }
   };
 
-  const handleRemoveCage = (cageId) => {
+  const handleRemoveCage = async (cageId) => {
     const cage = cages.find(c => c.id === cageId);
     if (!cage) return;
     if (cage.status === 'Occupied') {
@@ -186,14 +258,35 @@ export default function Hospitalization() {
     }
     
     if (window.confirm(`Are you sure you want to remove ${cage.name} from the board?`)) {
-      setCages(prev => prev.filter(c => c.id !== cageId));
-      toast.success(`${cage.name} removed from the board.`);
+      try {
+        const res = await apiFetch(`/api/v1/hospitalization/cages/${cageId}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          setCages(prev => prev.filter(c => c.id !== cageId));
+          toast.success(`${cage.name} removed from the board.`);
+        } else {
+          toast.error(data.message || 'Failed to remove cage.');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Network error removing cage.');
+      }
     }
   };
 
   const totalOccupied = cages.filter(c => c.status === 'Occupied').length;
   const totalVacant = cages.filter(c => c.status === 'Vacant').length;
   const totalCleaning = cages.filter(c => c.status === 'Cleaning Needed').length;
+
+  if (cagesLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <Loader className="animate-spin text-primary" size={36} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

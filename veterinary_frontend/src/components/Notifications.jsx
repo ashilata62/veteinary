@@ -135,19 +135,34 @@ export default function Notifications({ notifications: propNotifs, setNotificati
         ))}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="tab-container">
-        {[
-          { key: 'all',         label: 'All' },
-          { key: 'unread',      label: `Unread (${unread})` },
-          { key: 'appointment', label: 'Appointments' },
-          { key: 'low_stock',   label: 'Low Stock' },
-          { key: 'system',      label: 'System' },
-        ].map(({ key, label }) => (
-          <button key={key} className={`tab-btn ${filter === key ? 'active' : ''}`} onClick={() => setFilter(key)}>
-            {label}
-          </button>
-        ))}
+      {/* Filter Dropdown */}
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Filter Category:</span>
+        <select 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)}
+          className="form-control"
+          style={{ 
+            width: '220px', 
+            height: '38px', 
+            fontSize: '0.85rem', 
+            fontWeight: '600',
+            borderRadius: '8px', 
+            border: '1px solid var(--border)',
+            padding: '0 10px',
+            backgroundColor: '#ffffff',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <option value="all">All Notifications</option>
+          <option value="unread">Unread ({unread})</option>
+          <option value="appointment">Appointments</option>
+          <option value="low_stock">Low Stock</option>
+          <option value="system">System Alerts</option>
+        </select>
       </div>
 
       {/* Notifications List */}
