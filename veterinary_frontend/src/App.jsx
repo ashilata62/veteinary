@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import DashboardHome from './components/DashboardHome';
@@ -33,6 +33,7 @@ import TrialExpired from './components/TrialExpired';
 import SubscriptionExpired from './components/SubscriptionExpired';
 import AccountSuspended from './components/AccountSuspended';
 import Support from './components/Support';
+import PlansPage from './components/PlansPage';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
 
@@ -175,6 +176,7 @@ export default function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('trialPopupShown');
     setAttendanceStatus({
       isCheckedIn: false,
       checkInTime: null,
@@ -200,24 +202,13 @@ export default function App() {
     return <PaymentPage />;
   }
 
-  if (location.pathname === '/landing') {
-    return <LandingPage />;
-  }
-
   if (location.pathname.startsWith('/super-admin')) {
     if (!isSuperAdmin) {
-      if (location.pathname === '/super-admin/login') {
-        return <SuperAdminLogin setIsSuperAdmin={setIsSuperAdmin} />;
-      }
-      setTimeout(() => navigate('/super-admin/login', { replace: true }), 0);
-      return null;
+      return <Navigate to="/login" replace />;
     }
-    
     if (location.pathname === '/super-admin/login') {
-      setTimeout(() => navigate('/super-admin/dashboard', { replace: true }), 0);
-      return null;
+      return <Navigate to="/super-admin/dashboard" replace />;
     }
-
     return <SuperAdminLayout setIsSuperAdmin={setIsSuperAdmin} />;
   }
 
@@ -227,6 +218,7 @@ export default function App() {
         <Login
           setIsAuthenticated={setIsAuthenticated}
           setCurrentRole={setCurrentRole}
+          setIsSuperAdmin={setIsSuperAdmin}
           onLoginSuccess={() => setIsTrialExpired(checkTrialExpired())}
         />
       );
@@ -253,6 +245,10 @@ export default function App() {
       plan={subscriptionData.plan}
       expiryDate={subscriptionData.expiryDate}
     />;
+  }
+
+  if (currentTab === 'plans' || location.pathname.endsWith('/plans')) {
+    return <PlansPage />;
   }
 
   return (

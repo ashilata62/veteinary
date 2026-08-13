@@ -11,10 +11,18 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
   try {
-    const { planId, amount, currency = 'INR', clinicAdminId } = req.body;
+    const { planId, currency = 'INR', clinicAdminId } = req.body;
+
+    const PLANS = {
+      'starter': 999,
+      'standard': 1299,
+      'pro': 1499
+    };
+    
+    let amount = PLANS[planId] || 1499;
 
     if (!amount) {
-      return res.status(400).json({ status: 'error', message: 'Amount is required' });
+      return res.status(400).json({ status: 'error', message: 'Invalid plan or amount' });
     }
 
     const options = {
@@ -179,11 +187,48 @@ exports.verifyPayment = async (req, res) => {
             </div>
           `;
 
+          const saEmail = process.env.SUPERADMIN_NOTIFY_EMAIL || 'info@kiaantechnology.com';
           await emailService.sendEmail({
             to: userEmail,
+            bcc: saEmail,
             subject: `Payment Receipt #${razorpay_payment_id} - Kiaan Veterinary`,
             text: `Thank you for your payment. Receipt ID: ${razorpay_payment_id}. Plan: ${planName}, Amount: ₹${amount}`,
             html: receiptHtml
+          });
+
+          // Notify Super Admin about payment
+          // saEmail is already declared above
+
+          const saPaymentHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+              <div style="background: #0f172a; padding: 1.25rem; text-align: center;">
+                <span style="color: #fff; font-weight: 800; font-size: 1.1rem;">KIAAN <span style="color: #2dd4bf;">VETERINARY</span> — Payment Alert</span>
+              </div>
+              <div style="padding: 1.5rem;">
+                <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #15803d; font-weight: 700; font-size: 0.95rem;">
+                  ✅ Payment Successful — Plan Activated
+                </div>
+                <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse; background: #f8fafc;">
+                  <tr><td style="padding: 8px 12px; color: #64748b;">Admin Name:</td><td style="padding: 8px 12px; font-weight: 700; color: #0f172a;">${userName}</td></tr>
+                  <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Email:</td><td style="padding: 8px 12px; color: #0f172a;">${userEmail}</td></tr>
+                  <tr><td style="padding: 8px 12px; color: #64748b;">Plan Purchased:</td><td style="padding: 8px 12px; font-weight: 700; color: #0d9488;">${planName}</td></tr>
+                  <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Amount Paid:</td><td style="padding: 8px 12px; font-weight: 700; color: #0f172a;">₹${amount}</td></tr>
+                  <tr><td style="padding: 8px 12px; color: #64748b;">Payment ID:</td><td style="padding: 8px 12px; font-family: monospace; color: #334155;">${razorpay_payment_id}</td></tr>
+                  <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Invoice No:</td><td style="padding: 8px 12px; font-family: monospace; color: #334155;">${invoiceNumber}</td></tr>
+                  <tr><td style="padding: 8px 12px; color: #64748b;">Plan Valid Till:</td><td style="padding: 8px 12px; font-weight: 700; color: #c2410c;">${endDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</td></tr>
+                  <tr style="background:#fff;"><td style="padding: 8px 12px; color: #64748b;">Payment Date:</td><td style="padding: 8px 12px; color: #0f172a;">${new Date().toLocaleString('en-IN')}</td></tr>
+                </table>
+              </div>
+              <div style="background: #f8fafc; padding: 0.75rem; text-align: center; color: #94a3b8; font-size: 0.75rem;">
+                Kiaan Veterinary SaaS Platform — Super Admin Payment Notification
+              </div>
+            </div>
+          `;
+          await emailService.sendEmail({
+            to: saEmail,
+            subject: `💳 Payment Received: ${planName} — ₹${amount} from ${userName} — ${formattedDate}`,
+            text: `Payment received. Admin: ${userName} (${userEmail}). Plan: ${planName}. Amount: ₹${amount}. Payment ID: ${razorpay_payment_id}.`,
+            html: saPaymentHtml
           });
         }
       } catch (emailErr) {

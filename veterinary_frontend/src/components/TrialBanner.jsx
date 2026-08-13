@@ -9,106 +9,81 @@ export default function TrialBanner() {
   if (!userStr) return null;
   const user = JSON.parse(userStr);
 
-  if (!user || !user.trial_end_date) return null;
-  if (user.subscription_status !== 'Trial') return null; // Only show for Trial
+  if (!user) return null;
+  const status = (user.subscription_status || 'active').toLowerCase();
+  // Show banner for trial and active users only
+  if (status !== 'trial' && status !== 'active') return null;
 
-  const today = new Date();
-  const endDate = new Date(user.trial_end_date);
+  const isTrial = status === 'trial';
+  let diffDays = 0;
+  let isExpiringSoon = false;
   
-  // Calculate remaining days
-  const diffTime = endDate - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays <= 0) return null; // Handled by TrialExpired modal
-  
-  const isExpiringSoon = diffDays <= 3;
+  if (isTrial && user.trial_end_date) {
+    const today = new Date();
+    const endDate = new Date(user.trial_end_date);
+    diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return null; // Handled by TrialExpired modal
+    isExpiringSoon = diffDays <= 3;
+  }
   
   return (
     <div style={{
-      backgroundColor: isExpiringSoon ? '#fef2f2' : '#f0fdf4',
-      border: `1px solid ${isExpiringSoon ? '#f87171' : '#86efac'}`,
-      borderRadius: '8px',
-      padding: '12px 16px',
+      backgroundColor: '#fef3c7',
+      color: '#92400e',
+      padding: '8px 24px',
       margin: '0 0 20px 0',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '16px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      justifyContent: 'center',
+      gap: '12px',
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      borderRadius: '4px'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{ 
-          backgroundColor: isExpiringSoon ? '#fee2e2' : '#dcfce7', 
-          padding: '8px', 
-          borderRadius: '50%',
+      <span style={{
+        backgroundColor: '#f59e0b',
+        color: '#ffffff',
+        padding: '2px 10px',
+        borderRadius: '9999px',
+        fontSize: '0.75rem',
+        fontWeight: '700',
+        letterSpacing: '0.5px',
+        textTransform: 'uppercase'
+      }}>
+        Reminder
+      </span>
+
+      <span style={{ flex: 1, textAlign: 'center' }}>
+        {isTrial ? (
+          <>Notice: Only {diffDays} Days Left for Free Trial! Upgrade your plan to unlock full clinic management features.</>
+        ) : (
+          <>Notice: Want to unlock more premium features? Upgrade your plan today.</>
+        )}
+      </span>
+
+      <button 
+        onClick={() => navigate('/plans')}
+        style={{
+          backgroundColor: '#ea580c',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '20px',
+          padding: '6px 16px',
+          fontSize: '0.85rem',
+          fontWeight: '600',
+          cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          color: isExpiringSoon ? '#ef4444' : '#22c55e'
-        }}>
-          {isExpiringSoon ? <AlertTriangle size={20} /> : <Clock size={20} />}
-        </div>
-        <div>
-          <h4 style={{ margin: 0, color: '#1e293b', fontSize: '15px', fontWeight: '600' }}>
-            Your 7-day free trial is currently active
-          </h4>
-          <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13px' }}>
-            You have <strong>{diffDays} days remaining</strong> in your trial. 
-            {isExpiringSoon && ' To ensure uninterrupted access, please upgrade your plan.'}
-          </p>
-        </div>
-      </div>
-      
-      <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
-        <button 
-          onClick={() => {
-            navigate('/landing');
-            setTimeout(() => {
-              const el = document.getElementById('pricing');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#64748b',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            padding: '8px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <Eye size={14} /> View Plans
-        </button>
-        <button 
-          onClick={() => {
-            navigate('/landing');
-            setTimeout(() => {
-              const el = document.getElementById('pricing');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }}
-          style={{
-            backgroundColor: isExpiringSoon ? '#ef4444' : '#22c55e',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '8px 16px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}
-        >
-          Buy Plan Now <ArrowRight size={16} />
-        </button>
-      </div>
+          gap: '6px',
+          boxShadow: '0 2px 4px rgba(234, 88, 12, 0.2)',
+          transition: 'background-color 0.2s ease'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c2410c'}
+        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
+      >
+        Upgrade Plan <ArrowRight size={14} strokeWidth={2.5} />
+      </button>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, CircleCheck, AlertCircle, Loader2 } from 'lucide-react';
-import { apiFetch } from '../../utils/api';
 import './PaymentPage.css';
+import { apiFetch } from '../../utils/api';
 
 export default function PaymentPage() {
   const location = useLocation();
@@ -21,11 +21,19 @@ export default function PaymentPage() {
     script.onload = () => setLoading(false);
     document.body.appendChild(script);
 
-    // Map plan IDs to names and amounts
-    if (planId === 'plan-starter' || planId === 'starter') setPlanDetails({ name: 'Starter Plan', amount: 599 });
-    if (planId === 'plan-standard' || planId === 'standard') setPlanDetails({ name: 'Standard Plan', amount: 799 });
-    if (planId === 'plan-pro' || planId === 'pro') setPlanDetails({ name: 'Pro Plan', amount: 1299 });
-    if (planId === 'plan-testing' || planId === 'testing') setPlanDetails({ name: 'Testing Plan', amount: 1 });
+    const PLANS = {
+      'starter': { name: 'Starter Plan', amount: 999 },
+      'standard': { name: 'Standard Plan', amount: 1299 },
+      'pro': { name: 'Pro Plan', amount: 1499 },
+      'custom': { name: 'Custom Plan', amount: 0 },
+      'free-trial': { name: '7-Day Free Trial', amount: 0 }
+    };
+    
+    if (PLANS[planId]) {
+      setPlanDetails(PLANS[planId]);
+    } else {
+      setPlanDetails({ name: 'Pro Plan', amount: 1499 });
+    }
 
     return () => {
       document.body.removeChild(script);
@@ -45,6 +53,7 @@ export default function PaymentPage() {
       
       const orderRes = await apiFetch('/api/payment/create-order', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: planId || 'pro',
           amount: planDetails.amount,
@@ -69,6 +78,7 @@ export default function PaymentPage() {
           try {
             const verifyRes = await apiFetch('/api/payment/verify', {
               method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

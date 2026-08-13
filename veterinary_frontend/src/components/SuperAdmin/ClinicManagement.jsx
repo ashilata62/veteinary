@@ -50,9 +50,10 @@ export default function ClinicManagement() {
   const handleToggleStatus = (id) => {
     setClinics(prev => prev.map(c => {
       if (c.id === id) {
-        const newStatus = c.subStatus === 'Active' ? 'Suspended' : 'Active';
-        showToast(`Clinic "${c.name}" status updated to ${newStatus}`);
-        return { ...c, subStatus: newStatus };
+        const currentStatus = c.subStatus || c.subscriptionStatus || 'Unknown';
+        const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+        showToast(`Clinic "${c.name || c.clinic_name}" status updated to ${newStatus}`);
+        return { ...c, subStatus: newStatus, subscriptionStatus: newStatus };
       }
       return c;
     }));
@@ -72,15 +73,30 @@ export default function ClinicManagement() {
     showToast(`Clinic details updated successfully.`);
   };
 
-  const filteredClinics = clinics.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.adminName.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase());
+  // Normalize data — handle both API fields and default data fields
+  const normalizedClinics = clinics.map(c => ({
+    ...c,
+    name: c.name || c.clinic_name || 'Unknown Clinic',
+    adminName: c.adminName || c.admin_name || 'Unknown Admin',
+    email: c.email || c.adminEmail || '',
+    phone: c.phone || '',
+    subStatus: c.subStatus || c.subscriptionStatus || 'Unknown',
+    currentPlan: c.currentPlan || c.planName || 'No Plan',
+    expiryDate: c.expiryDate || c.subscriptionEnd || '—',
+  }));
+
+  const filteredClinics = normalizedClinics.filter(c => {
+    const name = (c.name || '').toLowerCase();
+    const adminName = (c.adminName || '').toLowerCase();
+    const email = (c.email || '').toLowerCase();
+    const matchesSearch = name.includes(search.toLowerCase()) ||
+      adminName.includes(search.toLowerCase()) ||
+      email.includes(search.toLowerCase());
     
     if (statusFilter === 'All') return matchesSearch;
     if (statusFilter === 'Active') return matchesSearch && c.subStatus === 'Active';
-    if (statusFilter === 'Trial') return matchesSearch && c.subStatus === 'Trial';
-    if (statusFilter === 'Suspended') return matchesSearch && c.subStatus === 'Suspended';
+    if (statusFilter === 'Trial') return matchesSearch && (c.subStatus === 'Trial' || c.subStatus === 'trial');
+    if (statusFilter === 'Suspended') return matchesSearch && (c.subStatus === 'Suspended' || c.subStatus === 'suspended');
     return matchesSearch;
   });
 

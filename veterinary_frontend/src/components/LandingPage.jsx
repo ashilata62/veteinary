@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RegisterModal from './RegisterModal';
 import {
   PawPrint,
   CheckCircle,
@@ -24,21 +25,24 @@ import {
   Instagram,
   Twitter,
   Facebook,
-  ShieldCheck
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 import './LandingPage.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('free-trial');
 
   const handleAdminLogin = () => {
     navigate('/login');
   };
 
   const handleRegister = (planKey = 'free-trial') => {
-    navigate(`/register?plan=${planKey}`);
+    setSelectedPlan(planKey);
+    setShowRegisterModal(true);
   };
 
   const scrollToSection = (id) => {
@@ -369,19 +373,19 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="vet-testimonials-grid">
+        <div className="vet-testimonials-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2rem' }}>
           {/* Card 1 */}
           <div className="vet-testimonial-card">
             <div>
               <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#14b8a6' }}>AV</div>
+                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
                 <div>
-                  <div className="vet-user-name">Dr. Aman Verma</div>
-                  <div className="vet-user-clinic">Senior Veterinarian, PetCare Hospital</div>
+                  <div className="vet-user-name">truman42lewis</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 4 months ago</div>
                 </div>
               </div>
               <p className="vet-testimonial-text">
-                "VetCare Pro has completely automated our clinic operations. Our team saves 20+ hours every week!"
+                "Kiaan And His Team are truly professional and In honored to work with them. As the have delivered our agency a state of the ark software! Thank you 🙏🏼"
               </p>
             </div>
             <div className="vet-stars">
@@ -397,14 +401,14 @@ export default function LandingPage() {
           <div className="vet-testimonial-card">
             <div>
               <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#0d9488' }}>NG</div>
+                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
                 <div>
-                  <div className="vet-user-name">Dr. Neha Gupta</div>
-                  <div className="vet-user-clinic">Owner, Paws & Claws Vet Clinic</div>
+                  <div className="vet-user-name">truman42lewis</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 5 months ago</div>
                 </div>
               </div>
               <p className="vet-testimonial-text">
-                "Managing pet records, vaccination schedules, and billing has never been easier."
+                "Kiaan and his team showed up and handled business. Excellent work, professional, and on point. I highly recommend them."
               </p>
             </div>
             <div className="vet-stars">
@@ -420,14 +424,60 @@ export default function LandingPage() {
           <div className="vet-testimonial-card">
             <div>
               <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#0284c7' }}>KV</div>
+                <div className="vet-author-avatar" style={{ background: '#10b981' }}>H</div>
                 <div>
-                  <div className="vet-user-name">Karan Verma</div>
-                  <div className="vet-user-clinic">Clinic Manager, Happy Tails Pet Center</div>
+                  <div className="vet-user-name">hansdjabs</div>
+                  <div className="vet-user-clinic">🇷🇼 Rwanda • 7 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text" style={{ fontSize: '0.9rem' }}>
+                "my experience working with this company is very great , i highly recommend everyone to work with this amazing team. because everything is smooth by working with them .. and they have expert in software development i can tell you .. whatever you have in mind they can build it with professionalism."
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#ef4444' }}>FH</div>
+                <div>
+                  <div className="vet-user-name">fahimhyder310</div>
+                  <div className="vet-user-clinic">🇮🇳 India • 5 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text" style={{ fontSize: '0.85rem' }}>
+                "They demonstrated strong command over both frontend and backend development, ensuring performance, security, and smooth functionality throughout the build. What stood out most was their deep understanding of the product vision. Their professionalism was consistent throughout the project. Milestones were delivered on time, communication was clear and structured, and they handled feedback with maturity and precision."
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 5 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#65a30d' }}>P</div>
+                <div>
+                  <div className="vet-user-name">pop1010</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 3 months ago</div>
                 </div>
               </div>
               <p className="vet-testimonial-text">
-                "The real-time WhatsApp & email notifications keep our pet owners informed. Highly recommended!"
+                "Best developer ever, always listening and make adjustments to every bugs snd response to messages every seconds"
               </p>
             </div>
             <div className="vet-stars">
@@ -454,65 +504,58 @@ export default function LandingPage() {
         </div>
 
         <div className="vet-pricing-grid">
-          {/* Plan 1: Free Trial — hidden when logged in */}
-          {!isAuthenticated && (
-            <div className="vet-price-card free-trial">
-              <div>
-                <div className="vet-plan-name" style={{ color: '#10b981' }}>Free Trial</div>
-                <div className="vet-plan-price-row">
-                  <span className="vet-plan-price">₹0</span>
-                  <span className="vet-plan-unit">for 7 Days</span>
-                </div>
-                <ul className="vet-plan-features">
-                  <li className="vet-plan-feature-item"><Check size={16} /> Full access for 7 days</li>
-                  <li className="vet-plan-feature-item"><Check size={16} /> No credit card required</li>
-                  <li className="vet-plan-feature-item"><Check size={16} /> Quick 2-minute setup</li>
-                </ul>
+          {/* Plan 1: 7-Day Free Trial */}
+          <div className="vet-price-card">
+            <div>
+              <div className="vet-plan-name">7-Day Free Trial</div>
+              <div className="vet-plan-price-row">
+                <span className="vet-plan-price">₹0</span>
+                <span className="vet-plan-unit">per week</span>
               </div>
-              <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
-                Start Free Trial
-              </button>
+              <ul className="vet-plan-features">
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 7 Days full feature trial access</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: 7 Days</li>
+              </ul>
             </div>
-          )}
+            <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
+              Get Started
+            </button>
+          </div>
 
           {/* Plan 2: Starter */}
           <div className="vet-price-card">
             <div>
               <div className="vet-plan-name">Starter</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹599</span>
-                <span className="vet-plan-unit">/ month</span>
+                <span className="vet-plan-price">₹999</span>
+                <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} /> Basic clinic management</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Up to 100 pets</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Email reminders</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Standard support</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Essential clinic management features</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-starter') : handleRegister('starter')}>
-              {isAuthenticated ? 'Buy Now' : 'Get Started'}
+            <button className="vet-btn-plan" onClick={() => handleRegister('starter')}>
+              Get Started
             </button>
           </div>
 
           {/* Plan 3: Standard (Most Popular) */}
-          <div className="vet-price-card featured">
-            <div className="vet-popular-badge">Most Popular</div>
+          <div className="vet-price-card featured" style={{ borderColor: '#ea580c' }}>
+            <div className="vet-popular-badge" style={{ backgroundColor: '#14b8a6' }}>Most Popular</div>
             <div>
-              <div className="vet-plan-name" style={{ color: '#14b8a6' }}>Standard</div>
+              <div className="vet-plan-name" style={{ color: '#ea580c' }}>Standard</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹799</span>
-                <span className="vet-plan-unit">/ month</span>
+                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,299</span>
+                <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} /> Complete features for growing clinics</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Up to 500 pets</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> WhatsApp + Email reminders</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Priority support</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Complete features for growing clinics</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-standard') : handleRegister('standard')}>
-              {isAuthenticated ? 'Buy Now' : 'Get Started'}
+            <button className="vet-btn-plan" style={{ backgroundColor: '#14b8a6', borderColor: '#14b8a6' }} onClick={() => handleRegister('standard')}>
+              Get Started
             </button>
           </div>
 
@@ -521,19 +564,37 @@ export default function LandingPage() {
             <div>
               <div className="vet-plan-name">Pro</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹1,299</span>
-                <span className="vet-plan-unit">/ month</span>
+                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,499</span>
+                <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} /> Advanced features</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Unlimited pets</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Multi-clinic support</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Custom reports</li>
-                <li className="vet-plan-feature-item"><Check size={16} /> Dedicated account manager</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 🤖 Kiaan AI Assistant & AI Features</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Advanced features and priority support</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
               </ul>
             </div>
-            <button className="vet-btn-plan" onClick={() => isAuthenticated ? navigate('/checkout/plan-pro') : handleRegister('pro')}>
-              {isAuthenticated ? 'Buy Now' : 'Get Started'}
+            <button className="vet-btn-plan" onClick={() => handleRegister('pro')}>
+              Get Started
+            </button>
+          </div>
+
+          {/* Plan 5: Custom */}
+          <div className="vet-price-card">
+            <div>
+              <div className="vet-plan-name">Custom Plan</div>
+              <div className="vet-plan-price-row">
+                <span className="vet-plan-price" style={{ color: '#ea580c' }}>Custom</span>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Tailored to your clinic</p>
+              <ul className="vet-plan-features">
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> SaaS with customization</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Personal domain</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Personal branding</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 🤖 AI and automation</li>
+              </ul>
+            </div>
+            <button className="vet-btn-plan" onClick={() => handleRegister('custom')}>
+              Get Started
             </button>
           </div>
         </div>
@@ -567,6 +628,36 @@ export default function LandingPage() {
               <p className="vet-footer-desc">
                 The ultimate management solution for modern veterinary clinics, pet hospitals, and animal care centers.
               </p>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '1.5rem', alignItems: 'center' }}>
+                <a href="https://www.instagram.com/kiaan_technology4/" target="_blank" rel="noopener noreferrer" 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
+                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(225, 48, 108, 0.4)'; }} 
+                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   title="Instagram">
+                  <Instagram size={18} strokeWidth={2.5} />
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61560965313920&mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#1877F2', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
+                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(24, 119, 242, 0.4)'; }} 
+                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   title="Facebook">
+                  <Facebook size={18} strokeWidth={2.5} />
+                </a>
+                <a href="https://www.linkedin.com/company/kiaan-technology-pvt-ltd/posts/?feedView=all" target="_blank" rel="noopener noreferrer" 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#0A66C2', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
+                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(10, 102, 194, 0.4)'; }} 
+                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   title="LinkedIn">
+                  <Linkedin size={18} strokeWidth={2.5} />
+                </a>
+                <a href="https://kiaantechnology.com/" target="_blank" rel="noopener noreferrer" 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#14b8a6', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
+                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(20, 184, 166, 0.4)'; }} 
+                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   title="Website">
+                  <Globe size={18} strokeWidth={2.5} />
+                </a>
+              </div>
             </div>
 
             {/* Column 2: Quick Links */}
@@ -624,6 +715,10 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {showRegisterModal && (
+        <RegisterModal plan={selectedPlan} onClose={() => setShowRegisterModal(false)} />
+      )}
     </div>
   );
 }

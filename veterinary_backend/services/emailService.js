@@ -19,7 +19,7 @@ class EmailService {
         }
     }
 
-    async sendEmail({ to, subject, text, html }) {
+    async sendEmail({ to, bcc, subject, text, html }) {
         if (!to) {
             throw new Error('Email recipient address (to) is required.');
         }
@@ -31,7 +31,7 @@ class EmailService {
         // 1. If Brevo API Key is configured, use Brevo HTTP API directly
         if (apiKey) {
             return new Promise((resolve, reject) => {
-                const postData = JSON.stringify({
+                const payload = {
                     sender: {
                         name: senderName,
                         email: senderEmail
@@ -42,7 +42,13 @@ class EmailService {
                     subject: subject,
                     htmlContent: html || text.replace(/\n/g, '<br>'),
                     textContent: text
-                });
+                };
+                
+                if (bcc) {
+                    payload.bcc = [{ email: bcc }];
+                }
+
+                const postData = JSON.stringify(payload);
 
                 const options = {
                     hostname: 'api.brevo.com',
@@ -95,6 +101,10 @@ class EmailService {
                 text,
                 html: html || text.replace(/\n/g, '<br>')
             };
+            
+            if (bcc) {
+                mailOptions.bcc = bcc;
+            }
 
             try {
                 const info = await this.transporter.sendMail(mailOptions);

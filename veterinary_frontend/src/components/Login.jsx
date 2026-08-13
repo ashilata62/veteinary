@@ -9,7 +9,7 @@ import {
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
 
-export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSuccess }) {
+export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAdmin, onLoginSuccess }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('admin@vetcarepro.com');
   const [password, setPassword] = useState('password123');
@@ -38,7 +38,11 @@ export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSucce
 
     if (email && password) {
       try {
-        const response = await apiFetch('/api/auth/login', {
+        // Super Admin uses a different API endpoint
+        const isSuperAdmin = activeRole === 'Super Admin';
+        const endpoint = isSuperAdmin ? '/api/super-admin/login' : '/api/auth/login';
+
+        const response = await apiFetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -46,22 +50,33 @@ export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSucce
         const data = await response.json();
 
         if (data.status === 'success') {
-          const { token, user } = data.data;
-          
-          localStorage.setItem('token', token);
-          localStorage.setItem('role', user.role);
-          localStorage.setItem('user', JSON.stringify(user));
-          
-          setSuccess(true);
-          setLoading(false);
-          setTransitionOut(true);
-
-          setTimeout(() => {
-            setIsAuthenticated(true);
-            if (setCurrentRole) setCurrentRole(user.role);
-            if (onLoginSuccess) onLoginSuccess(user);
-            navigate(pathForTab('dashboard', user.role), { replace: true });
-          }, 1000);
+          if (isSuperAdmin) {
+            const { token, user } = data.data;
+            localStorage.setItem('sa_token', token);
+            localStorage.setItem('sa_user', JSON.stringify(user));
+            setSuccess(true);
+            setLoading(false);
+            setTransitionOut(true);
+            setTimeout(() => {
+              if (setIsSuperAdmin) setIsSuperAdmin(true);
+              navigate('/super-admin/dashboard', { replace: true });
+            }, 800);
+          } else {
+            const { token, user } = data.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('role', user.role);
+            localStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.removeItem('trialPopupShown');
+            setSuccess(true);
+            setLoading(false);
+            setTransitionOut(true);
+            setTimeout(() => {
+              setIsAuthenticated(true);
+              if (setCurrentRole) setCurrentRole(user.role);
+              if (onLoginSuccess) onLoginSuccess(user);
+              navigate(pathForTab('dashboard', user.role), { replace: true });
+            }, 1000);
+          }
         } else {
           setError(data.message || 'Login failed. Please check your credentials.');
           setLoading(false);
@@ -84,13 +99,9 @@ export default function Login({ setIsAuthenticated, setCurrentRole, onLoginSucce
   ];
 
   const selectDemoUser = (role, demoEmail) => {
-    if (role === 'Super Admin') {
-      navigate('/super-admin/login');
-      return;
-    }
     setActiveRole(role);
     setEmail(demoEmail);
-    setPassword('password123');
+    setPassword('');
     setError('');
   };
 
