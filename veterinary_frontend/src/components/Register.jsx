@@ -340,256 +340,52 @@ export default function Register() {
 
   return (
     <div className="vet-register-page">
-      {/* Brand Header */}
-      <header className="vet-register-header">
-        <div className="vet-register-header-container">
-          <button className="vet-btn-back" onClick={() => navigate('/')}>
-            <ArrowLeft size={18} /> Back to Home
-          </button>
-
-          <div className="vet-brand-logo" onClick={() => navigate('/')}>
-            <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '36px', objectFit: 'contain', cursor: 'pointer' }} />
-            <span>VetCare <span style={{ color: '#14b8a6' }}>Pro</span></span>
-          </div>
+      {/* Background container with mesh gradients & floating blobs */}
+      <div className="register-bg-container">
+        <div className="register-bg-image" />
+        <div className="register-bg-blobs">
+          <div className="bg-blob b1" />
+          <div className="bg-blob b2" />
+          <div className="bg-blob b3" />
         </div>
-      </header>
+        <div className="register-bg-pattern" />
+      </div>
 
-      {/* Main 60/40 Grid Container */}
-      <main className="vet-register-main">
-        <div className="vet-register-grid">
-          {/* Left Side (60%): Registration Form */}
-          <div className="vet-register-card">
-            <h1 className="vet-form-title">Create Clinic Account</h1>
-            <p className="vet-form-subtitle">
-              Start your 7-day free trial. Streamline your practice in under 2 minutes.
-            </p>
-
-            <form onSubmit={handleSubmit} noValidate>
-              {/* Field 1: Clinic Name */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Clinic / Veterinary Business Name *
-                </label>
-                <input
-                  type="text"
-                  name="clinicName"
-                  placeholder="Enter your clinic name"
-                  value={formData.clinicName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`vet-form-input ${touched.clinicName && errors.clinicName ? 'is-invalid' : ''}`}
-                />
-                {touched.clinicName && errors.clinicName && (
-                  <span className="vet-error-msg">{errors.clinicName}</span>
-                )}
-              </div>
-
-              {/* Field 2: Admin Full Name */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Admin Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="adminName"
-                  placeholder="Enter admin full name"
-                  value={formData.adminName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`vet-form-input ${touched.adminName && errors.adminName ? 'is-invalid' : ''}`}
-                />
-                {touched.adminName && errors.adminName && (
-                  <span className="vet-error-msg">{errors.adminName}</span>
-                )}
-              </div>
-
-              {/* Field 3: Email Address */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Work Email Address *
-                </label>
-                <div className="vet-input-wrapper">
-                  <Mail size={18} className="vet-input-icon" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="admin@yourclinic.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`vet-form-input has-icon ${touched.email && errors.email ? 'is-invalid' : ''}`}
-                  />
-                </div>
-                {touched.email && errors.email && (
-                  <span className="vet-error-msg">{errors.email}</span>
-                )}
-              </div>
-
-              {/* Field 4: Mobile Number */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Mobile Number *
-                </label>
-                <div className="vet-input-wrapper">
-                  <Phone size={18} className="vet-input-icon" />
-                  <input
-                    type="tel"
-                    name="mobile"
-                    placeholder="+91 98765 43210"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`vet-form-input has-icon ${touched.mobile && errors.mobile ? 'is-invalid' : ''}`}
-                  />
-                </div>
-                {touched.mobile && errors.mobile && (
-                  <span className="vet-error-msg">{errors.mobile}</span>
-                )}
-              </div>
-
-              {/* Field 5: Password */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Create Password *
-                </label>
-                <div className="vet-input-wrapper">
-                  <Lock size={18} className="vet-input-icon" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    placeholder="Create a strong password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`vet-form-input has-icon has-toggle ${touched.password && errors.password ? 'is-invalid' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    className="vet-password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex="-1"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {touched.password && errors.password && (
-                  <span className="vet-error-msg">{errors.password}</span>
-                )}
-
-                {/* Real-time Password Strength Meter */}
-                {formData.password && (
-                  <div className="vet-strength-meter">
-                    <div className="vet-strength-bar-bg">
-                      <div
-                        className="vet-strength-bar-fill"
-                        style={{
-                          width: `${passwordStrength.percent}%`,
-                          backgroundColor: passwordStrength.color
-                        }}
-                      />
-                    </div>
-                    <div className="vet-strength-label">
-                      <span style={{ color: '#9ca3af' }}>Strength:</span>
-                      <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Field 6: Confirm Password */}
-              <div className="vet-form-group">
-                <label className="vet-form-label">
-                  Confirm Password *
-                </label>
-                <div className="vet-input-wrapper">
-                  <Lock size={18} className="vet-input-icon" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    placeholder="Re-enter password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`vet-form-input has-icon has-toggle ${touched.confirmPassword && errors.confirmPassword ? 'is-invalid' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    className="vet-password-toggle"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    tabIndex="-1"
-                  >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {touched.confirmPassword && errors.confirmPassword && (
-                  <span className="vet-error-msg">{errors.confirmPassword}</span>
-                )}
-              </div>
-
-              {/* Field 7: Selected Plan Dropdown */}
-              <div className="vet-form-group" style={{ marginTop: '1.5rem' }}>
-                <label className="vet-form-label">
-                  Selected Subscription Plan *
-                </label>
-                <select
-                  value={selectedPlan}
-                  onChange={handlePlanChange}
-                  className="vet-form-select"
-                >
-                  <option value="free-trial">Free Trial (₹0 for 7 Days)</option>
-                  <option value="starter">Starter Plan (₹599 / month)</option>
-                  <option value="standard">Standard Plan (₹799 / month - Most Popular)</option>
-                  <option value="pro">Pro Plan (₹1,299 / month)</option>
-                </select>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading || !isFormValid()}
-                className="vet-btn-submit"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" /> Submitting...
-                  </>
-                ) : (
-                  currentPlanObj.btnText
-                )}
-              </button>
-            </form>
-
-            <div style={{ marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-              <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
-                Already have an account?{' '}
-                <span
-                  onClick={() => navigate('/login')}
-                  style={{ color: '#14b8a6', fontWeight: '700', cursor: 'pointer' }}
-                >
-                  Login here
-                </span>
-              </p>
-            </div>
+      {/* Main Grid split layout */}
+      <div className="vet-register-layout">
+        
+        {/* Left Side: Brand Visual + Live Plan Summary */}
+        <div className="register-hero-side">
+          <div className="register-brand-premium" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+            <img src="/kt-logo.png" alt="VetCare Pro" className="register-brand-logo" />
+            <span className="register-brand-text">
+              VetCare <span className="register-brand-accent">Pro</span>
+            </span>
           </div>
 
-          {/* Right Side (40%): Live Plan Summary Card */}
-          <div className="vet-summary-card">
+          <div className="register-badge">
+            <Sparkles size={14} /> Next-Gen Veterinary SaaS
+          </div>
+
+          <h1 className="register-title-premium">
+            Elevate Your Practice
+            <span>Manage Clinic Smartly.</span>
+          </h1>
+
+          <p className="register-hero-desc">
+            Empower your veterinary practice with the next generation clinic management system. Track patient records, coordinate appointments, and simplify POS billing.
+          </p>
+
+          {/* Glass Plan summary card */}
+          <div className="glass-plan-card">
             <div className="vet-summary-header">
               <div>
-                <span style={{
-                  display: 'inline-block',
-                  fontSize: '0.75rem',
-                  fontWeight: '800',
-                  color: selectedPlan === 'free-trial' ? '#10b981' : '#14b8a6',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '0.2rem'
-                }}>
+                <span className="vet-summary-plan-badge">
                   {currentPlanObj.badge}
                 </span>
                 <div className="vet-summary-plan-name">{currentPlanObj.name}</div>
               </div>
-              <div style={{ textAlign: 'right' }}>
+              <div>
                 <div className="vet-summary-price">{currentPlanObj.price}</div>
                 <div className="vet-summary-cycle">{currentPlanObj.cycle}</div>
               </div>
@@ -598,13 +394,13 @@ export default function Register() {
             <ul className="vet-summary-features">
               {currentPlanObj.features.map((feature, idx) => (
                 <li key={idx} className="vet-summary-feature-item">
-                  <Check size={18} />
+                  <Check size={16} />
                   <span>{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <a
                 href="#pricing"
                 onClick={(e) => {
@@ -613,23 +409,285 @@ export default function Register() {
                 }}
                 className="vet-change-plan-link"
               >
-                ← Change Plan on Landing Page
+                ← View all pricing plans
               </a>
             </div>
           </div>
         </div>
-      </main>
 
-      {/* ======================================================
-          PREMIUM ENTERPRISE SAAS ONBOARDING SUCCESS MODAL
-          ====================================================== */}
+        {/* Right Side: Signup Form Card */}
+        <div className="register-form-side">
+          <div className="glass-register-card">
+            
+            {/* Back Button */}
+            <button className="register-back-btn" onClick={() => navigate('/')}>
+              <ArrowLeft size={16} /> Back to Home
+            </button>
+
+            {/* 3-Step Progress Indicator */}
+            <div className="register-steps-dots">
+              <div className="step-dot-container active">
+                <span className="step-dot">1</span>
+                <span className="step-label">Account</span>
+              </div>
+              <span className="step-line" />
+              <div className="step-dot-container">
+                <span className="step-dot">2</span>
+                <span className="step-label">Verify</span>
+              </div>
+              <span className="step-line" />
+              <div className="step-dot-container">
+                <span className="step-dot">3</span>
+                <span className="step-label">Done</span>
+              </div>
+            </div>
+
+            {/* Form Header */}
+            <div className="register-header-text">
+              <h2>Create Your Clinic Account</h2>
+              <p>Quick 2-minute setup. Start managing your clinic instantly.</p>
+            </div>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="form-input-grid">
+                
+                {/* Field 1: Clinic Name */}
+                <div className="premium-input-group grid-col-span-2">
+                  <input
+                    type="text"
+                    name="clinicName"
+                    placeholder=" "
+                    value={formData.clinicName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.clinicName && errors.clinicName ? 'is-invalid' : ''}`}
+                    id="clinicNameInput"
+                  />
+                  <Building2 size={18} className="premium-input-icon" />
+                  <label htmlFor="clinicNameInput" className="input-label-float">Clinic / Business Name *</label>
+                  {touched.clinicName && errors.clinicName && (
+                    <span className="vet-error-msg">{errors.clinicName}</span>
+                  )}
+                </div>
+
+                {/* Field 2: Admin Full Name */}
+                <div className="premium-input-group grid-col-span-2">
+                  <input
+                    type="text"
+                    name="adminName"
+                    placeholder=" "
+                    value={formData.adminName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.adminName && errors.adminName ? 'is-invalid' : ''}`}
+                    id="adminNameInput"
+                  />
+                  <User size={18} className="premium-input-icon" />
+                  <label htmlFor="adminNameInput" className="input-label-float">Admin Full Name *</label>
+                  {touched.adminName && errors.adminName && (
+                    <span className="vet-error-msg">{errors.adminName}</span>
+                  )}
+                </div>
+
+                {/* Field 3: Email Address */}
+                <div className="premium-input-group grid-col-span-2">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder=" "
+                    value={formData.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.email && errors.email ? 'is-invalid' : ''}`}
+                    id="emailInput"
+                  />
+                  <Mail size={18} className="premium-input-icon" />
+                  <label htmlFor="emailInput" className="input-label-float">Work Email Address *</label>
+                  {touched.email && errors.email && (
+                    <span className="vet-error-msg">{errors.email}</span>
+                  )}
+                </div>
+
+                {/* Field 4: Mobile Number */}
+                <div className="premium-input-group grid-col-span-2">
+                  <input
+                    type="tel"
+                    name="mobile"
+                    placeholder=" "
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.mobile && errors.mobile ? 'is-invalid' : ''}`}
+                    id="mobileInput"
+                  />
+                  <Phone size={18} className="premium-input-icon" />
+                  <label htmlFor="mobileInput" className="input-label-float">Mobile Number *</label>
+                  {touched.mobile && errors.mobile && (
+                    <span className="vet-error-msg">{errors.mobile}</span>
+                  )}
+                </div>
+
+                {/* Field 5: Password */}
+                <div className="premium-input-group">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    placeholder=" "
+                    value={formData.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.password && errors.password ? 'is-invalid' : ''}`}
+                    id="passwordInput"
+                  />
+                  <Lock size={18} className="premium-input-icon" />
+                  <label htmlFor="passwordInput" className="input-label-float">Password *</label>
+                  
+                  <div className="password-actions">
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex="-1"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  
+                  {touched.password && errors.password && (
+                    <span className="vet-error-msg">{errors.password}</span>
+                  )}
+
+                  {/* Real-time Password Strength Meter */}
+                  {formData.password && (
+                    <div className="vet-strength-meter">
+                      <div className="vet-strength-bar-bg">
+                        <div
+                          className="vet-strength-bar-fill"
+                          style={{
+                            width: `${passwordStrength.percent}%`,
+                            backgroundColor: passwordStrength.color
+                          }}
+                        />
+                      </div>
+                      <div className="vet-strength-label">
+                        <span style={{ color: '#64748b' }}>Strength:</span>
+                        <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Field 6: Confirm Password */}
+                <div className="premium-input-group">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    placeholder=" "
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`premium-input ${touched.confirmPassword && errors.confirmPassword ? 'is-invalid' : ''}`}
+                    id="confirmPasswordInput"
+                  />
+                  <Lock size={18} className="premium-input-icon" />
+                  <label htmlFor="confirmPasswordInput" className="input-label-float">Confirm Password *</label>
+                  
+                  <div className="password-actions">
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      tabIndex="-1"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+
+                  {touched.confirmPassword && errors.confirmPassword && (
+                    <span className="vet-error-msg">{errors.confirmPassword}</span>
+                  )}
+                </div>
+
+                {/* Field 7: Selected Plan Dropdown */}
+                <div className="premium-input-group grid-col-span-2">
+                  <div className="premium-select-wrapper">
+                    <select
+                      value={selectedPlan}
+                      onChange={handlePlanChange}
+                      className="premium-select"
+                      id="planSelect"
+                    >
+                      <option value="free-trial">Free Trial (₹0 for 7 Days)</option>
+                      <option value="starter">Starter Plan (₹599 / month)</option>
+                      <option value="standard">Standard Plan (₹799 / month - Most Popular)</option>
+                      <option value="pro">Pro Plan (₹1,299 / month)</option>
+                    </select>
+                    <Sparkles size={18} className="premium-input-icon" />
+                    <label htmlFor="planSelect" className="input-label-float" style={{ transform: 'translateY(-8px) scale(0.8)', transformOrigin: 'left top', color: 'var(--primary-teal)', fontWeight: '700' }}>Selected Subscription Plan *</label>
+                    <span className="premium-select-arrow">▼</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading || !isFormValid()}
+                className="premium-submit-btn"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" /> Submitting...
+                  </>
+                ) : (
+                  <>
+                    <span>{currentPlanObj.btnText}</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Security Badges Row below button */}
+            <div className="trust-indicators">
+              <div className="trust-item">
+                <ShieldCheck size={16} />
+                <span>SSL Secured</span>
+              </div>
+              <div className="trust-item">
+                <Shield size={16} />
+                <span>HIPAA Ready</span>
+              </div>
+            </div>
+
+            {/* Already have an account link footer */}
+            <div className="register-footer-redirect">
+              <p>
+                Already have an account?{' '}
+                <span
+                  onClick={() => navigate('/login')}
+                  className="register-link-btn"
+                >
+                  Login here
+                </span>
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      {/* Onboarding Success Modal Overlay */}
       {showSuccessModal && successData && (
         <div className="vet-onboarding-modal-backdrop">
           <div className="vet-onboarding-container">
             {/* Top Light Ambient Glow */}
             <div className="vet-onboarding-glow-bg" />
 
-            {/* 1. Onboarding Progress Steps Bar */}
+            {/* Onboarding Progress Steps Bar */}
             <div className="vet-steps-bar">
               <div className="vet-steps-line">
                 <div className="vet-steps-line-progress" />
@@ -662,7 +720,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* 2. Hero Onboarding Header */}
+            {/* Hero Onboarding Header */}
             <div className="vet-onboarding-hero">
               <div className="vet-onboarding-badge-icon">
                 <Sparkles size={38} />
@@ -676,7 +734,7 @@ export default function Register() {
               </p>
             </div>
 
-            {/* 3. Workspace Details Card with One-Click Copy Buttons */}
+            {/* Workspace Details Card with One-Click Copy Buttons */}
             <div className="vet-workspace-card">
               <div className="vet-workspace-card-header">
                 <span className="vet-workspace-card-title">
@@ -749,7 +807,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* 4. "What's Next?" Onboarding Checklist Cards Grid */}
+            {/* "What's Next?" Onboarding Checklist Cards Grid */}
             <div className="vet-next-section">
               <h3 className="vet-next-title">
                 <Sparkles size={18} style={{ color: '#14b8a6' }} /> What's Next? Recommended Steps
@@ -802,7 +860,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* 5. Primary Actions CTAs */}
+            {/* Primary Actions CTAs */}
             <div className="vet-onboarding-actions">
               <button
                 className="vet-btn-portal-primary"
@@ -836,7 +894,7 @@ export default function Register() {
               </button>
             </div>
 
-            {/* 6. Security & Trust Badges */}
+            {/* Security & Trust Badges */}
             <div className="vet-trust-bar">
               <div className="vet-trust-badges">
                 <span className="vet-trust-badge-item">
@@ -859,9 +917,11 @@ export default function Register() {
                 </a>
               </div>
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   );
 }

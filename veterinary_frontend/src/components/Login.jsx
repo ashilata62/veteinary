@@ -21,6 +21,52 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   const [transitionOut, setTransitionOut] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Stats count-up animation states
+  const [uptimeVal, setUptimeVal] = useState(80.0);
+  const [petsVal, setPetsVal] = useState(0);
+  const [encryptionVal, setEncryptionVal] = useState(0);
+
+  useEffect(() => {
+    // Animate Uptime (80.0 to 99.9)
+    const uptimeInterval = setInterval(() => {
+      setUptimeVal(prev => {
+        if (prev >= 99.9) {
+          clearInterval(uptimeInterval);
+          return 99.9;
+        }
+        return parseFloat((prev + 0.9).toFixed(1));
+      });
+    }, 45);
+
+    // Animate Pets (0 to 15)
+    const petsInterval = setInterval(() => {
+      setPetsVal(prev => {
+        if (prev >= 15) {
+          clearInterval(petsInterval);
+          return 15;
+        }
+        return prev + 1;
+      });
+    }, 60);
+
+    // Animate Encryption (0 to 256)
+    const encInterval = setInterval(() => {
+      setEncryptionVal(prev => {
+        if (prev >= 256) {
+          clearInterval(encInterval);
+          return 256;
+        }
+        return prev + 16;
+      });
+    }, 40);
+
+    return () => {
+      clearInterval(uptimeInterval);
+      clearInterval(petsInterval);
+      clearInterval(encInterval);
+    };
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.getModifierState) {
@@ -101,16 +147,25 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   const selectDemoUser = (role, demoEmail) => {
     setActiveRole(role);
     setEmail(demoEmail);
-    setPassword('');
+    setPassword('password123');
     setError('');
   };
+
+  const activeIndex = Math.max(0, demoUsers.findIndex(u => u.role === activeRole));
+  const colIndex = activeIndex % 3;
+  const rowIndex = Math.floor(activeIndex / 3);
 
   return (
     <div className={`login-premium-page ${transitionOut ? 'page-transition-out' : ''}`}>
       {/* Background Container */}
       <div className="login-bg-container">
         <div className="login-bg-image"></div>
-        <div className="login-overlay-grad"></div>
+        <div className="login-bg-blobs">
+          <div className="bg-blob b1"></div>
+          <div className="bg-blob b2"></div>
+          <div className="bg-blob b3"></div>
+        </div>
+        <div className="login-bg-pattern"></div>
       </div>
 
       <div className="login-premium-layout">
@@ -155,6 +210,22 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
               <span>Reports</span>
             </div>
           </div>
+
+          {/* Floating Stats */}
+          <div className="floating-stats-container">
+            <div className="glass-stat-card c1">
+              <span className="stat-val">{uptimeVal}%</span>
+              <span className="stat-lbl">Uptime</span>
+            </div>
+            <div className="glass-stat-card c2">
+              <span className="stat-val">{petsVal}k+</span>
+              <span className="stat-lbl">Pets Managed</span>
+            </div>
+            <div className="glass-stat-card c3">
+              <span className="stat-val">{encryptionVal}-Bit</span>
+              <span className="stat-lbl">SSL Secured</span>
+            </div>
+          </div>
         </div>
 
         {/* Right Form Side */}
@@ -190,18 +261,26 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
             </div>
 
             <div className="role-chips">
+              <div 
+                className="active-tab-indicator"
+                style={{
+                  '--active-left': `calc(0.35rem + ${colIndex} * (100% - 0.7rem) / 3)`,
+                  '--active-top': `calc(0.35rem + ${rowIndex} * (100% - 0.7rem) / 2)`
+                }}
+              />
               {demoUsers.map(({ role, email: dEmail, icon: Icon }) => {
                 const isActive = activeRole === role;
                 const label = role === 'Receptionist' ? 'Reception' : role === 'Vet Assistant' ? 'Assistant' : role;
                 return (
-                  <div 
+                  <button 
                     key={role}
+                    type="button"
                     className={`role-chip ${isActive ? 'active' : ''}`}
                     onClick={() => selectDemoUser(role, dEmail)}
                   >
                     <Icon size={14} />
-                    {label}
-                  </div>
+                    <span>{label}</span>
+                  </button>
                 );
               })}
             </div>
@@ -247,10 +326,12 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
               >
                 {success ? (
                   <>
-                    <CheckCircle size={20} /> Success! Redirecting...
+                    <CheckCircle size={20} className="animate-bounce" /> Success! Redirecting...
                   </>
                 ) : loading ? (
-                  'Authenticating...'
+                  <>
+                    <div className="btn-spinner"></div> Authenticating...
+                  </>
                 ) : (
                   <>
                     Access Dashboard <ArrowRight size={18} className="btn-arrow" />

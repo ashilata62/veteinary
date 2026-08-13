@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Mail, Phone, Lock, Eye, EyeOff, Building2, User, Loader2 } from 'lucide-react';
+import { 
+  X, Mail, Phone, Lock, Eye, EyeOff, Building2, User, Loader2, 
+  ArrowLeft, ShieldCheck, CheckCircle2, Shield 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -42,13 +45,21 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
   const submit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    
+    // Validation Checks
+    if (!form.clinicName.trim()) { setErrorMessage('Clinic name is required'); return; }
+    if (!form.adminName.trim()) { setErrorMessage('Admin name is required'); return; }
+    if (!form.email.trim()) { setErrorMessage('Email address is required'); return; }
+    if (!form.mobile.trim()) { setErrorMessage('Mobile number is required'); return; }
+    if (!form.password) { setErrorMessage('Password is required'); return; }
     if (form.password !== form.confirmPassword) {
       setErrorMessage('Passwords do not match!'); return;
     }
+    
     setLoading(true);
     try {
       const res = await api.post('/api/auth/register', {
-        businessName: form.clinicName, // updated to match backend expectation
+        businessName: form.clinicName,
         adminName:  form.adminName,
         email:      form.email,
         mobile:     form.mobile,
@@ -133,213 +144,446 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
     }
   };
 
-  const inp = {
-    width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
-    color: '#f3f4f6', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box',
-    transition: 'border 0.2s',
-  };
-  const lbl = { fontSize: '0.82rem', fontWeight: '600', color: '#9ca3af', marginBottom: '5px', display: 'block' };
-  const grp = { marginBottom: '14px' };
-
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '16px', animation: 'fadeOverlay 0.2s ease'
-    }} onClick={onClose}>
-      <div style={{
-        background: 'linear-gradient(145deg, #111113, #0d0d0f)',
-        border: '1px solid rgba(20,184,166,0.2)',
-        borderRadius: '20px',
-        boxShadow: '0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(20,184,166,0.1)',
-        width: '100%', maxWidth: '480px',
-        padding: '32px 28px',
-        position: 'relative',
-        animation: 'slideUp 0.3s ease',
-        fontFamily: "'Inter', system-ui, sans-serif",
-        color: '#f3f4f6',
-      }} onClick={e => e.stopPropagation()}>
+    <div className="register-modal-overlay" onClick={onClose}>
+      <div className="register-modal-card" onClick={e => e.stopPropagation()}>
 
-        {/* Close */}
+        {/* Back to Home Button at Top Right */}
         {!paymentSuccess && (
-          <button onClick={onClose} style={{
-            position: 'absolute', top: '16px', right: '16px',
-            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '50%', width: '34px', height: '34px',
-            cursor: 'pointer', color: '#9ca3af', fontSize: '16px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.2s', zIndex: 10
-          }}>
-            <X size={18} />
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="register-modal-back-btn"
+            aria-label="Back to Home"
+          >
+            <ArrowLeft size={16} /> Back to Home
           </button>
         )}
 
         {paymentSuccess ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px', animation: 'slideUp 0.4s ease' }}>
-            <div style={{ fontSize: '4.5rem', marginBottom: '24px', animation: 'bounce 2s infinite' }}>🎉</div>
-            <h2 style={{ fontSize: '1.8rem', color: '#10b981', marginBottom: '12px', fontWeight: 'bold' }}>Welcome to VetCare Pro!</h2>
-            <p style={{ color: '#9ca3af', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '32px' }}>
+          <div style={{ textAlign: 'center', padding: '30px 10px', animation: 'slideUp 0.4s ease' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>🎉</div>
+            <h2 style={{ fontSize: '1.6rem', color: '#10b981', marginBottom: '10px', fontWeight: 'bold' }}>Welcome to VetCare Pro!</h2>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '24px' }}>
               Your payment was successful and your account is now active.<br/>
               Redirecting you to the login page...
             </p>
-            <Loader2 size={28} color="#10b981" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
+            <Loader2 size={24} color="#10b981" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: '24px', paddingRight: '20px' }}>
-              <span style={{ 
-                background: 'rgba(20,184,166,0.1)', color: '#14b8a6', padding: '6px 12px', 
-                borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' 
-              }}>
+            <div className="register-modal-heading-section">
+              <span className="register-modal-plan-badge">
                 {planObj.name} — {planObj.price} {planObj.cycle}
               </span>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 'bold', margin: '16px 0 8px 0', letterSpacing: '-0.5px' }}>
+              <h2 className="register-modal-heading">
                 Create Your Clinic Account
               </h2>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '6px' }}>
+              <p className="register-modal-subheading">
                 Quick 2-minute setup. Start managing your clinic instantly.
               </p>
             </div>
 
-        {/* Form */}
-        <form onSubmit={submit} noValidate>
-          {/* Clinic Name */}
-          <div style={grp}>
-            <label style={lbl}>Clinic / Business Name *</label>
-            <div style={{ position: 'relative' }}>
-              <Building2 size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-              <input name="clinicName" value={form.clinicName} onChange={handle} required
-                placeholder="Enter your clinic name"
-                style={{ ...inp, paddingLeft: '38px' }} />
-            </div>
-          </div>
-
-          {/* Admin Name */}
-          <div style={grp}>
-            <label style={lbl}>Admin Full Name *</label>
-            <div style={{ position: 'relative' }}>
-              <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-              <input name="adminName" value={form.adminName} onChange={handle} required
-                placeholder="Enter admin full name"
-                style={{ ...inp, paddingLeft: '38px' }} />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div style={grp}>
-            <label style={lbl}>Work Email *</label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-              <input name="email" type="email" value={form.email} onChange={handle} required
-                placeholder="admin@yourclinic.com"
-                style={{ ...inp, paddingLeft: '38px' }} />
-            </div>
-          </div>
-
-          {/* Mobile */}
-          <div style={grp}>
-            <label style={lbl}>Mobile Number *</label>
-            <div style={{ position: 'relative' }}>
-              <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-              <input name="mobile" type="tel" value={form.mobile} onChange={handle} required
-                placeholder="+91 98765 43210"
-                style={{ ...inp, paddingLeft: '38px' }} />
-            </div>
-          </div>
-
-          {/* Password row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-            <div style={grp}>
-              <label style={lbl}>Password *</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} color="#6b7280" style={{ position: 'absolute', top: 12, left: 14 }} />
-                <input 
-                  type={showPass ? 'text' : 'password'} 
-                  name="password" 
-                  value={form.password}
-                  placeholder="Create strong password" 
-                  required 
-                  style={{...inp, paddingLeft: '40px'}} 
-                  onChange={handle}
-                  onFocus={() => setIsPasswordFocused(true)}
-                  onBlur={() => setIsPasswordFocused(false)}
-                />
-                <div onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', top: 12, right: 14, cursor: 'pointer', color: '#6b7280' }}>
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+            {/* Form - 2 Column Grid for Compact Layout */}
+            <form onSubmit={submit} noValidate className="register-modal-form-grid">
+              
+              {/* Clinic Name */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Clinic / Business Name *</label>
+                <div style={{ position: 'relative' }}>
+                  <Building2 size={16} className="register-modal-input-icon" />
+                  <input 
+                    name="clinicName" 
+                    value={form.clinicName} 
+                    onChange={handle} 
+                    required
+                    placeholder="Clinic name"
+                    className="register-modal-input" 
+                  />
                 </div>
               </div>
-              
-              {/* Password Strength Hint */}
+
+              {/* Admin Name */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Admin Full Name *</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={16} className="register-modal-input-icon" />
+                  <input 
+                    name="adminName" 
+                    value={form.adminName} 
+                    onChange={handle} 
+                    required
+                    placeholder="Admin full name"
+                    className="register-modal-input" 
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Work Email *</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={16} className="register-modal-input-icon" />
+                  <input 
+                    name="email" 
+                    type="email" 
+                    value={form.email} 
+                    onChange={handle} 
+                    required
+                    placeholder="admin@yourclinic.com"
+                    className="register-modal-input" 
+                  />
+                </div>
+              </div>
+
+              {/* Mobile */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Mobile Number *</label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={16} className="register-modal-input-icon" />
+                  <input 
+                    name="mobile" 
+                    type="tel" 
+                    value={form.mobile} 
+                    onChange={handle} 
+                    required
+                    placeholder="98765 43210"
+                    className="register-modal-input" 
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Password *</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={16} className="register-modal-input-icon" />
+                  <input 
+                    type={showPass ? 'text' : 'password'} 
+                    name="password" 
+                    value={form.password}
+                    placeholder="Create password" 
+                    required 
+                    className="register-modal-input"
+                    onChange={handle}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
+                  />
+                  <div onClick={() => setShowPass(!showPass)} className="register-modal-password-toggle">
+                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="register-modal-group">
+                <label className="register-modal-label">Confirm Password *</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={16} className="register-modal-input-icon" />
+                  <input 
+                    type={showConfirm ? 'text' : 'password'} 
+                    name="confirmPassword" 
+                    value={form.confirmPassword}
+                    placeholder="Confirm password" 
+                    required 
+                    className="register-modal-input"
+                    onChange={handle}
+                  />
+                  <div onClick={() => setShowConfirm(!showConfirm)} className="register-modal-password-toggle">
+                    {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Strength Hint - spans 2 columns */}
               {isPasswordFocused && (
-                <div style={{ 
-                  marginTop: '8px', padding: '10px', 
-                  background: 'rgba(59, 130, 246, 0.05)', 
-                  border: '1px solid rgba(59, 130, 246, 0.2)', 
-                  borderRadius: '8px', fontSize: '0.75rem', color: '#9ca3af' 
-                }}>
-                  <div style={{ color: '#60a5fa', fontWeight: 'bold', marginBottom: '4px' }}>Password must contain:</div>
-                  <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                    <li style={{ color: form.password?.length >= 8 ? '#10b981' : '#9ca3af' }}>At least 8 characters</li>
-                    <li style={{ color: /[A-Z]/.test(form.password) ? '#10b981' : '#9ca3af' }}>One uppercase letter (A-Z)</li>
-                    <li style={{ color: /[a-z]/.test(form.password) ? '#10b981' : '#9ca3af' }}>One lowercase letter (a-z)</li>
-                    <li style={{ color: /\d/.test(form.password) ? '#10b981' : '#9ca3af' }}>One number (0-9)</li>
-                    <li style={{ color: /[@$!%*?&]/.test(form.password) ? '#10b981' : '#9ca3af' }}>One special character (@$!%*?&)</li>
+                <div className="register-modal-strength-hint">
+                  <div style={{ color: '#0f766e', fontWeight: 'bold', marginBottom: '4px' }}>Password must contain:</div>
+                  <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                    <li style={{ color: form.password?.length >= 8 ? '#10b981' : '#64748b' }}>At least 8 characters</li>
+                    <li style={{ color: /[A-Z]/.test(form.password) ? '#10b981' : '#64748b' }}>One uppercase letter (A-Z)</li>
+                    <li style={{ color: /[a-z]/.test(form.password) ? '#10b981' : '#64748b' }}>One lowercase letter (a-z)</li>
+                    <li style={{ color: /\d/.test(form.password) ? '#10b981' : '#64748b' }}>One number (0-9)</li>
+                    <li style={{ color: /[@$!%*?&]/.test(form.password) ? '#10b981' : '#64748b' }}>One special character (@$!%*?&)</li>
                   </ul>
                 </div>
               )}
-            </div>
 
-            <div style={grp}>
-              <label style={lbl}>Confirm Password *</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} color="#6b7280" style={{ position: 'absolute', top: 12, left: 14 }} />
-                <input 
-                  type={showConfirm ? 'text' : 'password'} 
-                  name="confirmPassword" 
-                  value={form.confirmPassword}
-                  placeholder="Confirm password" 
-                  required 
-                  style={{...inp, paddingLeft: '40px'}} 
-                  onChange={handle}
-                />
-                <div onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', top: 12, right: 14, cursor: 'pointer', color: '#6b7280' }}>
-                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                </div>
-              </div>
-            </div>
-          </div>
+              {errorMessage && <div className="register-modal-error-msg">{errorMessage}</div>}
 
-          {errorMessage && <div style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '10px', textAlign: 'center' }}>{errorMessage}</div>}
-
-          {/* Submit */}
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{
-              width: '100%', padding: '14px', marginTop: '10px',
-              background: 'linear-gradient(135deg, #14b8a6, #0d9488)', border: 'none',
-              borderRadius: '10px', color: '#fff', fontSize: '1rem', fontWeight: 'bold',
-              cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              boxShadow: '0 4px 14px rgba(20, 184, 166, 0.4)'
-            }}
-          >
-            {loading ? <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Creating Account...</> : 'Create Account & Get Started →'}
-          </button>
-          </form>
-
-          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.85rem', color: '#6b7280' }}>
-            Already have an account? <span onClick={() => { onClose(); navigate('/login'); }} style={{ color: '#14b8a6', fontWeight: 'bold', cursor: 'pointer' }}>Login here</span>
-          </div>
+              {/* Submit - spans 2 columns */}
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="register-modal-submit-btn"
+              >
+                {loading ? <><Loader2 size={18} className="animate-spin" /> Creating Account...</> : <>Create Account & Get Started <span className="btn-arrow">→</span></>}
+              </button>
+            </form>
           </>
         )}
 
         <style>{`
+          .register-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(9, 13, 22, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeOverlay 0.2s ease;
+          }
+          
+          .register-modal-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            width: 100%;
+            max-width: 600px;
+            padding: 1.75rem 2rem;
+            position: relative;
+            animation: slideUp 0.3s ease;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #0f172a;
+            max-height: 90vh;
+            overflow-y: auto;
+          }
+
+          .register-modal-heading-section {
+            margin-bottom: 1.25rem;
+            padding-right: 120px;
+          }
+
+          .register-modal-back-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0f766e;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 10;
+            padding: 0;
+          }
+
+          .register-modal-back-btn:hover {
+            color: #0d9488;
+            transform: translateX(-3px);
+          }
+
+          .register-modal-plan-badge {
+            background: rgba(15, 118, 110, 0.08);
+            color: #0f766e;
+            padding: 4px 10px; 
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+          }
+
+          .register-modal-heading {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 8px 0 4px 0;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+          }
+
+          .register-modal-subheading {
+            color: #475569;
+            font-size: 0.825rem;
+            margin: 0;
+            font-weight: 500;
+          }
+
+          .register-modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+          }
+
+          .register-modal-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+          }
+
+          .register-modal-label {
+            font-size: 0.775rem;
+            font-weight: 700;
+            color: #475569;
+          }
+
+          .register-modal-input-icon {
+            position: absolute;
+            left: 0.95rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+            transition: color 0.2s;
+          }
+
+          .register-modal-input {
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1.5px solid rgba(226, 232, 240, 0.9);
+            border-radius: 12px;
+            padding: 0.65rem 1rem 0.65rem 2.6rem;
+            color: #0f172a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            outline: none;
+            height: 2.85rem;
+          }
+
+          .register-modal-input:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+            background: #ffffff;
+          }
+
+          .register-modal-input:focus + .register-modal-input-icon {
+            color: #0f766e;
+          }
+
+          .register-modal-password-toggle {
+            position: absolute;
+            right: 0.95rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+          }
+
+          .register-modal-password-toggle:hover {
+            color: #0f172a;
+          }
+
+          .register-modal-strength-hint {
+            grid-column: span 2;
+            margin-top: 4px;
+            padding: 8px;
+            background: rgba(15, 118, 110, 0.04);
+            border: 1px solid rgba(15, 118, 110, 0.15);
+            border-radius: 8px;
+            font-size: 0.7rem;
+            color: #475569;
+          }
+
+          .register-modal-error-msg {
+            grid-column: span 2;
+            color: #ef4444;
+            font-size: 0.775rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-align: center;
+          }
+
+          .register-modal-submit-btn {
+            grid-column: span 2;
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #2dd4bf 100%);
+            background-size: 200% auto;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            box-shadow: 0 8px 20px -5px rgba(15, 118, 110, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+          }
+
+          .register-modal-submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+              90deg,
+              transparent,
+              rgba(255, 255, 255, 0.25),
+              transparent
+            );
+            transition: 0.6s ease;
+          }
+
+          .register-modal-submit-btn:hover:not(:disabled)::before {
+            left: 100%;
+          }
+
+          .register-modal-submit-btn:hover:not(:disabled) {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -5px rgba(15, 118, 110, 0.4);
+          }
+
+          .register-modal-submit-btn .btn-arrow {
+            display: inline-block;
+            transition: transform 0.25s ease;
+          }
+
+          .register-modal-submit-btn:hover:not(:disabled) .btn-arrow {
+            transform: translateX(4px);
+          }
+
+          .register-modal-submit-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.7;
+          }
+
           @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
           @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+          @media (max-width: 600px) {
+            .register-modal-form-grid {
+              grid-template-columns: 1fr;
+            }
+            .register-modal-submit-btn,
+            .register-modal-strength-hint,
+            .register-modal-error-msg {
+              grid-column: span 1;
+            }
+            .register-modal-card {
+              padding: 1.5rem 1.25rem;
+            }
+            .register-modal-heading-section {
+              padding-right: 0;
+              margin-top: 1.5rem;
+            }
+          }
         `}</style>
       </div>
     </div>
