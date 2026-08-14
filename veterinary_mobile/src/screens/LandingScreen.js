@@ -569,6 +569,33 @@ export default function LandingScreen({ navigation }) {
                 <Text style={styles.btnPlanText}>Get Started</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Plan 5: Custom */}
+            <View style={styles.pricingCard}>
+              <View style={[styles.popularPill, { backgroundColor: '#7c3aed' }]}>
+                <Text style={styles.popularPillText}>ENTERPRISE</Text>
+              </View>
+              <Text style={[styles.planTitle, { color: '#8b5cf6' }]}>Custom Plan</Text>
+              <View style={styles.priceRow}>
+                <Text style={[styles.priceAmount, { color: '#8b5cf6' }]}>Custom</Text>
+                <Text style={styles.pricePeriod}> pricing</Text>
+              </View>
+              <Text style={{ fontSize: 13, color: darkTheme.textSecondary, marginBottom: 10 }}>
+                Tailored to your clinic's specific needs.
+              </Text>
+              <View style={styles.planChecklist}>
+                <Text style={styles.planCheckItem}>✓ SaaS with full customization</Text>
+                <Text style={styles.planCheckItem}>✓ Personal domain & branding</Text>
+                <Text style={styles.planCheckItem}>✓ 🤖 AI & automation features</Text>
+                <Text style={styles.planCheckItem}>✓ Dedicated account manager</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.btnPlan, { backgroundColor: '#7c3aed' }]}
+                onPress={() => navigation.navigate('Register', { plan: 'custom' })}
+              >
+                <Text style={styles.btnPlanText}>Get Started</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -642,6 +669,22 @@ export default function LandingScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
+          {/* Social Links Row */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={[styles.socialIcon, { backgroundColor: '#c13584' }]} onPress={() => Linking.openURL('https://www.instagram.com/kiaan_technology4/')}>
+              <Ionicons name="logo-instagram" size={18} color="#ffffff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.socialIcon, { backgroundColor: '#1877f2' }]} onPress={() => Linking.openURL('https://www.facebook.com/profile.php?id=61560965313920&mibextid=ZbWKwL')}>
+              <Ionicons name="logo-facebook" size={18} color="#ffffff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.socialIcon, { backgroundColor: '#0a66c2' }]} onPress={() => Linking.openURL('https://www.linkedin.com/company/kiaan-technology-pvt-ltd/posts/?feedView=all')}>
+              <Ionicons name="logo-linkedin" size={18} color="#ffffff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.socialIcon, { backgroundColor: '#14b8a6' }]} onPress={() => Linking.openURL('https://kiaantechnology.com/')}>
+              <Ionicons name="globe-outline" size={18} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
+
           {/* Bottom Policy Links */}
           <View style={styles.footerBottomLinks}>
             <TouchableOpacity onPress={() => showInfoAlert('Privacy Policy', 'VetCare Pro protects clinic & patient health data with enterprise grade 256-bit encryption.')}>
@@ -662,6 +705,15 @@ export default function LandingScreen({ navigation }) {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Floating WhatsApp Button */}
+      <TouchableOpacity
+        style={styles.whatsappFloat}
+        onPress={() => Linking.openURL('https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20VetCare%20Pro%20SaaS%20solution.')}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="logo-whatsapp" size={30} color="#ffffff" />
+      </TouchableOpacity>
 
       {/* MOBILE NAVIGATION DRAWER MODAL */}
       <Modal visible={drawerOpen} transparent animationType="slide">
@@ -1376,5 +1428,41 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  whatsappFloat: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#25D366',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#25D366',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  socialIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });

@@ -198,7 +198,10 @@ export default function SuperAdminTicketsScreen() {
                       ]}
                     >
                       <Text style={styles.chatSender}>{item.sender} • {item.time}</Text>
-                      <Text style={{ color: '#ffffff', fontSize: 13 }}>{item.text}</Text>
+                      <Text style={[
+                        { fontSize: 13 },
+                        item.isUser ? { color: darkTheme.textPrimary } : { color: '#ffffff' }
+                      ]}>{item.text}</Text>
                     </View>
                   )}
                 />
@@ -402,7 +405,7 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
   chatBubbleUser: {
-    backgroundColor: '#1e2d54',
+    backgroundColor: '#e2e8f0',
     alignSelf: 'flex-start',
   },
   chatBubbleSelf: {
@@ -427,8 +430,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 42,
     fontSize: 13,
-    color: '#ffffff',
-    backgroundColor: '#0b1329',
+    color: darkTheme.textPrimary,
+    backgroundColor: '#f1f5f9',
   },
   btnSend: {
     backgroundColor: darkTheme.primary,

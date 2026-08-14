@@ -25,7 +25,7 @@ const lightTheme = {
   danger: '#ef4444',
 };
 
-export default function SuperAdminDashboardScreen() {
+export default function SuperAdminDashboardScreen({ navigation }) {
   const { logout } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
@@ -175,6 +175,33 @@ export default function SuperAdminDashboardScreen() {
             </View>
           </View>
         ))}
+
+        {/* Quick Access to New Screens */}
+        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Quick Access</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+          {[
+            { label: 'Plans', icon: 'pricetag-outline', screen: 'SuperPlans', color: '#14b8a6' },
+            { label: 'Reports', icon: 'bar-chart-outline', screen: 'SuperReports', color: '#3b82f6' },
+            { label: 'Subscriptions', icon: 'refresh-circle-outline', screen: 'SuperSubscriptions', color: '#8b5cf6' },
+            { label: 'Notifications', icon: 'notifications-outline', screen: 'SuperNotifications', color: '#f59e0b' },
+          ].map((item) => (
+            <TouchableOpacity
+              key={item.screen}
+              style={{
+                width: '47%', backgroundColor: '#ffffff', borderRadius: 14,
+                padding: 16, borderWidth: 1, borderColor: '#e2e8f0',
+                flexDirection: 'row', alignItems: 'center', gap: 10,
+                elevation: 2,
+              }}
+              onPress={() => navigation.navigate(item.screen)}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: item.color + '20', justifyContent: 'center', alignItems: 'center' }}>
+                <Ionicons name={item.icon} size={20} color={item.color} />
+              </View>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#0f172a', flex: 1 }}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </View>
   );

@@ -35,6 +35,7 @@ import AttendanceScreen from '../screens/AttendanceScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import SupportScreen from '../screens/SupportScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 import SuperAdminNavigator from './SuperAdminNavigator';
 
@@ -157,6 +158,7 @@ function MainStackNavigator() {
       <MainStack.Screen name="Notifications" component={NotificationsScreen} />
       <MainStack.Screen name="Support" component={SupportScreen} />
       <MainStack.Screen name="Profile" component={ProfileScreen} />
+      <MainStack.Screen name="Settings" component={SettingsScreen} />
     </MainStack.Navigator>
   );
 }

@@ -47,9 +47,10 @@ export default function RoleMenuScreen({ navigation }) {
     { id: 'StaffManagement', label: 'Staff Management', icon: 'person-add-outline', roles: ['Admin'] },
     { id: 'Attendance', label: 'Attendance', icon: 'time-outline', roles: ['Admin', 'Manager'] },
     { id: 'Reports', label: 'Reports & Analytics', icon: 'stats-chart-outline', roles: ['Admin', 'Manager'] },
-    { id: 'Profile', label: activeRole !== 'Admin' ? 'Profile Settings' : 'Settings', icon: 'settings-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'Support', label: 'Support', icon: 'headset-outline', roles: ['Admin'] },
     { id: 'Notifications', label: 'Notifications', icon: 'notifications-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'Settings', label: 'Settings', icon: 'settings-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'Profile', label: 'My Profile', icon: 'person-circle-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'Support', label: 'Support', icon: 'headset-outline', roles: ['Admin'] },
   ];
 
   const getRoleColor = (roleName) => {

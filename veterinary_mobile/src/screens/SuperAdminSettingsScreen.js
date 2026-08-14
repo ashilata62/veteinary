@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: darkTheme.textPrimary,
     marginBottom: 12,
   },
   label: {
@@ -256,8 +256,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 44,
     fontSize: 14,
-    color: '#ffffff',
-    backgroundColor: '#0b1329',
+    color: darkTheme.textPrimary,
+    backgroundColor: '#f1f5f9',
   },
   switchRow: {
     flexDirection: 'row',
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   switchTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: darkTheme.textPrimary,
   },
   switchSub: {
     fontSize: 12,

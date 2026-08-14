@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from 'expo-local-authentication';
 import api from '../config/api';
 
 export const AuthContext = createContext();
@@ -8,21 +10,60 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const [biometricType, setBiometricType] = useState('Fingerprint'); // 'Fingerprint', 'FaceID', 'Iris'
 
   useEffect(() => {
     loadStoredAuth();
+    checkBiometricHardware();
   }, []);
+
+  const checkBiometricHardware = async () => {
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const supported = hasHardware && isEnrolled;
+      setIsBiometricSupported(supported);
+
+      if (supported) {
+        const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+        if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+          setBiometricType('FaceID');
+        } else {
+          setBiometricType('Fingerprint');
+        }
+        
+        const enabledSetting = await AsyncStorage.getItem('vetcare_biometrics_enabled');
+        setIsBiometricEnabled(enabledSetting === 'true');
+      }
+    } catch (e) {
+      console.warn('Error checking biometric hardware:', e);
+    }
+  };
 
   const loadStoredAuth = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('@vetcare_token');
-      const storedUser = await AsyncStorage.getItem('@vetcare_user');
+      // Securely load token, load user object from normal async storage
+      const storedToken = await SecureStore.getItemAsync('vetcare_token');
+      const storedUser = await AsyncStorage.getItem('vetcare_user');
+      
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
       }
     } catch (e) {
-      console.error('Failed to load auth state:', e);
+      // Fallback to AsyncStorage if SecureStore fails
+      try {
+        const storedToken = await AsyncStorage.getItem('vetcare_token');
+        const storedUser = await AsyncStorage.getItem('vetcare_user');
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (innerErr) {
+        console.error('Failed to load auth state:', innerErr);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +114,10 @@ export const AuthProvider = ({ children }) => {
       const jwtToken = payload.token || response.data?.token;
       const userData = payload.user || response.data?.user;
 
+      if (!jwtToken) {
+        return { success: false, error: 'Invalid credentials. Please check your email and password.' };
+      }
+
       const detectedRole = detectRole(email, userData?.role);
       const userObj = userData ? { ...userData, role: detectedRole } : {
         email,
@@ -80,14 +125,25 @@ export const AuthProvider = ({ children }) => {
         role: detectedRole,
       };
       
-      await AsyncStorage.setItem('@vetcare_token', jwtToken || 'demo-jwt-token');
-      await AsyncStorage.setItem('@vetcare_user', JSON.stringify(userObj));
+      // Save token securely (keys must be alphanumeric + . - _ only)
+      await SecureStore.setItemAsync('vetcare_token', jwtToken);
+      await AsyncStorage.setItem('vetcare_user', JSON.stringify(userObj));
 
-      setToken(jwtToken || 'demo-jwt-token');
+      setToken(jwtToken);
       setUser(userObj);
       return { success: true };
     } catch (error) {
-      // Fallback demo login for offline/testing
+      // If it's a 401/403 auth error, surface it to the user — do NOT auto-fallback
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        return { success: false, error: 'Invalid email or password. Please try again.' };
+      }
+      if (status === 404) {
+        return { success: false, error: 'Account not found. Please check your email.' };
+      }
+
+      // Network error / backend offline → use demo fallback
+      console.warn('[AuthContext] Backend offline or network error. Using demo fallback.', error?.message);
       const detectedRole = detectRole(email, null);
       const mockUser = {
         id: 1,
@@ -98,8 +154,8 @@ export const AuthProvider = ({ children }) => {
       };
       const mockToken = 'mock-vetcare-jwt-token';
 
-      await AsyncStorage.setItem('@vetcare_token', mockToken);
-      await AsyncStorage.setItem('@vetcare_user', JSON.stringify(mockUser));
+      await SecureStore.setItemAsync('vetcare_token', mockToken);
+      await AsyncStorage.setItem('vetcare_user', JSON.stringify(mockUser));
 
       setToken(mockToken);
       setUser(mockUser);
@@ -107,14 +163,65 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const authenticateWithBiometrics = async () => {
+    try {
+      if (!isBiometricSupported) {
+        return { success: false, error: 'Biometrics not supported or enrolled on this device.' };
+      }
+
+      // Check if we have a saved token
+      const storedToken = await SecureStore.getItemAsync('vetcare_token');
+      const storedUserStr = await AsyncStorage.getItem('vetcare_user');
+      
+      if (!storedToken || !storedUserStr) {
+        return { success: false, error: 'No credentials saved. Please log in with password first.' };
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: `Authenticate with ${biometricType === 'FaceID' ? 'Face ID' : 'Fingerprint'}`,
+        fallbackLabel: 'Use PIN/Password',
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) {
+        const storedUser = JSON.parse(storedUserStr);
+        setToken(storedToken);
+        setUser(storedUser);
+        return { success: true };
+      }
+
+      return { success: false, error: 'Authentication failed.' };
+    } catch (e) {
+      console.error('Biometric authentication error:', e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  const setBiometricPreference = async (enabled) => {
+    try {
+      await AsyncStorage.setItem('vetcare_biometrics_enabled', enabled ? 'true' : 'false');
+      setIsBiometricEnabled(enabled);
+    } catch (e) {
+      console.error('Failed to save biometric preference:', e);
+    }
+  };
+
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('@vetcare_token');
-      await AsyncStorage.removeItem('@vetcare_user');
+      await SecureStore.deleteItemAsync('vetcare_token');
+      await AsyncStorage.removeItem('vetcare_user');
       setToken(null);
       setUser(null);
     } catch (e) {
-      console.error('Logout error:', e);
+      // Fallback
+      try {
+        await AsyncStorage.removeItem('vetcare_token');
+        await AsyncStorage.removeItem('vetcare_user');
+        setToken(null);
+        setUser(null);
+      } catch (innerErr) {
+        console.error('Logout error:', innerErr);
+      }
     }
   };
 
@@ -124,7 +231,12 @@ export const AuthProvider = ({ children }) => {
         user,
         token,
         isLoading,
+        isBiometricSupported,
+        isBiometricEnabled,
+        biometricType,
         login,
+        authenticateWithBiometrics,
+        setBiometricPreference,
         logout,
         isAuthenticated: !!token,
       }}

@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "vetcarepro",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -13,10 +14,23 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kiaan.vetcarepro"
+      "bundleIdentifier": "com.kiaan.vetcarepro",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires camera access to capture pet photos, medical document scans, and invoices.",
+        "NSPhotoLibraryUsageDescription": "This app requires photo library access to upload pet photos and invoice files.",
+        "NSFaceIDUsageDescription": "This app requires Face ID permission to authenticate users securely using biometrics."
+      }
     },
     "android": {
       "package": "com.kiaan.vetcarepro",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0b1329",
         "foregroundImage": "./assets/android-icon-foreground.png"
@@ -24,6 +38,27 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to upload pet profiles and invoice scans.",
+          "cameraPermission": "The app needs access to your camera to capture pet photos and invoice scans."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow VetCare Pro to use Face ID for fast login."
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1d7108e1-0339-4b02-b470-d836b5b250c1"
+      }
     }
   }
 }

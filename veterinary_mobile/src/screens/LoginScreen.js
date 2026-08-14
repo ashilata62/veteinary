@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,8 +13,26 @@ import {
   Image,
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
-import { colors } from '../theme/colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
+// LoginScreen uses web-style premium glassmorphic colors (light card on dark teal/blue background)
+const colors = {
+  background: '#090d16',      // Deep space dark blue (web bg)
+  surface: 'rgba(255, 255, 255, 0.92)', // Premium glassmorphic white card
+  card: 'rgba(255, 255, 255, 0.92)',
+  primary: '#0f766e',        // Web Teal
+  primaryDark: '#042f2e',    // Deep Teal bg
+  primaryLight: '#ccfbf1',   // Soft teal for badges/biometric
+  textPrimary: '#0f172a',    // Dark slate text inside card
+  textSecondary: '#475569',  // Slate gray
+  textMuted: '#64748b',      // Muted label slate
+  border: '#e2e8f0',         // Soft light border
+  divider: '#e2e8f0',
+  danger: '#dc2626',
+  dangerLight: '#fee2e2',
+  success: '#16a34a',
+  warning: '#d97706',
+};
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('doctor@vetcare.com');
@@ -22,19 +40,74 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const { login } = useContext(AuthContext);
+  const { 
+    login, 
+    authenticateWithBiometrics, 
+    isBiometricSupported, 
+    isBiometricEnabled, 
+    biometricType 
+  } = useContext(AuthContext);
+
+  useEffect(() => {
+    // Auto-prompt biometrics if enabled on startup
+    const autoBiometric = async () => {
+      if (isBiometricSupported && isBiometricEnabled) {
+        setTimeout(async () => {
+          const res = await authenticateWithBiometrics();
+          if (res.success) {
+            console.log('[LoginScreen] Auto-biometric authentication successful.');
+          }
+        }, 1000);
+      }
+    };
+    autoBiometric();
+  }, [isBiometricSupported, isBiometricEnabled]);
 
   const handleLogin = async () => {
     if (!email || !password) {
       setErrorMsg('Please enter email and password');
       return;
     }
+    
+    // Validation Rules matching web validations
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setErrorMsg('Invalid email format (e.g. user@example.com)');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters');
+      return;
+    }
+
     setErrorMsg('');
     setLoading(true);
     try {
-      await login(email, password);
+      const res = await login(email.trim(), password);
+      if (!res.success) {
+        // Show error from backend (wrong password, account not found, etc.)
+        setErrorMsg(res.error || 'Login failed. Please check your credentials.');
+      } else if (res.isDemo) {
+        console.log('[LoginScreen] Backend offline. Logged in with demo fallback credentials.');
+      }
     } catch (err) {
       setErrorMsg('Login failed. Please check credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      const res = await authenticateWithBiometrics();
+      if (!res.success) {
+        setErrorMsg(res.error || 'Biometric authentication failed.');
+      }
+    } catch (err) {
+      setErrorMsg('Biometric authentication encountered an error.');
     } finally {
       setLoading(false);
     }
@@ -115,19 +188,36 @@ export default function LoginScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Login Button */}
-          <TouchableOpacity
-            style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.loginBtnText}>Sign In</Text>
+          {/* Login Action Row with Biometric Option */}
+          <View style={styles.loginActionsRow}>
+            <TouchableOpacity
+              style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.loginBtnText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+
+            {isBiometricSupported && (
+              <TouchableOpacity
+                style={styles.biometricBtn}
+                onPress={handleBiometricLogin}
+                activeOpacity={0.7}
+                disabled={loading}
+              >
+                <MaterialCommunityIcons 
+                  name={biometricType === 'FaceID' ? 'face-recognition' : 'fingerprint'} 
+                  size={28} 
+                  color={colors.primary} 
+                />
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
+          </View>
 
           {/* Demo Accounts Selector */}
           <View style={styles.demoSection}>
@@ -164,10 +254,10 @@ export default function LoginScreen({ navigation }) {
                 <Text style={styles.demoChipText}>Vet Assistant</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.demoChip, { backgroundColor: '#fef3c7' }]}
+                style={[styles.demoChip, { backgroundColor: '#f3e8ff', borderColor: '#c084fc', borderWidth: 1 }]}
                 onPress={() => setDemoUser('superadmin@vetcarepro.com')}
               >
-                <Text style={[styles.demoChipText, { color: '#b45309' }]}>Super Admin</Text>
+                <Text style={[styles.demoChipText, { color: '#7e22ce' }]}>Super Admin</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -186,8 +276,8 @@ export default function LoginScreen({ navigation }) {
               }}
               onPress={() => navigation.navigate('Landing')}
             >
-              <Ionicons name="home-outline" size={18} color={colors.primaryDark} />
-              <Text style={{ color: colors.primaryDark, fontSize: 13, fontWeight: 'bold' }}>Back to Home Page (Landing)</Text>
+              <Ionicons name="home-outline" size={18} color={colors.primary} />
+              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: 'bold' }}>Back to Home Page (Landing)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -227,7 +317,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -244,7 +334,7 @@ const styles = StyleSheet.create({
   },
   appTagline: {
     fontSize: 14,
-    color: colors.primaryLight,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   cardContainer: {
@@ -256,8 +346,10 @@ const styles = StyleSheet.create({
     elevation: 6,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   welcomeTitle: {
     fontSize: 22,
@@ -302,7 +394,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     height: 48,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#f1f5f9',
   },
   inputIcon: {
     marginRight: 10,
@@ -312,13 +404,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textPrimary,
   },
+  loginActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 10,
+  },
   loginBtn: {
+    flex: 1,
     backgroundColor: colors.primary,
     height: 52,
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
     elevation: 3,
   },
   loginBtnDisabled: {
@@ -328,6 +426,16 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  biometricBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight,
   },
   demoSection: {
     marginTop: 24,
@@ -354,7 +462,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   demoChipText: {
-    color: colors.primaryDark,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: '600',
   },

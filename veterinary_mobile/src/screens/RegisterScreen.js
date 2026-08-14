@@ -12,8 +12,10 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  Clipboard,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ExpoClipboard from 'expo-clipboard';
 import api from '../config/api';
 
 const darkTheme = {
@@ -90,6 +92,20 @@ const PLAN_SPECS = {
       'Priority 24/7 dedicated support',
     ],
   },
+  custom: {
+    key: 'custom',
+    name: 'Custom Plan',
+    price: 'Custom',
+    cycle: 'tailored pricing',
+    badge: 'Enterprise',
+    btnText: 'Request Custom Plan',
+    features: [
+      'SaaS with full customization',
+      'Personal domain & branding',
+      'AI & automation features',
+      'Dedicated account manager',
+    ],
+  },
 };
 
 export default function RegisterScreen({ navigation, route }) {
@@ -119,6 +135,17 @@ export default function RegisterScreen({ navigation, route }) {
   // Success Modal State
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successData, setSuccessData] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
+
+  const copyToClipboard = async (text, fieldName) => {
+    try {
+      await ExpoClipboard.setStringAsync(String(text));
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch {
+      Alert.alert('Copied', String(text));
+    }
+  };
 
   const getPasswordStrength = (pass) => {
     if (!pass) return { score: 0, label: 'None', color: darkTheme.textMuted, percent: '0%' };
@@ -486,17 +513,50 @@ export default function RegisterScreen({ navigation, route }) {
                 <Text style={styles.credKey}>Admin Name:</Text>
                 <Text style={styles.credVal}>{successData?.adminName}</Text>
               </View>
+
+              {/* Copyable: Email */}
               <View style={styles.credRow}>
                 <Text style={styles.credKey}>Email / Username:</Text>
-                <Text style={styles.credVal}>{successData?.email}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Text style={[styles.credVal, { flex: 1 }]}>{successData?.email}</Text>
+                  <TouchableOpacity onPress={() => copyToClipboard(successData?.email, 'email')}>
+                    <Ionicons
+                      name={copiedField === 'email' ? 'checkmark-circle' : 'copy-outline'}
+                      size={18}
+                      color={copiedField === 'email' ? darkTheme.success : darkTheme.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
+
+              {/* Copyable: Admin ID */}
               <View style={styles.credRow}>
                 <Text style={styles.credKey}>Admin ID:</Text>
-                <Text style={[styles.credVal, { color: darkTheme.primary, fontWeight: 'bold' }]}>{successData?.adminId}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Text style={[styles.credVal, { color: darkTheme.primary, fontWeight: 'bold', flex: 1 }]}>{successData?.adminId}</Text>
+                  <TouchableOpacity onPress={() => copyToClipboard(successData?.adminId, 'adminId')}>
+                    <Ionicons
+                      name={copiedField === 'adminId' ? 'checkmark-circle' : 'copy-outline'}
+                      size={18}
+                      color={copiedField === 'adminId' ? darkTheme.success : darkTheme.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
+
+              {/* Copyable: Tenant ID */}
               <View style={styles.credRow}>
                 <Text style={styles.credKey}>Tenant ID:</Text>
-                <Text style={[styles.credVal, { fontSize: 11, color: darkTheme.textSecondary }]}>{successData?.tenantId}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Text style={[styles.credVal, { fontSize: 11, color: darkTheme.textSecondary, flex: 1 }]}>{successData?.tenantId}</Text>
+                  <TouchableOpacity onPress={() => copyToClipboard(successData?.tenantId, 'tenantId')}>
+                    <Ionicons
+                      name={copiedField === 'tenantId' ? 'checkmark-circle' : 'copy-outline'}
+                      size={18}
+                      color={copiedField === 'tenantId' ? darkTheme.success : darkTheme.primary}
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 

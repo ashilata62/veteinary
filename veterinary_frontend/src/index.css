@@ -255,6 +255,11 @@ a {
   color: var(--secondary-blue);
 }
 
+.badge-secondary {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
 /* Modern Inputs & Forms */
 .form-group {
   margin-bottom: 1.25rem;

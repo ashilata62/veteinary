@@ -24,6 +24,7 @@ export default function PetOwnersScreen({ navigation }) {
   // Add Modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [name, setName] = useState('');
+  const [nic, setNic] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
@@ -50,22 +51,23 @@ export default function PetOwnersScreen({ navigation }) {
     const term = search.toLowerCase();
     return (
       (o.name || '').toLowerCase().includes(term) ||
-      (o.phone || '').toLowerCase().includes(term) ||
+      (o.mobile || o.phone || '').toLowerCase().includes(term) ||
       (o.email || '').toLowerCase().includes(term)
     );
   });
 
   const handleAddOwner = async () => {
-    if (!name || !phone) {
-      Alert.alert('Required Fields', 'Please enter owner name and phone number.');
+    if (!name.trim() || !nic.trim() || !phone.trim()) {
+      Alert.alert('Required Fields', 'Please enter owner name, NIC, and phone number.');
       return;
     }
     setSubmitting(true);
     try {
-      await api.post('/owners', { name, phone, email, address });
+      await api.post('/owners', { name, nic, mobile: phone, email, address });
       Alert.alert('Success', 'Pet Owner added successfully!');
       setShowAddModal(false);
       setName('');
+      setNic('');
       setPhone('');
       setEmail('');
       setAddress('');
@@ -200,6 +202,14 @@ export default function PetOwnersScreen({ navigation }) {
               placeholderTextColor={colors.textMuted}
               value={name}
               onChangeText={setName}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="NIC / National Identity Card *"
+              placeholderTextColor={colors.textMuted}
+              value={nic}
+              onChangeText={setNic}
             />
 
             <TextInput

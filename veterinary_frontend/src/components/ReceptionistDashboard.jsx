@@ -2,6 +2,7 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, CreditCard, AlertCircle, ArrowRight, UserPlus, FilePlus, PackageSearch, LayoutDashboard, Clock, CheckCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PET_OWNERS } from '../data/mockData';
 
 export default function ReceptionistDashboard({ setCurrentTab, attendanceStatus }) {
   const [appointments, setAppointments] = useState([]);
