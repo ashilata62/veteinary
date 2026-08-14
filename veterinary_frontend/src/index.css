@@ -3182,9 +3182,19 @@ select.form-control {
   .page-header-actions button,
     .page-header-actions select,
     .page-header-actions a {
-    width: 100%;
-    justify-content: center;
-  }
+      width: 100%;
+      justify-content: center;
+    }
+
+    .page-header-actions > div {
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+    .page-header-actions input {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
 }
 
 /* 8. Recharts Parent Responsive Height Fix */
