@@ -4,7 +4,7 @@ import OfflineSyncService from '../services/OfflineSyncService';
 
 // ⚠️ Update this to your PC's actual IPv4 address (run `ipconfig` on Windows)
 // Your phone and PC must be on the SAME Wi-Fi network
-const LOCAL_PC_IP = '192.168.29.73';
+const LOCAL_PC_IP = '192.168.1.39';
 const DEV_API_URL = `http://${LOCAL_PC_IP}:5000/api/v1`;
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || DEV_API_URL;
