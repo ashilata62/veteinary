@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RegisterModal from './RegisterModal';
+import LegalModal from './LegalModal';
 import {
   PawPrint,
   CheckCircle,
@@ -35,6 +36,8 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('free-trial');
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalType, setLegalType] = useState('privacy');
 
   const handleAdminLogin = () => {
     navigate('/login');
@@ -72,6 +75,7 @@ export default function LandingPage() {
             <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>Testimonials</a></li>
             <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>Pricing</a></li>
             <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>Contact</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>Brochure</a></li>
           </ul>
 
           {/* Right Actions */}
@@ -113,6 +117,7 @@ export default function LandingPage() {
           <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Testimonials</a></li>
           <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Pricing</a></li>
           <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Contact</a></li>
+          <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontSize: '1.1rem', textDecoration: 'none', fontWeight: 'bold' }}>Brochure</a></li>
         </ul>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
@@ -373,7 +378,9 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="vet-testimonials-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2rem' }}>
+        <div className="vet-testimonials-slider-container">
+          <div className="vet-testimonials-track">
+          <div className="vet-testimonials-group">
           {/* Card 1 */}
           <div className="vet-testimonial-card">
             <div>
@@ -488,6 +495,125 @@ export default function LandingPage() {
               <Star size={16} fill="#f59e0b" color="#f59e0b" />
             </div>
           </div>
+          </div>
+          
+          <div className="vet-testimonials-group" aria-hidden="true">
+          {/* Card 1 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
+                <div>
+                  <div className="vet-user-name">truman42lewis</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 4 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text">
+                "Kiaan And His Team are truly professional and In honored to work with them. As the have delivered our agency a state of the ark software! Thank you 🙏🏼"
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
+                <div>
+                  <div className="vet-user-name">truman42lewis</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 5 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text">
+                "Kiaan and his team showed up and handled business. Excellent work, professional, and on point. I highly recommend them."
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#10b981' }}>H</div>
+                <div>
+                  <div className="vet-user-name">hansdjabs</div>
+                  <div className="vet-user-clinic">🇷🇼 Rwanda • 7 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text" style={{ fontSize: '0.9rem' }}>
+                "my experience working with this company is very great , i highly recommend everyone to work with this amazing team. because everything is smooth by working with them .. and they have expert in software development i can tell you .. whatever you have in mind they can build it with professionalism."
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#ef4444' }}>FH</div>
+                <div>
+                  <div className="vet-user-name">fahimhyder310</div>
+                  <div className="vet-user-clinic">🇮🇳 India • 5 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text" style={{ fontSize: '0.85rem' }}>
+                "They demonstrated strong command over both frontend and backend development, ensuring performance, security, and smooth functionality throughout the build. What stood out most was their deep understanding of the product vision. Their professionalism was consistent throughout the project. Milestones were delivered on time, communication was clear and structured, and they handled feedback with maturity and precision."
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+
+          {/* Card 5 */}
+          <div className="vet-testimonial-card">
+            <div>
+              <div className="vet-testimonial-user">
+                <div className="vet-author-avatar" style={{ background: '#65a30d' }}>P</div>
+                <div>
+                  <div className="vet-user-name">pop1010</div>
+                  <div className="vet-user-clinic">🇺🇸 United States • 3 months ago</div>
+                </div>
+              </div>
+              <p className="vet-testimonial-text">
+                "Best developer ever, always listening and make adjustments to every bugs snd response to messages every seconds"
+              </p>
+            </div>
+            <div className="vet-stars">
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+              <Star size={16} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+          </div>
+          </div>
         </div>
       </section>
 
@@ -513,8 +639,8 @@ export default function LandingPage() {
                 <span className="vet-plan-unit">per week</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 7 Days full feature trial access</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: 7 Days</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 7 Days full feature trial access</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: 7 Days</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
@@ -531,8 +657,8 @@ export default function LandingPage() {
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Essential clinic management features</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Essential clinic management features</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('starter')}>
@@ -541,17 +667,17 @@ export default function LandingPage() {
           </div>
 
           {/* Plan 3: Standard (Most Popular) */}
-          <div className="vet-price-card featured" style={{ borderColor: '#ea580c' }}>
+          <div className="vet-price-card featured" style={{ borderColor: '#14b8a6' }}>
             <div className="vet-popular-badge" style={{ backgroundColor: '#14b8a6' }}>Most Popular</div>
             <div>
-              <div className="vet-plan-name" style={{ color: '#ea580c' }}>Standard</div>
+              <div className="vet-plan-name" style={{ color: '#14b8a6' }}>Standard</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,299</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>₹1,299</span>
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Complete features for growing clinics</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Complete features for growing clinics</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
               </ul>
             </div>
             <button className="vet-btn-plan" style={{ backgroundColor: '#14b8a6', borderColor: '#14b8a6' }} onClick={() => handleRegister('standard')}>
@@ -564,13 +690,13 @@ export default function LandingPage() {
             <div>
               <div className="vet-plan-name">Pro</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,499</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>₹1,499</span>
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 🤖 Kiaan AI Assistant & AI Features</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Advanced features and priority support</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 🤖 Kiaan AI Assistant & AI Features</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Advanced features and priority support</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('pro')}>
@@ -583,14 +709,14 @@ export default function LandingPage() {
             <div>
               <div className="vet-plan-name">Custom Plan</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#ea580c' }}>Custom</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>Custom</span>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Tailored to your clinic</p>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> SaaS with customization</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Personal domain</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> Personal branding</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#ea580c' }} /> 🤖 AI and automation</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> SaaS with customization</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Personal domain</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Personal branding</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 🤖 AI and automation</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('custom')}>
@@ -672,18 +798,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Column 3: Software Modules */}
-            <div>
-              <h4 className="vet-footer-col-title">Software Modules</h4>
-              <ul className="vet-footer-links">
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Pet Medical Records</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Appointment Scheduling</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Pharmacy & Inventory</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Billing & POS Invoicing</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Home Visits & Encounters</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Reports & Analytics</a></li>
-              </ul>
-            </div>
+
 
             {/* Column 4: Contact */}
             <div>
@@ -708,9 +823,8 @@ export default function LandingPage() {
               © 2026 <strong>Kiaan Tech Craft</strong>. All rights reserved. Powered by <strong>Kiaan Technology</strong>.
             </div>
             <div className="vet-bottom-links">
-              <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
-              <a href="#terms" onClick={(e) => e.preventDefault()}>Terms & Conditions</a>
-              <a href="#docs" onClick={(e) => e.preventDefault()}>Documentation</a>
+              <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalType('privacy'); setShowLegalModal(true); }}>Privacy Policy</a>
+              <a href="#terms" onClick={(e) => { e.preventDefault(); setLegalType('terms'); setShowLegalModal(true); }}>Terms & Conditions</a>
             </div>
           </div>
         </div>
@@ -755,6 +869,10 @@ export default function LandingPage() {
 
       {showRegisterModal && (
         <RegisterModal plan={selectedPlan} onClose={() => setShowRegisterModal(false)} />
+      )}
+
+      {showLegalModal && (
+        <LegalModal type={legalType} onClose={() => setShowLegalModal(false)} />
       )}
     </div>
   );
