@@ -43,7 +43,7 @@ import api from './utils/api';
 const checkTrialExpired = () => {
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.role || user.isPaidPlan || user.subscription_status === 'active' || user.plan === 'paid') return false;
+    if (user.isPaidPlan || user.subscription_status === 'active' || user.plan === 'paid') return false;
     const trialEnd = user.trial_end_date || user.trialEndDate || user.trial_expires_at;
     if (!trialEnd) return false;
     return new Date(trialEnd) < new Date();
