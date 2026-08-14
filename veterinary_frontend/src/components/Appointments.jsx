@@ -455,7 +455,7 @@ export default function Appointments({ currentRole }) {
           </p>
         </div>
         {currentRole !== 'Doctor' && currentRole !== 'Vet Assistant' && (
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div className="page-header-actions">
             <button type="button" onClick={() => { setIsHomeVisit(true); setShowBookingModal(true); }} className="btn btn-secondary" style={{ flexShrink: 0 }}>
               <Plus size={16} /> Home Visit
             </button>
