@@ -438,7 +438,7 @@ export default function Inventory() {
       `}</style>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="page-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.025em', margin: 0 }}>
             Clinic Inventory Control
@@ -447,6 +447,7 @@ export default function Inventory() {
             Real-time batch tracking, stock level monitoring, and expiration alerts.
           </p>
         </div>
+        <div className="page-header-actions">
         <button 
           onClick={() => setShowAddForm(true)} 
           className="btn btn-primary" 
