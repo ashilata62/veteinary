@@ -22,6 +22,7 @@ app.use(helmet({
         },
     },
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
 }));
 
 // Rate limiting for auth routes

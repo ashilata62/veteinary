@@ -11,7 +11,7 @@ class HospitalizationService {
                 hc.pet_id,
                 p.name AS petName,
                 p.breed,
-                COALESCE(p.photo_url, p.photo, '') AS photo,
+                COALESCE(p.photo_url, '') AS photo,
                 hc.reason,
                 hc.check_in AS checkIn,
                 hc.flowsheet

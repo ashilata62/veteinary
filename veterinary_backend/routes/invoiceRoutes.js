@@ -15,8 +15,8 @@ router.use(protect);
 
 router.get('/', authorize('Admin', 'Manager', 'Receptionist', 'Doctor'), getInvoices);
 router.get('/unbilled', authorize('Admin', 'Manager', 'Receptionist', 'Doctor'), getUnbilled);
-router.get('/pet/:petId', authorize('Admin', 'Manager', 'Receptionist', 'Doctor'), getPetInvoices);
-router.get('/:id', authorize('Admin', 'Manager', 'Receptionist', 'Doctor'), getInvoice);
+router.get('/pet/:petId', authorize('Admin', 'Manager', 'Receptionist', 'Doctor', 'Vet Assistant'), getPetInvoices);
+router.get('/:id', authorize('Admin', 'Manager', 'Receptionist', 'Doctor', 'Vet Assistant'), getInvoice);
 router.post('/', authorize('Admin', 'Manager', 'Receptionist', 'Doctor'), createInvoice);
 router.put('/:id/status', authorize('Admin', 'Manager', 'Receptionist'), updateStatus);
 
