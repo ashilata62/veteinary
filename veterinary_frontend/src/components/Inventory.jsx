@@ -455,6 +455,7 @@ export default function Inventory() {
         >
           <Plus size={16} /> Add Product
         </button>
+        </div>
       </div>
 
       {/* Top KPI Cards (Interactive Filters) */}
