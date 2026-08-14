@@ -169,7 +169,7 @@ export default function SuperAdminPaymentsScreen() {
 
       <FlatList
         data={filteredPayments}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => (item.id ? `${item.id}-${index}` : index.toString())}
         renderItem={renderTx}
         contentContainerStyle={styles.listContainer}
       />

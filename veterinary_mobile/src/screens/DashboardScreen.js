@@ -23,12 +23,12 @@ export default function DashboardScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const [stats, setStats] = useState({
-    todayAppointments: 8,
-    activePatients: 42,
-    pendingInvoices: 3,
-    homeVisits: 2,
-    careTasks: 5,
-    dailyRevenue: '₹45,000',
+    todayAppointments: 0,
+    activePatients: 0,
+    pendingInvoices: 0,
+    homeVisits: 0,
+    careTasks: 0,
+    dailyRevenue: '₹0',
   });
 
   const [recentAppointments, setRecentAppointments] = useState([
@@ -40,14 +40,54 @@ export default function DashboardScreen({ navigation }) {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/appointments').catch(() => ({ data: [] }));
-      const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      if (list.length > 0) {
-        setRecentAppointments(list.slice(0, 5));
-        setStats((prev) => ({ ...prev, todayAppointments: list.length }));
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [aptsRes, petsRes, invoicesRes, visitsRes, tasksRes] = await Promise.all([
+        api.get('/appointments').catch(() => ({ data: [] })),
+        api.get('/pets').catch(() => ({ data: [] })),
+        api.get('/invoices').catch(() => ({ data: [] })),
+        api.get('/home-visits').catch(() => ({ data: [] })),
+        api.get('/assistance-tasks').catch(() => ({ data: [] })),
+      ]);
+
+      const aptsList = aptsRes.data?.data || aptsRes.data || [];
+      const petsList = petsRes.data?.data || petsRes.data || [];
+      const invoicesList = invoicesRes.data?.data || invoicesRes.data || [];
+      const visitsList = visitsRes.data?.data || visitsRes.data || [];
+      const tasksList = tasksRes.data?.data || tasksRes.data || [];
+
+      // Filter today's appointments
+      const todayApts = aptsList.filter(a => {
+        const adate = a.appointment_date ? a.appointment_date.split('T')[0] : '';
+        return adate === today;
+      });
+
+      // Filter pending invoices
+      const pendingInvoices = invoicesList.filter(inv => inv.status === 'Pending' || inv.status === 'Draft');
+
+      // Filter home visits scheduled for today
+      const todayVisits = visitsList.filter(v => {
+        const vdate = v.visit_date ? v.visit_date.split('T')[0] : '';
+        return vdate === today;
+      });
+
+      // Filter pending care tasks
+      const pendingTasks = tasksList.filter(t => t.status !== 'Completed');
+
+      if (aptsList.length > 0) {
+        setRecentAppointments(aptsList.slice(0, 5));
       }
+
+      setStats({
+        todayAppointments: todayApts.length || aptsList.filter(a => a.status !== 'Cancelled').length,
+        activePatients: petsList.length,
+        pendingInvoices: pendingInvoices.length,
+        homeVisits: todayVisits.length || visitsList.filter(v => v.visit_status !== 'Completed').length,
+        careTasks: pendingTasks.length,
+        dailyRevenue: '₹0',
+      });
     } catch (err) {
-      console.log('Using default dashboard dataset:', err.message);
+      console.log('Using fallback dashboard dataset:', err.message);
     } finally {
       setLoading(false);
       setRefreshing(false);

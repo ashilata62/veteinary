@@ -10,6 +10,7 @@ import { colors } from '../theme/colors';
 import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import BrochureScreen from '../screens/BrochureScreen';
 
 // Core Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -47,10 +48,11 @@ const MainStack = createNativeStackNavigator();
 
 function AuthStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
-      <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Landing">
       <Stack.Screen name="Landing" component={LandingScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Brochure" component={BrochureScreen} />
     </Stack.Navigator>
   );
 }

@@ -206,7 +206,7 @@ export default function SuperAdminClinicsScreen() {
 
       <FlatList
         data={filteredClinics}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => (item.id ? `${item.id}-${index}` : index.toString())}
         renderItem={renderClinicCard}
         contentContainerStyle={styles.listContainer}
       />

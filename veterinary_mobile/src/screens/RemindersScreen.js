@@ -17,21 +17,82 @@ export default function RemindersScreen({ navigation }) {
   const [reminders, setReminders] = useState([
     { id: '1', pet: 'Max (Golden Retriever)', owner: 'Rahul Sharma', phone: '+91 98765 11111', type: 'Annual Rabies Booster Due', date: '15 Aug 2026', status: 'Pending' },
     { id: '2', pet: 'Bella (Persian Cat)', owner: 'Neha Gupta', phone: '+91 98765 22222', type: 'Post-Surgery Follow Up Visit', date: '18 Aug 2026', status: 'Pending' },
-    { id: '3', pet: 'Rocky (Beagle)', owner: 'Karan Verma', phone: '+91 98765 33333', type: 'Deworming Second Dose', date: '20 Aug 2026', status: 'Sent' },
   ]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSendReminder = (id, pet, owner) => {
+  const fetchRemindersQueue = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/appointments/upcoming-reminders');
+      const list = res.data?.data || [];
+      if (Array.isArray(list)) {
+        const mapped = list.map(item => ({
+          id: String(item.id),
+          pet: `${item.petName} (${item.petBreed || 'Patient'})`,
+          owner: item.ownerName,
+          phone: item.ownerMobile || 'No phone',
+          email: item.ownerEmail || '',
+          type: item.notes || 'General Consultation Reminder',
+          date: item.appointment_date ? item.appointment_date.split('T')[0] : '',
+          time: item.appointment_time,
+          status: item.reminder_sent ? 'Sent' : 'Pending',
+          doctorName: item.doctorName || 'Veterinarian',
+        }));
+        setReminders(mapped);
+      }
+    } catch (e) {
+      console.log('Error loading reminders queue:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRemindersQueue();
+  }, []);
+
+  const handleSendReminder = (item) => {
+    let timeStr = item.time || '';
+    if (timeStr && timeStr.includes(':')) {
+        const [hour, minute] = timeStr.split(':');
+        const hr = parseInt(hour, 10);
+        const ampm = hr >= 12 ? 'PM' : 'AM';
+        const hr12 = hr % 12 || 12;
+        timeStr = `${hr12.toString().padStart(2, '0')}:${minute} ${ampm}`;
+    }
+
+    const defaultMessage = `Dear ${item.owner},
+
+This is a reminder that your pet ${item.pet} has an appointment for "${item.type}" with ${item.doctorName} at VetCare Pro.
+
+Scheduled Time: ${timeStr} on ${item.date}
+
+Please bring your pet on a leash or in a suitable carrier. If you need to reschedule or cancel, please contact us.
+
+Best regards,
+VetCare Pro Animal Hospital`;
+
     Alert.alert(
       'Send Automated Reminder',
-      `Trigger WhatsApp & Email reminder to ${owner} for ${pet}?`,
+      `Trigger WhatsApp & Email reminder to ${item.owner} for ${item.pet}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Send Now',
-          onPress: () => {
-            setReminders(prev => prev.map(r => r.id === id ? { ...r, status: 'Sent' } : r));
-            Alert.alert('Sent!', `Reminder notification dispatched successfully.`);
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await api.post(`/appointments/${item.id}/send-reminder`, {
+                messageBody: defaultMessage,
+                customRecipientEmail: item.email,
+              });
+              Alert.alert('Sent!', `Reminder notification dispatched successfully.`);
+              fetchRemindersQueue();
+            } catch (err) {
+              Alert.alert('Error', err?.response?.data?.message || 'Failed to dispatch reminder email.');
+            } finally {
+              setLoading(false);
+            }
           },
         },
       ]
@@ -58,7 +119,7 @@ export default function RemindersScreen({ navigation }) {
         <Text style={styles.dateText}>Due Date: {item.date}</Text>
 
         {!isSent ? (
-          <TouchableOpacity style={styles.btnSend} onPress={() => handleSendReminder(item.id, item.pet, item.owner)}>
+          <TouchableOpacity style={styles.btnSend} onPress={() => handleSendReminder(item)}>
             <Ionicons name="paper-plane-outline" size={16} color="#fff" />
             <Text style={styles.btnSendText}>Send Email & WhatsApp Alert</Text>
           </TouchableOpacity>
@@ -81,12 +142,18 @@ export default function RemindersScreen({ navigation }) {
         </View>
       </View>
 
-      <FlatList
-        data={reminders}
-        keyExtractor={item => item.id}
-        renderItem={renderCard}
-        contentContainerStyle={styles.listBody}
-      />
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={reminders}
+          keyExtractor={item => item.id}
+          renderItem={renderCard}
+          contentContainerStyle={styles.listBody}
+        />
+      )}
     </View>
   );
 }

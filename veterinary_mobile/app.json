@@ -53,12 +53,14 @@
           "faceIDPermission": "Allow VetCare Pro to use Face ID for fast login."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "extra": {
       "eas": {
         "projectId": "1d7108e1-0339-4b02-b470-d836b5b250c1"
       }
-    }
+    },
+    "owner": "akritikushwaha"
   }
 }
