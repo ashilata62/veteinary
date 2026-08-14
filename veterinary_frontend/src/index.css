@@ -3180,7 +3180,8 @@ select.form-control {
     width: 100%;
   }
   .page-header-actions button,
-  .page-header-actions a {
+    .page-header-actions select,
+    .page-header-actions a {
     width: 100%;
     justify-content: center;
   }
