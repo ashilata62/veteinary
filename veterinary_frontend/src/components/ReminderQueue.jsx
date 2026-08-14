@@ -142,8 +142,8 @@ No. 45, Temple Road, Colombo 07`;
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Mail size={28} style={{ color: 'var(--primary-teal)' }} /> Appointment Reminders Desk
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <Mail size={28} style={{ color: 'var(--primary-teal)', marginTop: '4px' }} /> Appointment Reminders Desk
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
             Review upcoming appointments for tomorrow and beyond, edit compiled notification templates, and dispatch reminder emails.
@@ -152,21 +152,8 @@ No. 45, Temple Road, Colombo 07`;
       </div>
 
       {/* Tabs and Search Selector */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
-          gap: '1rem',
-          backgroundColor: '#fff',
-          padding: '1rem',
-          borderRadius: '12px',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-sm)'
-        }}
-      >
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+      <div className="page-header-actions" style={{ backgroundColor: "#fff", padding: "1rem", borderRadius: "12px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+        <div className="page-header-actions" style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap", flex: 1, minWidth: 0 }}>
           {/* Search Input */}
           <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
             <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />

@@ -182,7 +182,7 @@ function AppointmentChart({ data = [] }) {
               onTouchStart={() => setHov(i)} onTouchEnd={() => setTimeout(() => setHov(null), 2000)}>
               {isHov && (
                 <div style={{ position: 'absolute', top: '100%', marginTop: '4px', zIndex: 20, backgroundColor: '#0f172a', color: '#fff', fontSize: '0.75rem', padding: '6px 12px', borderRadius: '6px', whiteSpace: 'nowrap', fontWeight: 600, boxShadow: '0 8px 16px rgba(0,0,0,0.2)', pointerEvents: 'none', transform: 'scale(1.05)' }}>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div className="page-header-actions" style={{ alignItems: "center" }}>
                     <span style={{ color: '#14b8a6' }}>✅ {item.completed}</span>
                     <span style={{ color: '#3b82f6' }}>📅 {item.upcoming}</span>
                     <span style={{ color: '#ef4444' }}>❌ {item.cancelled}</span>

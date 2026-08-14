@@ -281,8 +281,8 @@ export default function HomeVisits({ currentRole }) {
             Manage your scheduled off-site home visit appointments and consultations.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ textAlign: 'right', marginRight: '1rem' }}>
+        <div className="page-header-actions" style={{ alignItems: "center" }}>
+          <div style={{ textAlign: "right" }}>
             <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Fleet Status</span>
             <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--success)', fontWeight: 700 }}>Active</span>
           </div>

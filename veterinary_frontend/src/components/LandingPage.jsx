@@ -367,7 +367,7 @@ export default function LandingPage() {
       </section>
 
       {/* 5. TESTIMONIALS SECTION */}
-      <section id="testimonials" className="vet-section-container">
+      <section id="testimonials" className="vet-section-container" style={{ paddingBottom: "0.5rem" }}>
         <div className="vet-section-header">
           <div className="vet-badge"><Star size={14} fill="#f59e0b" color="#f59e0b" /> Testimonials</div>
           <h2 className="vet-section-title">
@@ -618,7 +618,7 @@ export default function LandingPage() {
       </section>
 
       {/* 6. PRICING SECTION (CRITICAL FOR SAAS) */}
-      <section id="pricing" className="vet-section-container">
+      <section id="pricing" className="vet-section-container" style={{ paddingTop: "0.5rem" }}>
         <div className="vet-section-header">
           <div className="vet-badge"><CreditCard size={14} /> Pricing Plans</div>
           <h2 className="vet-section-title">

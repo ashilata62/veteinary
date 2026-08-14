@@ -303,7 +303,7 @@ export default function Hospitalization() {
         </div>
         
         {/* Add Cage Dropdown & Button */}
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div className="page-header-actions" style={{ alignItems: "center" }}>
           <select 
             value={selectedTemplateId} 
             onChange={(e) => setSelectedTemplateId(e.target.value)}

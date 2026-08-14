@@ -27,20 +27,7 @@ export default function TrialBanner() {
   }
   
   return (
-    <div style={{
-      backgroundColor: '#fef3c7',
-      color: '#92400e',
-      padding: '8px 24px',
-      margin: '0 0 20px 0',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '12px',
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-      borderRadius: '4px'
-    }}>
+    <div className="trial-banner">
       <span style={{
         backgroundColor: '#f59e0b',
         color: '#ffffff',
