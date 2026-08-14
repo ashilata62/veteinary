@@ -103,7 +103,7 @@ export default function Notifications({ notifications: propNotifs, setNotificati
           <h1>Notifications</h1>
           <p>System alerts, appointment reminders, and activity feed.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div className="page-header-actions" style={{ alignItems: "center" }}>
           <button onClick={fetchNotifications} className="btn btn-secondary btn-sm" title="Refresh">
             <RefreshCw size={14} />
           </button>

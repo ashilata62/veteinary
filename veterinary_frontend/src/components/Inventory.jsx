@@ -641,7 +641,7 @@ export default function Inventory() {
               </div>
 
               {/* Right Side: Action Buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div className="page-header-actions" style={{ alignItems: "center" }}>
                 <button
                   type="button"
                   onClick={() => setShowFilterDrawer(!showFilterDrawer)}
