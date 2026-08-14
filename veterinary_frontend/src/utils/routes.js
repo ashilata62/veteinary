@@ -10,6 +10,7 @@ export const ROLE_PREFIX = {
 export const TAB_IDS = new Set([
   'landing',
   'register',
+  'brochure',
   'dashboard',
   'appointments',
   'home-visits',
@@ -45,6 +46,7 @@ export function getRolePrefix(role) {
 export function pathForTab(tab, role) {
   if (tab === 'landing') return '/landing';
   if (tab === 'register') return '/register';
+  if (tab === 'brochure') return '/brochure';
   return `/${getRolePrefix(role)}/${tab}`;
 }
 
@@ -55,6 +57,7 @@ export function tabFromPath(pathname) {
   if (parts.length === 1) {
     if (parts[0] === 'login') return 'login';
     if (parts[0] === 'register') return 'register';
+    if (parts[0] === 'brochure') return 'brochure';
     if (parts[0] === 'landing') return 'landing';
     if (TAB_IDS.has(parts[0])) return parts[0];
     return 'landing';

@@ -20,6 +20,7 @@ import SettingsPage from './components/Settings';
 import Login from './components/Login';
 import LandingPage from './components/LandingPage';
 import Register from './components/Register';
+import BrochurePage from './components/BrochurePage';
 import StaffManagement from './components/StaffManagement';
 import Attendance from './components/Attendance';
 import Notifications from './components/Notifications';
@@ -210,6 +211,10 @@ export default function App() {
       return <Navigate to="/super-admin/dashboard" replace />;
     }
     return <SuperAdminLayout setIsSuperAdmin={setIsSuperAdmin} />;
+  }
+
+  if (location.pathname === '/brochure') {
+    return <BrochurePage />;
   }
 
   if (!isAuthenticated) {
