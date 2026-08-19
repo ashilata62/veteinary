@@ -269,3 +269,44 @@ exports.getPaymentHistory = async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Failed to fetch payment history' });
   }
 };
+
+
+exports.handleWebhook = async (req, res) => {
+  try {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'fallback_secret_for_dev';
+    
+    // Validate signature
+    const shasum = crypto.createHmac('sha256', secret);
+    shasum.update(JSON.stringify(req.body));
+    const digest = shasum.digest('hex');
+
+    if (digest !== req.headers['x-razorpay-signature']) {
+      return res.status(400).json({ status: 'error', message: 'Invalid signature' });
+    }
+
+    const event = req.body.event;
+    const payload = req.body.payload;
+
+    if (event === 'payment.authorized' || event === 'payment.captured' || event === 'subscription.charged') {
+      const paymentEntity = payload.payment.entity;
+      // You can extract clinicId/adminId if you pass it in notes during order creation
+      const clinicId = paymentEntity.notes ? paymentEntity.notes.clinic_id : null;
+      
+      if (clinicId) {
+        // Extend subscription by 30 days
+        const updateQuery = `
+          UPDATE users 
+          SET subscription_status = 'active', 
+              trial_expiry_date = DATE_ADD(IFNULL(trial_expiry_date, NOW()), INTERVAL 30 DAY) 
+          WHERE clinic_id = ? AND role = 'Doctor'
+        `;
+        await pool.query(updateQuery, [clinicId]);
+      }
+    }
+    
+    res.json({ status: 'ok' });
+  } catch (error) {
+    console.error('Webhook error:', error);
+    res.status(500).json({ status: 'error', message: 'Webhook processing failed' });
+  }
+};
