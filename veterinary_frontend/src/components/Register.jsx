@@ -357,9 +357,9 @@ export default function Register() {
         {/* Left Side: Brand Visual + Live Plan Summary */}
         <div className="register-hero-side">
           <div className="register-brand-premium" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <img src="/kt-logo.png" alt="VetCare Pro" className="register-brand-logo" />
+            <img src="/kt-logo.png" alt="PetCare Pro" className="register-brand-logo" />
             <span className="register-brand-text">
-              VetCare <span className="register-brand-accent">Pro</span>
+              PetCare <span className="register-brand-accent">Pro</span>
             </span>
           </div>
 
@@ -702,7 +702,7 @@ export default function Register() {
               </div>
 
               <h2 className="vet-onboarding-title">
-                Welcome to <span style={{ color: '#14b8a6' }}>VetCare Pro</span>!
+                Welcome to <span style={{ color: '#14b8a6' }}>PetCare Pro</span>!
               </h2>
               <p className="vet-onboarding-subtext">
                 Your clinic workspace <strong>{successData.businessName}</strong> has been provisioned and is ready for action. A verification link has been sent to your registered email.

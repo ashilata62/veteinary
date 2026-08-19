@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { pathForTab } from '../utils/routes';
 import { apiFetch } from '../utils/api';
 import './Login.css';
-import { 
-  Mail, Lock, ArrowRight, ShieldCheck, Stethoscope, Users, 
-  HeartHandshake, Briefcase, Eye, EyeOff, CalendarCheck, 
+import {
+  Mail, Lock, ArrowRight, ShieldCheck, Stethoscope, Users,
+  HeartHandshake, Briefcase, Eye, EyeOff, CalendarCheck,
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
 
@@ -136,12 +136,12 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   };
 
   const demoUsers = [
-    { role: 'Admin',        email: 'admin@vetcarepro.com',       icon: Shield },
-    { role: 'Manager',      email: 'manager@vetcarepro.com',     icon: Briefcase },
-    { role: 'Doctor',       email: 'demodoctor@gmail.com',       icon: Stethoscope },
-    { role: 'Receptionist', email: 'demoR@gmail.com',            icon: Users },
-    { role: 'Vet Assistant',email: 'assistant@vetcarepro.com',   icon: HeartHandshake },
-    { role: 'Super Admin',  email: 'superadmin@vetcarepro.com',  icon: ShieldCheck },
+    { role: 'Admin', email: 'admin@vetcarepro.com', icon: Shield },
+    { role: 'Manager', email: 'manager@vetcarepro.com', icon: Briefcase },
+    { role: 'Doctor', email: 'demodoctor@gmail.com', icon: Stethoscope },
+    { role: 'Receptionist', email: 'demoR@gmail.com', icon: Users },
+    { role: 'Vet Assistant', email: 'assistant@vetcarepro.com', icon: HeartHandshake },
+    { role: 'Super Admin', email: 'superadmin@vetcarepro.com', icon: ShieldCheck },
   ];
 
   const selectDemoUser = (role, demoEmail) => {
@@ -174,7 +174,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
           <div className="login-brand-premium">
             <img src="/kt-logo.png" alt="Logo" className="login-brand-logo" />
             <span style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-              VetCare <span className="text-gradient">Pro</span>
+              PetCare <span className="text-gradient">Pro</span>
             </span>
           </div>
 
@@ -231,7 +231,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
         {/* Right Form Side */}
         <div className="login-form-side">
           <div className="glass-login-card">
-            
+
             <button
               type="button"
               onClick={() => navigate('/')}
@@ -245,14 +245,14 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
             <div className="login-mobile-brand">
               <img src="/kt-logo.png" alt="Logo" className="login-brand-logo-mobile" />
               <span>
-                VetCare <span className="text-gradient">Pro</span>
+                PetCare <span className="text-gradient">Pro</span>
               </span>
             </div>
 
             <div className="login-header-text">
               <h2>👋 Welcome Back<span className="cursor-blink"></span></h2>
-              <p>Sign in to your VetCare Pro Dashboard.</p>
-              
+              <p>Sign in to your PetCare Pro Dashboard.</p>
+
               {error && (
                 <div style={{ marginTop: '1rem', padding: '0.8rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', color: '#fca5a5', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Shield size={16} /> {error}
@@ -261,7 +261,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
             </div>
 
             <div className="role-chips">
-              <div 
+              <div
                 className="active-tab-indicator"
                 style={{
                   '--active-left': `calc(0.35rem + ${colIndex} * (100% - 0.7rem) / 3)`,
@@ -272,7 +272,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 const isActive = activeRole === role;
                 const label = role === 'Receptionist' ? 'Reception' : role === 'Vet Assistant' ? 'Assistant' : role;
                 return (
-                  <button 
+                  <button
                     key={role}
                     type="button"
                     className={`role-chip ${isActive ? 'active' : ''}`}
@@ -310,7 +310,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 />
                 <label className="input-label-float">Password</label>
                 <Lock size={18} className="premium-input-icon" />
-                
+
                 <div className="password-actions">
                   {capsLockActive && <span className="caps-lock-warning">CAPS</span>}
                   <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
@@ -319,9 +319,9 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 </div>
               </div>
 
-              <button 
-                type="submit" 
-                className="premium-submit-btn" 
+              <button
+                type="submit"
+                className="premium-submit-btn"
                 disabled={loading || success}
               >
                 {success ? (

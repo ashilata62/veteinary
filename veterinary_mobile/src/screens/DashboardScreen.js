@@ -106,7 +106,7 @@ export default function DashboardScreen({ navigation }) {
   const getPortalTitle = () => {
     if (roleLower.includes('admin')) return 'Admin Control Center';
     if (roleLower.includes('reception')) return 'Receptionist Portal';
-    if (roleLower.includes('assistant')) return 'Vet Assistant Workspace';
+    if (roleLower.includes('assistant')) return 'Pet Assistant Workspace';
     if (roleLower.includes('manager')) return 'Manager Dashboard';
     return 'Doctor Workspace';
   };
@@ -138,7 +138,7 @@ export default function DashboardScreen({ navigation }) {
 
         <View style={styles.clinicCard}>
           <Text style={styles.portalTitle}>{getPortalTitle()}</Text>
-          <Text style={styles.clinicSub}>VetCare Pro Clinic Center • Online</Text>
+          <Text style={styles.clinicSub}>PetCare Pro Clinic Center • Online</Text>
         </View>
       </View>
 

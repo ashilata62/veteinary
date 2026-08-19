@@ -21,7 +21,7 @@ export default function ClinicManagement() {
 
   const defaultClinics = [
     { id: '1', name: 'Downtown Vet Clinic', adminName: 'Dr. John Doe', email: 'john@downtown.com', phone: '+91 98765 43210', currentPlan: 'Monthly Pro', trialStatus: 'Expired', subStatus: 'Active', createdDate: '2025-01-10', expiryDate: '2026-09-10' },
-    { id: '2', name: 'Pet Care Central', adminName: 'Dr. Jane Smith', email: 'jane@petcare.com', phone: '+91 98123 45678', currentPlan: '7-Day Trial', trialStatus: 'Active', subStatus: 'Trial', createdDate: '2026-08-01', expiryDate: '2026-08-15' },
+    { id: '2', name: 'Pet Care Central', adminName: 'Dr. Jane Smith', email: 'jane@vetcare.com', phone: '+91 98123 45678', currentPlan: '7-Day Trial', trialStatus: 'Active', subStatus: 'Trial', createdDate: '2026-08-01', expiryDate: '2026-08-15' },
     { id: '3', name: 'Paws & Claws Care', adminName: 'Dr. Vikram Singh', email: 'vikram@pawsclaws.in', phone: '+91 99887 76655', currentPlan: 'Yearly Enterprise', trialStatus: 'Expired', subStatus: 'Active', createdDate: '2025-05-20', expiryDate: '2027-05-20' },
     { id: '4', name: 'City Animal Hospital', adminName: 'Dr. Anjali Sharma', email: 'anjali@cityvet.com', phone: '+91 97654 32109', currentPlan: 'Monthly Pro', trialStatus: 'Expired', subStatus: 'Suspended', createdDate: '2026-02-15', expiryDate: '2026-07-15' },
     { id: '5', name: 'Happy Tails Pet Clinic', adminName: 'Rajesh Kumar', email: 'rajesh@happytails.com', phone: '+91 96543 21098', currentPlan: '7-Day Trial', trialStatus: 'Active', subStatus: 'Trial', createdDate: '2026-08-05', expiryDate: '2026-08-12' },

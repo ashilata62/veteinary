@@ -1,20 +1,16 @@
 {
   "expo": {
-    "name": "VetCare Pro",
+    "name": "PetCare Pro",
     "slug": "vetcare-pro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "vetcarepro",
+    "scheme": "petcarepro",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0b1329"
-    },
+
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kiaan.vetcarepro",
+      "bundleIdentifier": "com.kiaan.petcarepro",
       "infoPlist": {
         "NSCameraUsageDescription": "This app requires camera access to capture pet photos, medical document scans, and invoices.",
         "NSPhotoLibraryUsageDescription": "This app requires photo library access to upload pet photos and invoice files.",
@@ -22,7 +18,7 @@
       }
     },
     "android": {
-      "package": "com.kiaan.vetcarepro",
+      "package": "com.kiaan.petcarepro",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -50,7 +46,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Allow VetCare Pro to use Face ID for fast login."
+          "faceIDPermission": "Allow PetCare Pro to use Face ID for fast login."
         }
       ],
       "expo-secure-store",

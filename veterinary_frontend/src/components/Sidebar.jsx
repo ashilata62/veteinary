@@ -105,7 +105,7 @@ export default function Sidebar({
             {sidebarOpen && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '1.05rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap' }}>
-                  VetCare <span style={{ color: '#2dd4bf' }}>Pro</span>
+                  PetCare <span style={{ color: '#2dd4bf' }}>Pro</span>
                 </span>
                 <span style={{ fontSize: '0.65rem', color: '#64748b', whiteSpace: 'nowrap' }}>
                   Clinic Management System

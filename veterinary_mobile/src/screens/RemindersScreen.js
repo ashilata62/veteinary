@@ -36,7 +36,7 @@ export default function RemindersScreen({ navigation }) {
           date: item.appointment_date ? item.appointment_date.split('T')[0] : '',
           time: item.appointment_time,
           status: item.reminder_sent ? 'Sent' : 'Pending',
-          doctorName: item.doctorName || 'Veterinarian',
+          doctorName: item.doctorName || 'Pet Doctor',
         }));
         setReminders(mapped);
       }
@@ -63,14 +63,14 @@ export default function RemindersScreen({ navigation }) {
 
     const defaultMessage = `Dear ${item.owner},
 
-This is a reminder that your pet ${item.pet} has an appointment for "${item.type}" with ${item.doctorName} at VetCare Pro.
+This is a reminder that your pet ${item.pet} has an appointment for "${item.type}" with ${item.doctorName} at PetCare Pro.
 
 Scheduled Time: ${timeStr} on ${item.date}
 
 Please bring your pet on a leash or in a suitable carrier. If you need to reschedule or cancel, please contact us.
 
 Best regards,
-VetCare Pro Animal Hospital`;
+PetCare Pro Animal Hospital`;
 
     Alert.alert(
       'Send Automated Reminder',

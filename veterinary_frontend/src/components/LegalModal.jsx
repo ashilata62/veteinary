@@ -50,7 +50,7 @@ export default function LegalModal({ type, onClose }) {
               <p>We collect information you provide directly to us, such as when you create an account, update your profile, or communicate with us. This may include your name, email address, phone number, and clinic details.</p>
               <br/>
               <h3>2. How We Use Your Information</h3>
-              <p>We use the information we collect to provide, maintain, and improve our VetCare Pro services, to process transactions, and to send you related information, including confirmations and receipts.</p>
+              <p>We use the information we collect to provide, maintain, and improve our PetCare Pro services, to process transactions, and to send you related information, including confirmations and receipts.</p>
               <br/>
               <h3>3. Data Security</h3>
               <p>We implement appropriate technical and organizational measures designed to protect the security of any personal information we process. However, please note that no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure.</p>
@@ -66,7 +66,7 @@ export default function LegalModal({ type, onClose }) {
               <p><strong>Last Updated: {new Date().toLocaleDateString()}</strong></p>
               <br/>
               <h3>1. Acceptance of Terms</h3>
-              <p>By accessing and using VetCare Pro, you accept and agree to be bound by the terms and provision of this agreement.</p>
+              <p>By accessing and using PetCare Pro, you accept and agree to be bound by the terms and provision of this agreement.</p>
               <br/>
               <h3>2. Use License</h3>
               <p>Permission is granted to temporarily download one copy of the materials (information or software) on Kiaan Technology's website for personal, non-commercial transitory viewing only.</p>

@@ -185,7 +185,7 @@ export default function HomeVisitsScreen({ navigation }) {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Home Visit Appointments</Text>
-          <Text style={styles.headerSub}>Manage & route vet home visits</Text>
+          <Text style={styles.headerSub}>Manage & route pet home visits</Text>
         </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowBookModal(true)}>
           <Ionicons name="add" size={22} color="#ffffff" />
@@ -228,7 +228,7 @@ export default function HomeVisitsScreen({ navigation }) {
       <Modal visible={showBookModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Book Vet Home Visit</Text>
+            <Text style={styles.modalTitle}>Book Pet Home Visit</Text>
 
             <TextInput
               style={styles.input}

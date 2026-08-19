@@ -36,7 +36,7 @@ export default function SuperAdminPaymentsScreen() {
   const [selectedTx, setSelectedTx] = useState(null);
 
   const [payments, setPayments] = useState([
-    { id: 'PAY-982341', orderId: 'order_M1k298x', clinic: 'Downtown Vet Clinic', date: '07 Aug 2026 10:14 AM', amount: '₹1,999.00', method: 'Razorpay UPI (gpay@upi)', status: 'Successful', invoice: 'INV-2026-0801' },
+    { id: 'PAY-982341', orderId: 'order_M1k298x', clinic: 'Downtown Pet Clinic', date: '07 Aug 2026 10:14 AM', amount: '₹1,999.00', method: 'Razorpay UPI (gpay@upi)', status: 'Successful', invoice: 'INV-2026-0801' },
     { id: 'PAY-982340', orderId: 'order_K88129y', clinic: 'Paws & Claws Care', date: '06 Aug 2026 04:30 PM', amount: '₹18,999.00', method: 'Razorpay NetBanking (HDFC)', status: 'Successful', invoice: 'INV-2026-0802' },
     { id: 'PAY-982339', orderId: 'order_L99210z', clinic: 'Happy Pets Hospital', date: '05 Aug 2026 09:22 AM', amount: '₹1,999.00', method: 'Razorpay Card (**** 4242)', status: 'Failed', invoice: '-' },
     { id: 'PAY-982338', orderId: 'order_P77123a', clinic: 'PetCare Central', date: '05 Aug 2026 02:15 PM', amount: '₹1,999.00', method: 'Razorpay UPI (paytm@upi)', status: 'Pending', invoice: '-' },

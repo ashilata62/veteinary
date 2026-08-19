@@ -53,7 +53,7 @@ export default function SuperAdminLogin({ setIsSuperAdmin }) {
         <div className="sa-login-left">
           <div className="sa-brand">
             <img src="/kt-logo.png" alt="Logo" />
-            <span>VetCare <span style={{ color: '#2dd4bf' }}>Pro</span></span>
+            <span>PetCare <span style={{ color: '#2dd4bf' }}>Pro</span></span>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#2dd4bf', fontWeight: 600, fontSize: '0.85rem', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>

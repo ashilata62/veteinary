@@ -1,6 +1,6 @@
 {
-  "appId": "com.vetcarepro.app",
-  "appName": "VetCare Pro",
+  "appId": "com.petcarepro.app",
+  "appName": "PetCare Pro",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {

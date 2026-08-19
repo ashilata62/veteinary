@@ -25,7 +25,7 @@ if (isExpoGo) {
 }
 
 
-const MUTATION_QUEUE_KEY = '@vetcare_sync_queue';
+const MUTATION_QUEUE_KEY = '@petcare_sync_queue';
 const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes cache
 
 class OfflineSyncService {

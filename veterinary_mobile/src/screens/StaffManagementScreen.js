@@ -16,12 +16,12 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../config/api';
 import { colors } from '../theme/colors';
 
-const ROLE_OPTIONS = ['Doctor', 'Receptionist', 'Vet Assistant', 'Admin'];
+const ROLE_OPTIONS = ['Doctor', 'Receptionist', 'Pet Assistant', 'Admin'];
 
 const DEPARTMENTS = {
   Doctor: ['General Practice', 'Surgery', 'Dermatology', 'Emergency Care', 'Internal Medicine'],
   Receptionist: ['Front Desk', 'Client Services'],
-  'Vet Assistant': ['Clinical Support', 'Lab & Diagnostics', 'Surgical Assistance'],
+  'Pet Assistant': ['Clinical Support', 'Lab & Diagnostics', 'Surgical Assistance'],
   Admin: ['Administration'],
 };
 
@@ -53,7 +53,7 @@ export default function StaffManagementScreen({ navigation }) {
       setStaff(Array.isArray(data) && data.length > 0 ? data : [
         { id: '1', name: 'Dr. Sarah Connor', role: 'Doctor', email: 'doctor@vetcare.com', phone: '+91 98765 43210', status: 'Active', department: 'General Practice' },
         { id: '2', name: 'Barry Allen', role: 'Receptionist', email: 'receptionist@vetcare.com', phone: '+91 98765 43211', status: 'Active', department: 'Front Desk' },
-        { id: '3', name: 'Kara Danvers', role: 'Vet Assistant', email: 'assistant@vetcare.com', phone: '+91 98765 43212', status: 'Active', department: 'Clinical Support' },
+        { id: '3', name: 'Kara Danvers', role: 'Pet Assistant', email: 'assistant@vetcare.com', phone: '+91 98765 43212', status: 'Active', department: 'Clinical Support' },
         { id: '4', name: 'Bruce Wayne', role: 'Manager', email: 'manager@vetcare.com', phone: '+91 98765 43213', status: 'Active', department: 'Administration' },
       ]);
     } catch (err) {

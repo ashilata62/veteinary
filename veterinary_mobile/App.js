@@ -7,7 +7,7 @@ import RootNavigator from './src/navigation/AppNavigator';
 const prefix = Linking.createURL('/');
 
 const linking = {
-  prefixes: [prefix, 'vetcarepro://'],
+  prefixes: [prefix, 'petcarepro://'],
   config: {
     screens: {
       Auth: {

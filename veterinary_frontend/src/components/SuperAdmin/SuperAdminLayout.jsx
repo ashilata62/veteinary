@@ -94,7 +94,7 @@ export default function SuperAdminLayout({ setIsSuperAdmin }) {
           <div className="sa-brand-container">
             <img 
               src="/kt-logo.png" 
-              alt="VetCare Logo" 
+              alt="PetCare Logo" 
               className="sa-brand-logo" 
               onError={(e) => { e.target.style.display = 'none'; }}
             />

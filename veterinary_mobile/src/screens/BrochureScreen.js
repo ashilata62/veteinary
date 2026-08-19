@@ -47,9 +47,9 @@ export default function BrochureScreen({ navigation }) {
           <Image source={require('../../assets/icon.png')} style={{ width: 28, height: 28, borderRadius: 6, marginRight: 8, resizeMode: 'contain' }} />
           <View>
             <Text style={styles.headerTitle}>
-              VetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
+              PetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
             </Text>
-            <Text style={styles.headerSub}>Veterinary Management SaaS</Text>
+            <Text style={styles.headerSub}>Petcare Management SaaS</Text>
           </View>
         </View>
 
@@ -66,7 +66,7 @@ export default function BrochureScreen({ navigation }) {
         <View style={styles.heroCard}>
           <View style={styles.badgeBox}>
             <Ionicons name="sparkles" size={14} color={darkTheme.primary} />
-            <Text style={styles.badgeText}>ALL-IN-ONE VETERINARY CLINIC MANAGEMENT</Text>
+            <Text style={styles.badgeText}>ALL-IN-ONE PETCARE CLINIC MANAGEMENT</Text>
           </View>
 
           <Text style={styles.heroTitle}>One Platform to{'\n'}Run Your Entire Clinic</Text>
@@ -114,14 +114,14 @@ export default function BrochureScreen({ navigation }) {
           ))}
         </View>
 
-        {/* ================= 3. WHY CLINICS CHOOSE VETCARE PRO ================= */}
-        <Text style={styles.secTitle}>WHY CLINICS CHOOSE VETCARE PRO</Text>
+        {/* ================= 3. WHY CLINICS CHOOSE PETCARE PRO ================= */}
+        <Text style={styles.secTitle}>WHY CLINICS CHOOSE PETCARE PRO</Text>
         <View style={styles.compareGrid}>
-          {/* Without VetCare Pro */}
+          {/* Without PetCare Pro */}
           <View style={[styles.compareBox, { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)' }]}>
             <View style={[styles.compareHeader, { backgroundColor: '#ef4444' }]}>
               <Ionicons name="close-circle" size={16} color="#ffffff" />
-              <Text style={styles.compareHeaderText}>Without VetCare Pro</Text>
+              <Text style={styles.compareHeaderText}>Without PetCare Pro</Text>
             </View>
             {[
               'Manual appointments & scheduling',
@@ -140,11 +140,11 @@ export default function BrochureScreen({ navigation }) {
             ))}
           </View>
 
-          {/* With VetCare Pro */}
+          {/* With PetCare Pro */}
           <View style={[styles.compareBox, { borderColor: darkTheme.primary, backgroundColor: 'rgba(20, 184, 166, 0.08)' }]}>
             <View style={[styles.compareHeader, { backgroundColor: darkTheme.primary }]}>
               <Ionicons name="checkmark-circle" size={16} color="#ffffff" />
-              <Text style={styles.compareHeaderText}>With VetCare Pro</Text>
+              <Text style={styles.compareHeaderText}>With PetCare Pro</Text>
             </View>
             {[
               'Centralized clinic management',
@@ -239,7 +239,7 @@ export default function BrochureScreen({ navigation }) {
           </View>
           <View style={styles.roleCard}>
             <Text style={styles.roleEmoji}>🩺</Text>
-            <Text style={styles.roleTitle}>Veterinarian</Text>
+            <Text style={styles.roleTitle}>Pet Doctor</Text>
             <Text style={styles.roleDesc}>Patient history, prescriptions & schedules</Text>
           </View>
           <View style={styles.roleCard}>
@@ -254,8 +254,8 @@ export default function BrochureScreen({ navigation }) {
           </View>
         </View>
 
-        {/* ================= 7. WHY VETCARE PRO? ================= */}
-        <Text style={[styles.secTitle, { marginTop: 24 }]}>WHY VETCARE PRO?</Text>
+        {/* ================= 7. WHY PETCARE PRO? ================= */}
+        <Text style={[styles.secTitle, { marginTop: 24 }]}>WHY PETCARE PRO?</Text>
         <View style={styles.whyGrid}>
           {[
             { title: 'Multi-Tenant SaaS', icon: 'cloud-outline' },
@@ -342,7 +342,7 @@ export default function BrochureScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.footerBox}>
-          <Text style={styles.footerTagline}>VetCare Pro • Smart Clinic • Happy Pets</Text>
+          <Text style={styles.footerTagline}>PetCare Pro • Smart Clinic • Happy Pets</Text>
           <TouchableOpacity onPress={() => Linking.openURL('tel:+919752100980')}>
             <Text style={styles.footerLink}>Call: +91 97521 00980</Text>
           </TouchableOpacity>

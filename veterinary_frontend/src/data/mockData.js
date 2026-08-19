@@ -1,4 +1,4 @@
-// Rich mock data for Veterinary Clinic Management System (VetCare Pro)
+// Rich mock data for Veterinary Clinic Management System (PetCare Pro)
 
 export const USERS = [
   { id: 'usr-1', name: 'Dr. Sarah Connor', role: 'Doctor', email: 'sarah.connor@vetcare.com', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150' },
@@ -452,7 +452,7 @@ export const ANALYTICS_DOCTOR_PERFORMANCE = [
 ];
 
 export const CLINIC_SETTINGS = {
-  name: 'VetCare Pro Animal Hospital',
+  name: 'PetCare Pro Animal Hospital',
   email: 'info@vetcarepro.com',
   phone: '+94 11 234 5678',
   address: 'No. 45, Temple Road, Colombo 07, Sri Lanka',

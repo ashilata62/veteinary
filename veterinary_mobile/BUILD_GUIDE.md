@@ -1,6 +1,6 @@
-# VetCare Pro Mobile App: Build & Deployment Guide
+# PetCare Pro Mobile App: Build & Deployment Guide
 
-This guide describes how to configure, build, and deploy the VetCare Pro mobile app for Android (APK) and iOS (IPA) using the Expo ecosystem.
+This guide describes how to configure, build, and deploy the PetCare Pro mobile app for Android (APK) and iOS (IPA) using the Expo ecosystem.
 
 ---
 

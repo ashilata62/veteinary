@@ -623,7 +623,7 @@ export default function Billing({ currentRole }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '2rem' }}>🐾</span>
                 <span style={{ fontSize: 'clamp(1.1rem, 4vw, 1.5rem)', fontWeight: 800 }}>
-                  VetCare <span style={{ color: 'var(--primary-teal)' }}>Pro</span>
+                  PetCare <span style={{ color: 'var(--primary-teal)' }}>Pro</span>
                 </span>
               </div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 4px 0', wordBreak: 'break-word' }}>

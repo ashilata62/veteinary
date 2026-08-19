@@ -97,7 +97,7 @@ export default function LandingScreen({ navigation }) {
         >
           <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8, marginRight: 8, resizeMode: 'contain' }} />
           <Text style={styles.brandTitle}>
-            VetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
+            PetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
           </Text>
         </TouchableOpacity>
 
@@ -140,17 +140,17 @@ export default function LandingScreen({ navigation }) {
           <View style={styles.heroBadge}>
             <Ionicons name="trophy" size={14} color={darkTheme.gold} />
             <Text style={styles.heroBadgeText}>
-              #1 Veterinary Clinic Management Software
+              #1 Petcare Clinic Management Software
             </Text>
           </View>
 
           <Text style={styles.heroMainTitle}>
             Transform Your{'\n'}
-            <Text style={styles.heroGradientText}>Veterinary Practice</Text>
+            <Text style={styles.heroGradientText}>Petcare Practice</Text>
           </Text>
 
           <Text style={styles.heroSubText}>
-            The all-in-one solution for modern veterinary clinics and pet hospitals. Streamline appointments, manage pet records, automate billing, and grow your clinic.
+            The all-in-one solution for modern petcare clinics and pet hospitals. Streamline appointments, manage pet records, automate billing, and grow your clinic.
           </Text>
 
           <View style={styles.heroActionsRow}>
@@ -219,7 +219,7 @@ export default function LandingScreen({ navigation }) {
             Everything You Need to <Text style={{ color: darkTheme.primary }}>Manage Your Clinic</Text>
           </Text>
           <Text style={styles.sectionHeaderSub}>
-            Comprehensive tools designed specifically for veterinary practices.
+            Comprehensive tools designed specifically for petcare practices.
           </Text>
 
           <View style={styles.featuresList}>
@@ -328,7 +328,7 @@ export default function LandingScreen({ navigation }) {
           </View>
 
           <Text style={styles.leftSectionTitle}>
-            Why <Text style={{ color: darkTheme.primary }}>VetCare Pro</Text> Stands Out
+            Why <Text style={{ color: darkTheme.primary }}>PetCare Pro</Text> Stands Out
           </Text>
 
           <View style={styles.checklistContainer}>
@@ -374,7 +374,7 @@ export default function LandingScreen({ navigation }) {
           {/* Quote Card */}
           <View style={styles.quoteCard}>
             <Text style={styles.quoteBody}>
-              "VetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
+              "PetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
             </Text>
             <View style={styles.quoteAuthorRow}>
               <View style={styles.avatarCircle}>
@@ -382,7 +382,7 @@ export default function LandingScreen({ navigation }) {
               </View>
               <View>
                 <Text style={styles.authorName}>Dr. Rahul Sharma</Text>
-                <Text style={styles.authorSub}>Owner, City Vet Clinic</Text>
+                <Text style={styles.authorSub}>Owner, City Pet Clinic</Text>
               </View>
             </View>
           </View>
@@ -417,7 +417,7 @@ export default function LandingScreen({ navigation }) {
                 </View>
               </View>
               <Text style={styles.testiText}>
-                "VetCare Pro has completely automated our clinic operations. Our team saves 20+ hours every week!"
+                "PetCare Pro has completely automated our clinic operations. Our team saves 20+ hours every week!"
               </Text>
               <View style={styles.starsRow}>
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -609,7 +609,7 @@ export default function LandingScreen({ navigation }) {
         <View style={styles.ctaBanner}>
           <Text style={styles.ctaTitle}>Ready to Transform Your Clinic?</Text>
           <Text style={styles.ctaSub}>
-            Join thousands of veterinarians who have already streamlined their practice.
+            Join thousands of pet practitioners who have already streamlined their practice.
           </Text>
           <TouchableOpacity
             style={styles.btnCtaLg}
@@ -635,7 +635,7 @@ export default function LandingScreen({ navigation }) {
           </View>
 
           <Text style={styles.footerDescText}>
-            The ultimate management solution for modern veterinary clinics, pet hospitals, and animal care centers.
+            The ultimate management solution for modern petcare clinics, pet hospitals, and animal care centers.
           </Text>
 
           {/* Quick Links Section */}
@@ -693,7 +693,7 @@ export default function LandingScreen({ navigation }) {
 
           {/* Bottom Policy Links */}
           <View style={styles.footerBottomLinks}>
-            <TouchableOpacity onPress={() => showInfoAlert('Privacy Policy', 'VetCare Pro protects clinic & patient health data with enterprise grade 256-bit encryption.')}>
+            <TouchableOpacity onPress={() => showInfoAlert('Privacy Policy', 'PetCare Pro protects clinic & patient health data with enterprise grade 256-bit encryption.')}>
               <Text style={styles.footerBottomLinkText}>Privacy Policy</Text>
             </TouchableOpacity>
             <Text style={{ color: darkTheme.cardBorder }}>|</Text>
@@ -715,7 +715,7 @@ export default function LandingScreen({ navigation }) {
       {/* Floating WhatsApp Button */}
       <TouchableOpacity
         style={styles.whatsappFloat}
-        onPress={() => Linking.openURL('https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20VetCare%20Pro%20SaaS%20solution.')}
+        onPress={() => Linking.openURL('https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20PetCare%20Pro%20SaaS%20solution.')}
         activeOpacity={0.85}
       >
         <Ionicons name="logo-whatsapp" size={30} color="#ffffff" />
@@ -733,7 +733,7 @@ export default function LandingScreen({ navigation }) {
               <View style={styles.brandLogoBox}>
                 <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8, marginRight: 8, resizeMode: 'contain' }} />
                 <Text style={styles.brandTitle}>
-                  VetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
+                  PetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setDrawerOpen(false)}>

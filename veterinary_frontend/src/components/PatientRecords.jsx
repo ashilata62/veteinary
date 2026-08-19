@@ -1394,7 +1394,7 @@ export default function PatientRecords({
             {/* Printable Area */}
             <div id="vaccine-certificate-print" style={{ padding: '2.5rem', backgroundColor: '#fff', border: '15px double var(--primary-teal-light)', margin: '1rem', borderRadius: '8px', color: '#0f172a' }}>
               <div style={{ textAlign: 'center', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-teal)', paddingBottom: '1rem' }}>
-                <h2 style={{ margin: 0, color: 'var(--primary-teal)', fontWeight: 800, fontSize: '1.5rem', letterSpacing: '0.05em' }}>VETCARE MEDICAL CENTER</h2>
+                <h2 style={{ margin: 0, color: 'var(--primary-teal)', fontWeight: 800, fontSize: '1.5rem', letterSpacing: '0.05em' }}>PETCARE MEDICAL CENTER</h2>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>120/A Veterinary Lane, Colombo • Tel: +94 11 245 6789</p>
                 <h3 style={{ marginTop: '1.25rem', marginBottom: 0, fontSize: '1.1rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>Certificate of Vaccination</h3>
               </div>

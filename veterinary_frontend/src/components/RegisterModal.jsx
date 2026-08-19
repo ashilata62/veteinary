@@ -92,7 +92,7 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
           key: orderData.data.key_id,
           amount: orderData.data.amount,
           currency: orderData.data.currency,
-          name: 'VetCare Pro',
+          name: 'PetCare Pro',
           description: `Subscription for ${planObj.name}`,
           image: '/kt-logo.png',
           order_id: orderData.data.order_id,
@@ -163,7 +163,7 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
         {paymentSuccess ? (
           <div style={{ textAlign: 'center', padding: '30px 10px', animation: 'slideUp 0.4s ease' }}>
             <div style={{ fontSize: '4rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>🎉</div>
-            <h2 style={{ fontSize: '1.6rem', color: '#10b981', marginBottom: '10px', fontWeight: 'bold' }}>Welcome to VetCare Pro!</h2>
+            <h2 style={{ fontSize: '1.6rem', color: '#10b981', marginBottom: '10px', fontWeight: 'bold' }}>Welcome to PetCare Pro!</h2>
             <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '24px' }}>
               Your payment was successful and your account is now active.<br/>
               Redirecting you to the login page...

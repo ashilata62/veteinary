@@ -14,12 +14,12 @@ const darkTheme = {
 };
 
 const DUMMY_SUBSCRIPTIONS = [
-  { id: 1, clinicName: 'City Vet Clinic', email: 'contact@cityvet.com', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-01-15', amount: '₹18,999' },
+  { id: 1, clinicName: 'City Pet Clinic', email: 'contact@cityvet.com', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-01-15', amount: '₹18,999' },
   { id: 2, clinicName: 'Paws & Claws Care', email: 'admin@pawsclaws.com', plan: 'Pro', status: 'Active', billingCycle: 'Monthly', nextBilling: '2026-09-01', amount: '₹1,999' },
   { id: 3, clinicName: 'Happy Pets Hospital', email: 'hello@happypets.net', plan: 'Basic', status: 'Past Due', billingCycle: 'Monthly', nextBilling: '2026-08-01', amount: '₹999' },
-  { id: 4, clinicName: 'Downtown Animal ER', email: 'er@downtownvet.org', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-03-10', amount: '₹18,999' },
-  { id: 5, clinicName: 'Green Valley Vet', email: 'support@greenvalley.com', plan: 'Starter', status: 'Cancelled', billingCycle: 'Monthly', nextBilling: '-', amount: '₹0' },
-  { id: 6, clinicName: 'PetCare Plus', email: 'info@petcareplus.in', plan: 'Pro', status: 'Active', billingCycle: 'Monthly', nextBilling: '2026-09-10', amount: '₹1,999' },
+  { id: 4, clinicName: 'Downtown Animal Care', email: 'er@downtownvet.org', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-03-10', amount: '₹18,999' },
+  { id: 5, clinicName: 'Green Valley Pet', email: 'support@greenvalley.com', plan: 'Starter', status: 'Cancelled', billingCycle: 'Monthly', nextBilling: '-', amount: '₹0' },
+  { id: 6, clinicName: 'PetCare Plus', email: 'info@vetcareplus.in', plan: 'Pro', status: 'Active', billingCycle: 'Monthly', nextBilling: '2026-09-10', amount: '₹1,999' },
 ];
 
 const getStatusColor = (status) => {

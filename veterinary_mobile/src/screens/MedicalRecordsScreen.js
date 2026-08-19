@@ -137,7 +137,7 @@ export default function MedicalRecordsScreen({ navigation }) {
             encounter_id: encounterId,
             report_type: 'Lab Report',
             file_name: documentFile.name || 'Diagnostic_Report.pdf',
-            file_url: 'http://localhost:5000/uploads/placeholder.pdf'
+            file_url: 'http://localhost:5002/uploads/placeholder.pdf'
           });
         } catch (repErr) {
           console.log('Failed to attach document report record, ignoring.');

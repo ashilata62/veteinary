@@ -63,14 +63,14 @@ export default function ReminderQueue() {
 
     const defaultMessage = `Dear ${apt.ownerName},
 
-This is a reminder that your pet ${apt.petName} has an appointment for "${apt.notes || 'General Consultation'}" with ${apt.doctorName || 'our Veterinary staff'} at VetCare Pro.
+This is a reminder that your pet ${apt.petName} has an appointment for "${apt.notes || 'General Consultation'}" with ${apt.doctorName || 'our Veterinary staff'} at PetCare Pro.
 
 Scheduled Time: ${timeStr} on ${apt.appointment_date}
 
 Please bring your pet on a leash or in a suitable carrier. If you need to reschedule or cancel, please contact us at +94 11 234 5678.
 
 Best regards,
-VetCare Pro Animal Hospital
+PetCare Pro Animal Hospital
 No. 45, Temple Road, Colombo 07`;
 
     setActiveApt(apt);

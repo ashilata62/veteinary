@@ -1,4 +1,4 @@
-package com.kiaan.vetcarepro
+package com.kiaan.petcarepro
 
 import android.app.Application
 import android.content.res.Configuration

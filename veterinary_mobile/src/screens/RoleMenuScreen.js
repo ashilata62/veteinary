@@ -20,7 +20,7 @@ export default function RoleMenuScreen({ navigation }) {
     const str = r.toString().toLowerCase();
     if (str.includes('super')) return 'SUPER_ADMIN';
     if (str.includes('reception') || str.includes('demor')) return 'Receptionist';
-    if (str.includes('assistant')) return 'Vet Assistant';
+    if (str.includes('assistant')) return 'Pet Assistant';
     if (str.includes('manager')) return 'Manager';
     if (str.includes('admin')) return 'Admin';
     return 'Doctor';
@@ -30,15 +30,15 @@ export default function RoleMenuScreen({ navigation }) {
 
   // Exact Role-Based Menu Matrix matching web Sidebar.jsx
   const menuConfig = [
-    { id: 'DashboardScreen', label: 'Dashboard', icon: 'speedometer-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'Appointments', label: activeRole === 'Doctor' || activeRole === 'Vet Assistant' ? 'My Appointments' : 'Appointments', icon: 'calendar-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'HomeVisits', label: activeRole === 'Doctor' ? 'Home Visits' : 'Home Visit Appointments', icon: 'navigate-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'Hospitalization', label: 'Hospitalization', icon: 'bed-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'DashboardScreen', label: 'Dashboard', icon: 'speedometer-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'Appointments', label: activeRole === 'Doctor' || activeRole === 'Pet Assistant' ? 'My Appointments' : 'Appointments', icon: 'calendar-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'HomeVisits', label: activeRole === 'Doctor' ? 'Home Visits' : 'Home Visit Appointments', icon: 'navigate-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'Hospitalization', label: 'Hospitalization', icon: 'bed-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
     { id: 'PetOwners', label: 'Pet Owners', icon: 'people-outline', roles: ['Admin', 'Manager', 'Receptionist'] },
-    { id: 'Pets', label: activeRole === 'Doctor' || activeRole === 'Vet Assistant' ? 'Patients' : 'Pets', icon: 'paw-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'MedicalRecords', label: 'Medical Records', icon: 'fitness-outline', roles: ['Admin', 'Manager', 'Doctor', 'Vet Assistant'] },
+    { id: 'Pets', label: activeRole === 'Doctor' || activeRole === 'Pet Assistant' ? 'Patients' : 'Pets', icon: 'paw-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'MedicalRecords', label: 'Medical Records', icon: 'fitness-outline', roles: ['Admin', 'Manager', 'Doctor', 'Pet Assistant'] },
     { id: 'TreatmentNotes', label: 'Treatment Notes', icon: 'document-text-outline', roles: ['Doctor'] },
-    { id: 'AssistanceTasks', label: 'Assistance Tasks', icon: 'checkbox-outline', roles: ['Vet Assistant'] },
+    { id: 'AssistanceTasks', label: 'Assistance Tasks', icon: 'checkbox-outline', roles: ['Pet Assistant'] },
     { id: 'Prescriptions', label: 'Prescriptions', icon: 'journal-outline', roles: ['Doctor'] },
     { id: 'DoctorRevenue', label: 'My Revenue', icon: 'bar-chart-outline', roles: ['Doctor'] },
     { id: 'Billing', label: 'Billing & POS', icon: 'card-outline', roles: ['Admin', 'Manager', 'Receptionist', 'Doctor'] },
@@ -47,9 +47,9 @@ export default function RoleMenuScreen({ navigation }) {
     { id: 'StaffManagement', label: 'Staff Management', icon: 'person-add-outline', roles: ['Admin'] },
     { id: 'Attendance', label: 'Attendance', icon: 'time-outline', roles: ['Admin', 'Manager'] },
     { id: 'Reports', label: 'Reports & Analytics', icon: 'stats-chart-outline', roles: ['Admin', 'Manager'] },
-    { id: 'Notifications', label: 'Notifications', icon: 'notifications-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'Settings', label: 'Settings', icon: 'settings-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
-    { id: 'Profile', label: 'My Profile', icon: 'person-circle-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'Notifications', label: 'Notifications', icon: 'notifications-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'Settings', label: 'Settings', icon: 'settings-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
+    { id: 'Profile', label: 'My Profile', icon: 'person-circle-outline', roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Pet Assistant'] },
     { id: 'Support', label: 'Support', icon: 'headset-outline', roles: ['Admin'] },
   ];
 

@@ -43,7 +43,7 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.userName}>{user?.name || 'Dr. Doctor'}</Text>
         <Text style={styles.userRole}>
-          {(user?.role || 'Veterinary Specialist').toUpperCase()}
+          {(user?.role || 'Petcare Specialist').toUpperCase()}
         </Text>
       </View>
 
@@ -58,7 +58,7 @@ export default function ProfileScreen() {
 
           <View style={styles.row}>
             <Ionicons name="location-outline" size={18} color={colors.textSecondary} />
-            <Text style={styles.rowText}>VetCare Main Clinic, Suite 402</Text>
+            <Text style={styles.rowText}>PetCare Main Clinic, Suite 402</Text>
           </View>
 
           <View style={styles.row}>
@@ -92,7 +92,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Sign Out of Mobile App</Text>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>VetCare Mobile App • Version 1.0.0</Text>
+        <Text style={styles.versionText}>PetCare Mobile App • Version 1.0.0</Text>
       </ScrollView>
     </View>
   );

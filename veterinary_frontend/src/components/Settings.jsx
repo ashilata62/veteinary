@@ -447,7 +447,7 @@ export default function SettingsPage({ currentRole }) {
                     {/* Preset swatches */}
                     <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                       {[
-                        { color: '#14b8a6', name: 'VetCare Teal (Default)' },
+                        { color: '#14b8a6', name: 'PetCare Teal (Default)' },
                         { color: '#3b82f6', name: 'Ocean Blue' },
                         { color: '#8b5cf6', name: 'Royal Purple' },
                         { color: '#f59e0b', name: 'Amber Gold' },

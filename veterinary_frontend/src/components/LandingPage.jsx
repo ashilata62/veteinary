@@ -64,7 +64,7 @@ export default function LandingPage() {
           {/* Logo */}
           <div className="vet-brand-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '36px', objectFit: 'contain', cursor: 'pointer' }} />
-            <span>VetCare <span className="vet-brand-highlight">Pro</span></span>
+            <span>PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
 
           {/* Center Links (Desktop) */}
@@ -103,7 +103,7 @@ export default function LandingPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="vet-brand-logo">
             <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '32px', objectFit: 'contain' }} />
-            <span>VetCare <span className="vet-brand-highlight">Pro</span></span>
+            <span>PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
           <button className="vet-mobile-toggle" onClick={() => setMobileMenuOpen(false)}>
             <X size={24} />
@@ -296,7 +296,7 @@ export default function LandingPage() {
           <div className="vet-why-left">
             <div className="vet-badge"><ShieldCheck size={14} /> Why Choose Us</div>
             <h2 className="vet-section-title">
-              Why <span className="vet-text-gradient">VetCare Pro</span> Stands Out
+              Why <span className="vet-text-gradient">PetCare Pro</span> Stands Out
             </h2>
             <p className="vet-section-subtitle">
               Designed to help you save time, increase revenue, and provide exceptional care.
@@ -352,7 +352,7 @@ export default function LandingPage() {
 
             <div className="vet-quote-card">
               <p className="vet-quote-text">
-                "VetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
+                "PetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
               </p>
               <div className="vet-quote-author">
                 <div className="vet-author-avatar">RS</div>
@@ -832,7 +832,7 @@ export default function LandingPage() {
 
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20VetCare%20Pro%20SaaS%20solution."
+        href="https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20PetCare%20Pro%20SaaS%20solution."
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with Kiaan Technology on WhatsApp"
