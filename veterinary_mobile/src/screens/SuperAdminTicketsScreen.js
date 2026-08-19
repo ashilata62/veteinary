@@ -170,7 +170,7 @@ export default function SuperAdminTicketsScreen() {
 
       <FlatList
         data={filteredTickets}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => (item.id ? `${item.id}-${index}` : index.toString())}
         renderItem={renderTicket}
         contentContainerStyle={styles.listContainer}
       />

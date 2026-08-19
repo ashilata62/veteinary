@@ -30,9 +30,9 @@ export default function BrochurePage() {
       {/* TOP HEADER */}
       <header className="vcb3-header">
         <div className="vcb3-logo" onClick={() => navigate('/')}>
-          <img src="/kt-logo.png" alt="VetCare Pro" className="vcb3-logo-img" />
+          <img src="/kt-logo.png" alt="PetCare Pro" className="vcb3-logo-img" />
           <div className="vcb3-logo-text">
-            <h2>VetCare <span>Pro</span></h2>
+            <h2>PetCare <span>Pro</span></h2>
             <p>Veterinary Management SaaS</p>
           </div>
         </div>
@@ -146,9 +146,9 @@ export default function BrochurePage() {
             </div>
           </section>
 
-          {/* 4. WHY VETCARE PRO? */}
+          {/* 4. WHY PETCARE PRO? */}
           <section className="vcb3-section">
-            <h2 className="vcb3-section-title">WHY VETCARE PRO?</h2>
+            <h2 className="vcb3-section-title">WHY PETCARE PRO?</h2>
             <div className="vcb3-why-row">
               <div className="why-box"><Cloud size={28}/><span>Multi-Tenant<br/>SaaS Platform</span></div>
               <div className="why-box"><Shield size={28}/><span>Secure &<br/>Reliable</span></div>
@@ -191,7 +191,7 @@ export default function BrochurePage() {
           <section className="vcb3-cta-banner">
             <div className="vcb3-cta-left">
               <h2>Ready to Transform Your Veterinary Practice?</h2>
-              <p>Join hundreds of clinics already using VetCare Pro.</p>
+              <p>Join hundreds of clinics already using PetCare Pro.</p>
               <div className="cta-btn-group">
                 <button className="cta-btn primary" onClick={() => handleRegister('free-trial')}>Request a Demo</button>
                 <button className="cta-btn outline" onClick={() => handleRegister('free-trial')}>Talk to Expert</button>
@@ -217,9 +217,9 @@ export default function BrochurePage() {
           
           {/* Box 1: WHY CLINICS CHOOSE */}
           <div className="vcb3-side-box">
-            <div className="sb-head">WHY CLINICS CHOOSE VETCARE PRO</div>
+            <div className="sb-head">WHY CLINICS CHOOSE PETCARE PRO</div>
             <div className="sb-body">
-              <h5 className="sb-red"><XCircle size={18} fill="#ef4444" color="#111827"/> Without VetCare Pro</h5>
+              <h5 className="sb-red"><XCircle size={18} fill="#ef4444" color="#111827"/> Without PetCare Pro</h5>
               <ul className="sb-list-red">
                 <li>Manual appointments & scheduling</li>
                 <li>Missed follow-ups & reminders</li>
@@ -231,7 +231,7 @@ export default function BrochurePage() {
                 <li>Difficult to scale your clinic</li>
               </ul>
 
-              <h5 className="sb-green"><CheckCircle size={18} fill="#10b981" color="#111827"/> With VetCare Pro</h5>
+              <h5 className="sb-green"><CheckCircle size={18} fill="#10b981" color="#111827"/> With PetCare Pro</h5>
               <ul className="sb-list-green">
                 <li>Centralized clinic management</li>
                 <li>Smart appointments & reminders</li>
@@ -314,7 +314,7 @@ export default function BrochurePage() {
       </div>
 
       <div className="vcb3-footer-bottom">
-        <div className="vcb3-fb-text">VetCare Pro. Smart Clinic. Happy Pets.</div>
+        <div className="vcb3-fb-text">PetCare Pro. Smart Clinic. Happy Pets.</div>
         <div className="vcb3-fb-contact">
           <a href="tel:+919752100980"><PhoneCall size={18} /> +91-97521 00980</a>
           <a href="mailto:info@kiaantechnology.com"><Mail size={18} /> info@kiaantechnology.com</a>

@@ -40,12 +40,12 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const { 
-    login, 
-    authenticateWithBiometrics, 
-    isBiometricSupported, 
-    isBiometricEnabled, 
-    biometricType 
+  const {
+    login,
+    authenticateWithBiometrics,
+    isBiometricSupported,
+    isBiometricEnabled,
+    biometricType
   } = useContext(AuthContext);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function LoginScreen({ navigation }) {
       setErrorMsg('Please enter email and password');
       return;
     }
-    
+
     // Validation Rules matching web validations
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
@@ -139,8 +139,8 @@ export default function LoginScreen({ navigation }) {
           <View style={[styles.logoCircle, { backgroundColor: 'transparent' }]}>
             <Image source={require('../../assets/icon.png')} style={{ width: 56, height: 56, borderRadius: 14, resizeMode: 'contain' }} />
           </View>
-          <Text style={styles.appName}>VetCare Pro</Text>
-          <Text style={styles.appTagline}>Veterinary Practice Management</Text>
+          <Text style={styles.appName}>PetCare Pro</Text>
+          <Text style={styles.appTagline}>Petcare Practice Management</Text>
         </View>
 
         {/* Card Form */}
@@ -210,10 +210,10 @@ export default function LoginScreen({ navigation }) {
                 activeOpacity={0.7}
                 disabled={loading}
               >
-                <MaterialCommunityIcons 
-                  name={biometricType === 'FaceID' ? 'face-recognition' : 'fingerprint'} 
-                  size={28} 
-                  color={colors.primary} 
+                <MaterialCommunityIcons
+                  name={biometricType === 'FaceID' ? 'face-recognition' : 'fingerprint'}
+                  size={28}
+                  color={colors.primary}
                 />
               </TouchableOpacity>
             )}
@@ -251,7 +251,7 @@ export default function LoginScreen({ navigation }) {
                 style={styles.demoChip}
                 onPress={() => setDemoUser('assistant@vetcarepro.com')}
               >
-                <Text style={styles.demoChipText}>Vet Assistant</Text>
+                <Text style={styles.demoChipText}>Pet Assistant</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.demoChip, { backgroundColor: '#f3e8ff', borderColor: '#c084fc', borderWidth: 1 }]}
@@ -290,7 +290,7 @@ export default function LoginScreen({ navigation }) {
           </View>
         </View>
 
-        <Text style={styles.footerNote}>VetCare Clinic Management v1.0.0</Text>
+        <Text style={styles.footerNote}>PetCare Clinic Management v1.0.0</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

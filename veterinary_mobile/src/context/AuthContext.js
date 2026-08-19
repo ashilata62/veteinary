@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
           setBiometricType('Fingerprint');
         }
         
-        const enabledSetting = await AsyncStorage.getItem('vetcare_biometrics_enabled');
+        const enabledSetting = await AsyncStorage.getItem('petcare_biometrics_enabled');
         setIsBiometricEnabled(enabledSetting === 'true');
       }
     } catch (e) {
@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
   const loadStoredAuth = async () => {
     try {
       // Securely load token, load user object from normal async storage
-      const storedToken = await SecureStore.getItemAsync('vetcare_token');
-      const storedUser = await AsyncStorage.getItem('vetcare_user');
+      const storedToken = await SecureStore.getItemAsync('petcare_token');
+      const storedUser = await AsyncStorage.getItem('petcare_user');
       
       if (storedToken && storedUser) {
         setToken(storedToken);
@@ -55,8 +55,8 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       // Fallback to AsyncStorage if SecureStore fails
       try {
-        const storedToken = await AsyncStorage.getItem('vetcare_token');
-        const storedUser = await AsyncStorage.getItem('vetcare_user');
+        const storedToken = await AsyncStorage.getItem('petcare_token');
+        const storedUser = await AsyncStorage.getItem('petcare_user');
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     const str = r.toString().trim().toLowerCase();
     if (str.includes('super')) return 'SUPER_ADMIN';
     if (str.includes('reception') || str.includes('demor')) return 'Receptionist';
-    if (str.includes('assistant')) return 'Vet Assistant';
+    if (str.includes('assistant')) return 'Pet Assistant';
     if (str.includes('manager')) return 'Manager';
     if (str.includes('admin')) return 'Admin';
     if (str.includes('doctor') || str.includes('doc')) return 'Doctor';
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
     }
     if (userRole) return normalizeRole(userRole);
     if (em.includes('reception') || em.includes('demor')) return 'Receptionist';
-    if (em.includes('assistant')) return 'Vet Assistant';
+    if (em.includes('assistant')) return 'Pet Assistant';
     if (em.includes('manager')) return 'Manager';
     if (em.includes('admin')) return 'Admin';
     return 'Doctor';
@@ -126,8 +126,8 @@ export const AuthProvider = ({ children }) => {
       };
       
       // Save token securely (keys must be alphanumeric + . - _ only)
-      await SecureStore.setItemAsync('vetcare_token', jwtToken);
-      await AsyncStorage.setItem('vetcare_user', JSON.stringify(userObj));
+      await SecureStore.setItemAsync('petcare_token', jwtToken);
+      await AsyncStorage.setItem('petcare_user', JSON.stringify(userObj));
 
       setToken(jwtToken);
       setUser(userObj);
@@ -150,12 +150,12 @@ export const AuthProvider = ({ children }) => {
         name: getStaffName(detectedRole, email),
         email: email,
         role: detectedRole,
-        clinicName: 'VetCare SaaS Control Platform'
+        clinicName: 'PetCare SaaS Control Platform'
       };
-      const mockToken = 'mock-vetcare-jwt-token';
+      const mockToken = 'mock-petcare-jwt-token';
 
-      await SecureStore.setItemAsync('vetcare_token', mockToken);
-      await AsyncStorage.setItem('vetcare_user', JSON.stringify(mockUser));
+      await SecureStore.setItemAsync('petcare_token', mockToken);
+      await AsyncStorage.setItem('petcare_user', JSON.stringify(mockUser));
 
       setToken(mockToken);
       setUser(mockUser);
@@ -170,8 +170,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Check if we have a saved token
-      const storedToken = await SecureStore.getItemAsync('vetcare_token');
-      const storedUserStr = await AsyncStorage.getItem('vetcare_user');
+      const storedToken = await SecureStore.getItemAsync('petcare_token');
+      const storedUserStr = await AsyncStorage.getItem('petcare_user');
       
       if (!storedToken || !storedUserStr) {
         return { success: false, error: 'No credentials saved. Please log in with password first.' };
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }) => {
 
   const setBiometricPreference = async (enabled) => {
     try {
-      await AsyncStorage.setItem('vetcare_biometrics_enabled', enabled ? 'true' : 'false');
+      await AsyncStorage.setItem('petcare_biometrics_enabled', enabled ? 'true' : 'false');
       setIsBiometricEnabled(enabled);
     } catch (e) {
       console.error('Failed to save biometric preference:', e);
@@ -208,15 +208,15 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await SecureStore.deleteItemAsync('vetcare_token');
-      await AsyncStorage.removeItem('vetcare_user');
+      await SecureStore.deleteItemAsync('petcare_token');
+      await AsyncStorage.removeItem('petcare_user');
       setToken(null);
       setUser(null);
     } catch (e) {
       // Fallback
       try {
-        await AsyncStorage.removeItem('vetcare_token');
-        await AsyncStorage.removeItem('vetcare_user');
+        await AsyncStorage.removeItem('petcare_token');
+        await AsyncStorage.removeItem('petcare_user');
         setToken(null);
         setUser(null);
       } catch (innerErr) {

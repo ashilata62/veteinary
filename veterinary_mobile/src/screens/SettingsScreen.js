@@ -176,7 +176,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>Settings</Text>
-          <Text style={styles.headerSub}>{user?.role} • {user?.clinicName || 'VetCare Pro'}</Text>
+          <Text style={styles.headerSub}>{user?.role} • {user?.clinicName || 'PetCare Pro'}</Text>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
           <Ionicons name="log-out-outline" size={22} color={colors.danger} />

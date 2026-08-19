@@ -7,8 +7,8 @@ export default function AccountSuspended({ onLogout, clinicName }) {
       <div className="trial-expired-bg" />
       <header className="trial-expired-header">
         <div className="trial-expired-logo">
-          <img src="/kt-logo.png" alt="VetCare Pro" className="trial-logo-img" />
-          <span className="trial-logo-text">VetCare Pro</span>
+          <img src="/kt-logo.png" alt="PetCare Pro" className="trial-logo-img" />
+          <span className="trial-logo-text">PetCare Pro</span>
         </div>
         <button className="trial-logout-btn" onClick={onLogout}>
           <LogOut size={16} />

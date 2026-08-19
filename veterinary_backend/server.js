@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 app.set('trust proxy', 1);
-const port = process.env.PORT || 5000;
+const port = 5002;
 
 // Security Headers
 app.use(helmet({

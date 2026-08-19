@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Search, ArrowLeft, Send, MessageSquare, Clipboard, User, Mail, Filter, RotateCcw, CheckCircle2 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function SuperAdminTickets() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -16,7 +18,7 @@ export default function SuperAdminTickets() {
     try {
       setLoading(true);
       const token = localStorage.getItem("sa_token");
-      const res = await fetch("http://localhost:5000/api/super-admin/tickets", {
+      const res = await fetch(`${API_URL}/api/super-admin/tickets`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -52,7 +54,7 @@ export default function SuperAdminTickets() {
   const handleStatusChange = async (ticketId, newStatus) => {
     try {
       const token = localStorage.getItem("sa_token");
-      const res = await fetch(`http://localhost:5000/api/super-admin/tickets/${ticketId}/status`, {
+      const res = await fetch(`${API_URL}/api/super-admin/tickets/${ticketId}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -81,7 +83,7 @@ export default function SuperAdminTickets() {
 
     try {
       const token = localStorage.getItem("sa_token");
-      const res = await fetch(`http://localhost:5000/api/super-admin/tickets/${selectedTicket.id}/reply`, {
+      const res = await fetch(`${API_URL}/api/super-admin/tickets/${selectedTicket.id}/reply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

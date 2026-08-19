@@ -1,11 +1,21 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OfflineSyncService from '../services/OfflineSyncService';
+import Constants from 'expo-constants';
 
-// ⚠️ Update this to your PC's actual IPv4 address (run `ipconfig` on Windows)
-// Your phone and PC must be on the SAME Wi-Fi network
-const LOCAL_PC_IP = '192.168.1.39';
-const DEV_API_URL = `http://${LOCAL_PC_IP}:5000/api/v1`;
+// Auto-detect PC's IP address from Expo hostUri if available, fallback to 192.168.1.73
+let detectedIp = '192.168.1.73';
+try {
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost || Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (hostUri) {
+    detectedIp = hostUri.split(':')[0];
+  }
+} catch (e) {
+  console.log('Error detecting Expo host IP:', e);
+}
+
+const LOCAL_PC_IP = detectedIp || '192.168.1.73';
+const DEV_API_URL = `http://${LOCAL_PC_IP}:5002/api/v1`;
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || DEV_API_URL;
 
@@ -134,14 +144,19 @@ api.defaults.adapter = async (config) => {
 // Interceptor to attach JWT auth token from SecureStore or AsyncStorage
 api.interceptors.request.use(
   async (config) => {
+    // Redirect super-admin endpoints to /api instead of /api/v1
+    if (config.url && config.url.startsWith('/super-admin')) {
+      config.baseURL = API_BASE_URL.replace('/api/v1', '/api');
+    }
+
     try {
       let token = null;
       try {
         const SecureStore = require('expo-secure-store');
         // Key must not contain '@' — only alphanumeric, '.', '-', '_'
-        token = await SecureStore.getItemAsync('vetcare_token');
+        token = await SecureStore.getItemAsync('petcare_token');
       } catch (err) {
-        token = await AsyncStorage.getItem('vetcare_token');
+        token = await AsyncStorage.getItem('petcare_token');
       }
 
       if (token) {

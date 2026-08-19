@@ -1,4 +1,4 @@
-// Centralized currency and formatting utilities for VetCare Pro
+// Centralized currency and formatting utilities for PetCare Pro
 
 /**
  * Formats a numeric value into currency string with 'Rs' prefix.

@@ -35,11 +35,13 @@ const darkTheme = {
 
 export default function LandingScreen({ navigation }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [brochureModalOpen, setBrochureModalOpen] = useState(false);
   const scrollViewRef = useRef(null);
 
   // Layout Y positions for smooth scrolling to sections
   const sectionYPositions = useRef({
     home: 0,
+    brochure: 0,
     features: 0,
     benefits: 0,
     testimonials: 0,
@@ -49,6 +51,10 @@ export default function LandingScreen({ navigation }) {
 
   const scrollToSection = (sectionKey) => {
     setDrawerOpen(false);
+    if (sectionKey === 'brochure') {
+      navigation.navigate('Brochure');
+      return;
+    }
     const yPos = sectionYPositions.current[sectionKey] || 0;
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ y: Math.max(0, yPos - 10), animated: true });
@@ -91,7 +97,7 @@ export default function LandingScreen({ navigation }) {
         >
           <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8, marginRight: 8, resizeMode: 'contain' }} />
           <Text style={styles.brandTitle}>
-            VetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
+            PetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
           </Text>
         </TouchableOpacity>
 
@@ -134,17 +140,17 @@ export default function LandingScreen({ navigation }) {
           <View style={styles.heroBadge}>
             <Ionicons name="trophy" size={14} color={darkTheme.gold} />
             <Text style={styles.heroBadgeText}>
-              #1 Veterinary Clinic Management Software
+              #1 Petcare Clinic Management Software
             </Text>
           </View>
 
           <Text style={styles.heroMainTitle}>
             Transform Your{'\n'}
-            <Text style={styles.heroGradientText}>Veterinary Practice</Text>
+            <Text style={styles.heroGradientText}>Petcare Practice</Text>
           </Text>
 
           <Text style={styles.heroSubText}>
-            The all-in-one solution for modern veterinary clinics and pet hospitals. Streamline appointments, manage pet records, automate billing, and grow your clinic.
+            The all-in-one solution for modern petcare clinics and pet hospitals. Streamline appointments, manage pet records, automate billing, and grow your clinic.
           </Text>
 
           <View style={styles.heroActionsRow}>
@@ -213,7 +219,7 @@ export default function LandingScreen({ navigation }) {
             Everything You Need to <Text style={{ color: darkTheme.primary }}>Manage Your Clinic</Text>
           </Text>
           <Text style={styles.sectionHeaderSub}>
-            Comprehensive tools designed specifically for veterinary practices.
+            Comprehensive tools designed specifically for petcare practices.
           </Text>
 
           <View style={styles.featuresList}>
@@ -322,7 +328,7 @@ export default function LandingScreen({ navigation }) {
           </View>
 
           <Text style={styles.leftSectionTitle}>
-            Why <Text style={{ color: darkTheme.primary }}>VetCare Pro</Text> Stands Out
+            Why <Text style={{ color: darkTheme.primary }}>PetCare Pro</Text> Stands Out
           </Text>
 
           <View style={styles.checklistContainer}>
@@ -368,7 +374,7 @@ export default function LandingScreen({ navigation }) {
           {/* Quote Card */}
           <View style={styles.quoteCard}>
             <Text style={styles.quoteBody}>
-              "VetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
+              "PetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
             </Text>
             <View style={styles.quoteAuthorRow}>
               <View style={styles.avatarCircle}>
@@ -376,7 +382,7 @@ export default function LandingScreen({ navigation }) {
               </View>
               <View>
                 <Text style={styles.authorName}>Dr. Rahul Sharma</Text>
-                <Text style={styles.authorSub}>Owner, City Vet Clinic</Text>
+                <Text style={styles.authorSub}>Owner, City Pet Clinic</Text>
               </View>
             </View>
           </View>
@@ -411,7 +417,7 @@ export default function LandingScreen({ navigation }) {
                 </View>
               </View>
               <Text style={styles.testiText}>
-                "VetCare Pro has completely automated our clinic operations. Our team saves 20+ hours every week!"
+                "PetCare Pro has completely automated our clinic operations. Our team saves 20+ hours every week!"
               </Text>
               <View style={styles.starsRow}>
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -603,7 +609,7 @@ export default function LandingScreen({ navigation }) {
         <View style={styles.ctaBanner}>
           <Text style={styles.ctaTitle}>Ready to Transform Your Clinic?</Text>
           <Text style={styles.ctaSub}>
-            Join thousands of veterinarians who have already streamlined their practice.
+            Join thousands of pet practitioners who have already streamlined their practice.
           </Text>
           <TouchableOpacity
             style={styles.btnCtaLg}
@@ -629,7 +635,7 @@ export default function LandingScreen({ navigation }) {
           </View>
 
           <Text style={styles.footerDescText}>
-            The ultimate management solution for modern veterinary clinics, pet hospitals, and animal care centers.
+            The ultimate management solution for modern petcare clinics, pet hospitals, and animal care centers.
           </Text>
 
           {/* Quick Links Section */}
@@ -687,7 +693,7 @@ export default function LandingScreen({ navigation }) {
 
           {/* Bottom Policy Links */}
           <View style={styles.footerBottomLinks}>
-            <TouchableOpacity onPress={() => showInfoAlert('Privacy Policy', 'VetCare Pro protects clinic & patient health data with enterprise grade 256-bit encryption.')}>
+            <TouchableOpacity onPress={() => showInfoAlert('Privacy Policy', 'PetCare Pro protects clinic & patient health data with enterprise grade 256-bit encryption.')}>
               <Text style={styles.footerBottomLinkText}>Privacy Policy</Text>
             </TouchableOpacity>
             <Text style={{ color: darkTheme.cardBorder }}>|</Text>
@@ -709,7 +715,7 @@ export default function LandingScreen({ navigation }) {
       {/* Floating WhatsApp Button */}
       <TouchableOpacity
         style={styles.whatsappFloat}
-        onPress={() => Linking.openURL('https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20VetCare%20Pro%20SaaS%20solution.')}
+        onPress={() => Linking.openURL('https://wa.me/919752100980?text=Hello%20Kiaan%20Technology%2C%20I%20would%20like%20to%20know%20more%20about%20your%20PetCare%20Pro%20SaaS%20solution.')}
         activeOpacity={0.85}
       >
         <Ionicons name="logo-whatsapp" size={30} color="#ffffff" />
@@ -727,7 +733,7 @@ export default function LandingScreen({ navigation }) {
               <View style={styles.brandLogoBox}>
                 <Image source={require('../../assets/icon.png')} style={{ width: 32, height: 32, borderRadius: 8, marginRight: 8, resizeMode: 'contain' }} />
                 <Text style={styles.brandTitle}>
-                  VetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
+                  PetCare <Text style={{ color: darkTheme.primary }}>Pro</Text>
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setDrawerOpen(false)}>
@@ -738,6 +744,7 @@ export default function LandingScreen({ navigation }) {
             <View style={styles.drawerLinksList}>
               {[
                 { label: 'Home', section: 'home', icon: 'home-outline' },
+                { label: 'All-In-One Brochure', section: 'brochure', icon: 'document-text-outline' },
                 { label: 'Features', section: 'features', icon: 'flash-outline' },
                 { label: 'Why Choose Us', section: 'benefits', icon: 'shield-checkmark-outline' },
                 { label: 'Testimonials', section: 'testimonials', icon: 'star-outline' },
@@ -747,7 +754,14 @@ export default function LandingScreen({ navigation }) {
                 <TouchableOpacity
                   key={item.section}
                   style={styles.drawerNavItem}
-                  onPress={() => scrollToSection(item.section)}
+                  onPress={() => {
+                    setDrawerOpen(false);
+                    if (item.section === 'brochure') {
+                      navigation.navigate('Brochure');
+                    } else {
+                      scrollToSection(item.section);
+                    }
+                  }}
                 >
                   <Ionicons name={item.icon} size={20} color={darkTheme.primary} />
                   <Text style={styles.drawerNavText}>{item.label}</Text>
@@ -1464,5 +1478,276 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+  },
+  brochureSectionContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    backgroundColor: '#070c1b',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  brochureBannerCard: {
+    backgroundColor: darkTheme.cardBg,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  brochureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: darkTheme.badgeBg,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  brochureBadgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: darkTheme.primary,
+  },
+  brochureTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 6,
+  },
+  brochureSubtitle: {
+    fontSize: 13,
+    color: darkTheme.textSecondary,
+    marginBottom: 16,
+  },
+  btnLaunchBrochureModal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: darkTheme.primary,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  btnLaunchBrochureText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  infographicSecHeader: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: darkTheme.primary,
+    letterSpacing: 1,
+    marginBottom: 14,
+  },
+  compareGridRow: {
+    gap: 12,
+  },
+  compareBox: {
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: 'hidden',
+    paddingBottom: 12,
+  },
+  compareHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  compareHeaderText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  compareItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  compareItemText: {
+    fontSize: 12,
+  },
+  mgmtModuleGrid: {
+    gap: 12,
+  },
+  mgmtModuleCard: {
+    backgroundColor: darkTheme.cardBg,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  mgmtModuleIconHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  mgmtModuleTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: darkTheme.primary,
+  },
+  mgmtModuleBullet: {
+    fontSize: 12,
+    color: darkTheme.textSecondary,
+    marginBottom: 4,
+  },
+  rolesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  roleBoxCard: {
+    width: (width - 50) / 2,
+    backgroundColor: darkTheme.cardBg,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  roleIconEmoji: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  roleBoxTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  roleBoxSub: {
+    fontSize: 11,
+    color: darkTheme.textSecondary,
+    marginTop: 2,
+  },
+  stepsHorizontalScroll: {
+    alignItems: 'center',
+    gap: 8,
+    paddingRight: 20,
+  },
+  stepChipBox: {
+    backgroundColor: darkTheme.cardBg,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+    alignItems: 'center',
+    width: 120,
+  },
+  stepNumBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: darkTheme.primary,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 22,
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  stepTitleText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  stepDescText: {
+    color: darkTheme.textMuted,
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  stepArrowText: {
+    color: darkTheme.primary,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  kpiMetricsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  kpiCardItem: {
+    backgroundColor: darkTheme.cardBg,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    width: (width - 56) / 3,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  kpiValNum: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: darkTheme.primary,
+  },
+  kpiValLbl: {
+    fontSize: 10,
+    color: darkTheme.textSecondary,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  brochureModalContainer: {
+    flex: 1,
+    backgroundColor: '#070c1b',
+  },
+  brochureModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 14,
+    backgroundColor: darkTheme.cardBg,
+    borderBottomWidth: 1,
+    borderBottomColor: darkTheme.cardBorder,
+  },
+  brochureModalHeaderTitle: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  btnModalTrial: {
+    backgroundColor: darkTheme.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  btnModalTrialText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  brochureHeroCard: {
+    backgroundColor: darkTheme.cardBg,
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: darkTheme.cardBorder,
+  },
+  brochureModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 6,
+  },
+  brochureModalSub: {
+    fontSize: 13,
+    color: darkTheme.textSecondary,
+  },
+  modalSecTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: darkTheme.primary,
+    marginBottom: 10,
+    letterSpacing: 1,
   },
 });

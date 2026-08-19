@@ -1,4 +1,4 @@
-/* BrochurePage.css - VetCare Pro Dark/Teal Exact Layout Clone */
+/* BrochurePage.css - PetCare Pro Dark/Teal Exact Layout Clone */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .vcb3-page {
@@ -182,7 +182,7 @@
 .role-text h4 { margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 700; color: #f8fafc;}
 .role-text p { margin: 0; font-size: 0.75rem; color: #94a3b8; line-height: 1.5; font-weight: 500;}
 
-/* WHY VETCARE */
+/* WHY PETCARE */
 .vcb3-why-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; }
 .why-box { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; color: #14b8a6; }
 .why-box span { font-size: 0.8rem; font-weight: 700; color: #e2e8f0; line-height: 1.4; }

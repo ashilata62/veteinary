@@ -40,10 +40,10 @@ export default function SuperAdminDashboardScreen({ navigation }) {
   });
 
   const [renewals, setRenewals] = useState([
-    { id: '1', clinic: 'Downtown Vet Care', owner: 'Dr. John Doe', expiry: '18 Aug 2026', plan: '7-Day Trial', status: 'Trial' },
+    { id: '1', clinic: 'Downtown Pet Care', owner: 'Dr. John Doe', expiry: '18 Aug 2026', plan: '7-Day Trial', status: 'Trial' },
     { id: '2', clinic: 'PetCare Central', owner: 'Dr. Jane Smith', expiry: '22 Aug 2026', plan: 'Monthly Pro', status: 'Pro' },
     { id: '3', clinic: 'Paws & Claws Clinic', owner: 'Dr. Vikram Singh', expiry: '28 Aug 2026', plan: 'Yearly Enterprise', status: 'Enterprise' },
-    { id: '4', clinic: 'City Vet Hospital', owner: 'Rajesh Kumar', expiry: '30 Aug 2026', plan: '7-Day Trial', status: 'Trial' },
+    { id: '4', clinic: 'City Pet Hospital', owner: 'Rajesh Kumar', expiry: '30 Aug 2026', plan: '7-Day Trial', status: 'Trial' },
   ]);
 
   const fetchStats = async () => {

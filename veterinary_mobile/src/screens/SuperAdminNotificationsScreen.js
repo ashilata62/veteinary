@@ -22,7 +22,7 @@ const NOTIFICATIONS = [
   },
   {
     id: 2, type: 'billing', title: 'Payment Failed',
-    desc: 'Enterprise subscription renewal failed for City Vet Clinic.',
+    desc: 'Enterprise subscription renewal failed for City Pet Clinic.',
     time: '1 hour ago', icon: 'card-outline', color: darkTheme.gold, bg: 'rgba(245,158,11,0.12)',
   },
   {
@@ -37,7 +37,7 @@ const NOTIFICATIONS = [
   },
   {
     id: 5, type: 'user', title: 'New Support Ticket',
-    desc: 'Downtown Animal ER submitted a high priority support ticket.',
+    desc: 'Downtown Animal Care submitted a high priority support ticket.',
     time: '1 day ago', icon: 'chatbubble-outline', color: darkTheme.primary, bg: 'rgba(20,184,166,0.12)',
   },
 ];

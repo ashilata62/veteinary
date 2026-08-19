@@ -30,7 +30,7 @@ const darkTheme = {
 
 export default function SuperAdminSettingsScreen() {
   const { logout } = useContext(AuthContext);
-  const [platformName, setPlatformName] = useState('VetCare Pro Platform');
+  const [platformName, setPlatformName] = useState('PetCare Pro Platform');
   const [supportEmail, setSupportEmail] = useState('support@vetcarepro.com');
   const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_dummyKeyId');
   const [maintenanceMode, setMaintenanceMode] = useState(false);

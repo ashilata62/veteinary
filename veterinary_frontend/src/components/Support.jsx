@@ -342,7 +342,7 @@ export default function Support() {
             <div style={{ textAlign: 'center', backgroundColor: '#fff', padding: '3rem', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
               <HelpCircle size={48} style={{ color: '#94a3b8', marginBottom: '0.75rem' }} />
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#334155' }}>No tickets raised yet</h3>
-              <p style={{ color: '#64748b', fontSize: '0.85rem' }}>If you face any issues with VetCare Pro, feel free to raise a support request.</p>
+              <p style={{ color: '#64748b', fontSize: '0.85rem' }}>If you face any issues with PetCare Pro, feel free to raise a support request.</p>
             </div>
           ) : (
             tickets.map((t) => (

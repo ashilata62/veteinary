@@ -69,9 +69,9 @@ export default function PaymentPage() {
         key: orderData.data.key_id,
         amount: orderData.data.amount,
         currency: orderData.data.currency,
-        name: 'VetCare Pro',
+        name: 'PetCare Pro',
         description: `Subscription for ${planDetails.name}`,
-        image: '/kt-logo.png', // VetCare Pro logo
+        image: '/kt-logo.png', // PetCare Pro logo
         order_id: orderData.data.order_id,
         handler: async function (response) {
           // 3. Verify Payment Signature
@@ -131,7 +131,7 @@ export default function PaymentPage() {
     <div className="payment-container">
       <div className="payment-card">
         <div className="payment-header">
-          <img src="/kt-logo.png" alt="VetCare Pro" className="payment-logo" />
+          <img src="/kt-logo.png" alt="PetCare Pro" className="payment-logo" />
           <h2>Complete Your Subscription</h2>
           <p>Secure checkout via Razorpay</p>
         </div>

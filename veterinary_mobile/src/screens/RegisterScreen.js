@@ -280,7 +280,7 @@ export default function RegisterScreen({ navigation, route }) {
         </TouchableOpacity>
         <View style={styles.headerTitleBox}>
           <Text style={styles.headerTitle}>Clinic Registration</Text>
-          <Text style={styles.headerSub}>Create your VetCare Pro account</Text>
+          <Text style={styles.headerSub}>Create your PetCare Pro account</Text>
         </View>
       </View>
 
@@ -350,7 +350,7 @@ export default function RegisterScreen({ navigation, route }) {
               <MaterialCommunityIcons name="office-building" size={20} color={darkTheme.primary} style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
-                placeholder="e.g. City Vet Hospital & Clinic"
+                placeholder="e.g. City Pet Hospital & Clinic"
                 placeholderTextColor={darkTheme.textMuted}
                 value={formData.clinicName}
                 onChangeText={(val) => handleChange('clinicName', val)}

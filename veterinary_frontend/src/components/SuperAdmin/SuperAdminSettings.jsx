@@ -4,7 +4,7 @@ import { Save, Globe, Shield, Mail, CreditCard, CheckCircle2 } from 'lucide-reac
 export default function SuperAdminSettings() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [settings, setSettings] = useState({
-    platformName: 'VetCare Pro Platform',
+    platformName: 'PetCare Pro Platform',
     supportEmail: 'support@vetcarepro.com',
     currency: 'INR',
     maintenanceMode: false,

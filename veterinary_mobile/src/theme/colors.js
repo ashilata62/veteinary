@@ -1,5 +1,5 @@
 // ============================================================
-// VetCare Pro — Color System
+// PetCare Pro — Color System
 // Landing / Login / Register → Dark Theme (handled locally in each screen)
 // Post-login app screens → Light/White theme (this file)
 // ============================================================

@@ -69,8 +69,8 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
       <div className="trial-expired-bg" />
       <header className="trial-expired-header">
         <div className="trial-expired-logo">
-          <img src="/kt-logo.png" alt="VetCare Pro" className="trial-logo-img" />
-          <span className="trial-logo-text">VetCare Pro</span>
+          <img src="/kt-logo.png" alt="PetCare Pro" className="trial-logo-img" />
+          <span className="trial-logo-text">PetCare Pro</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 

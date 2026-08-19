@@ -42,7 +42,7 @@ export default function TrialExpiredModal({ user, onClose }) {
         key: orderData.data.key_id,
         amount: orderData.data.amount,
         currency: orderData.data.currency,
-        name: 'VetCare Pro',
+        name: 'PetCare Pro',
         description: `Upgrade to ${planDetails.name}`,
         image: '/kt-logo.png',
         order_id: orderData.data.order_id,
@@ -101,7 +101,7 @@ export default function TrialExpiredModal({ user, onClose }) {
           <AlertCircle size={48} color="#f59e0b" style={{ margin: '0 auto 16px' }} />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>Your Free Trial Has Expired</h2>
           <p style={{ color: '#9ca3af', marginTop: '8px' }}>
-            To continue using VetCare Pro, please select a plan and upgrade your account.
+            To continue using PetCare Pro, please select a plan and upgrade your account.
           </p>
         </div>
 

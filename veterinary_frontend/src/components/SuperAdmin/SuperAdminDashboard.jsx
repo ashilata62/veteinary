@@ -70,7 +70,7 @@ export default function SuperAdminDashboard() {
   };
 
   const renewalsList = [
-    { id: 1, clinic: 'Downtown Vet Care', owner: 'Dr. John Doe', expiry: '8/6/2026', plan: '7-Day Trial', planType: 'trial' },
+    { id: 1, clinic: 'Downtown Pet Care', owner: 'Dr. John Doe', expiry: '8/6/2026', plan: '7-Day Trial', planType: 'trial' },
     { id: 2, clinic: 'PetCare Central', owner: 'Dr. Jane Smith', expiry: '8/10/2026', plan: 'Monthly Pro', planType: 'pro' },
     { id: 3, clinic: 'Paws & Claws Clinic', owner: 'Dr. Vikram Singh', expiry: '8/12/2026', plan: 'Yearly Enterprise', planType: 'enterprise' },
     { id: 4, clinic: 'City Vet Hospital', owner: 'Rajesh Kumar', expiry: '8/14/2026', plan: '7-Day Trial', planType: 'trial' },

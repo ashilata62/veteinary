@@ -191,7 +191,7 @@ export default function AssistanceTasksScreen({ navigation }) {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Assistance Board</Text>
-          <Text style={styles.headerSub}>Ward tasks assigned to veterinary assistants</Text>
+          <Text style={styles.headerSub}>Ward tasks assigned to pet assistants</Text>
         </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowModal(true)}>
           <Ionicons name="add" size={22} color="#ffffff" />
