@@ -1,0 +1,42 @@
+{
+  "short_name": "PetCare PWA",
+  "name": "PetCare Pro - Veterinary Mobile PWA",
+  "description": "Progressive Web App for Veterinary Clinic Doctors, Staff & Admins",
+  "icons": [
+    {
+      "src": "/pwa-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#0d9488",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["medical", "business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Appointments",
+      "url": "/appointments",
+      "description": "View today's clinic appointments"
+    },
+    {
+      "name": "Patients",
+      "url": "/patients",
+      "description": "Search and view pet medical records"
+    },
+    {
+      "name": "Billing & POS",
+      "url": "/billing",
+      "description": "Quick invoices and payments"
+    }
+  ]
+}
