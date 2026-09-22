@@ -6,6 +6,7 @@ import {
   ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical
 } from 'lucide-react';
 import './Sidebar.css';
+import { isTabAllowedForPlan } from '../utils/planPermissions';
 
 export default function Sidebar({ 
   currentTab, setCurrentTab,
@@ -14,6 +15,12 @@ export default function Sidebar({
   onLogout,
   notifications
 }) {
+  const user = (() => {
+    try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+    catch (e) { return {}; }
+  })();
+  const userPlanId = user.plan_id || (user.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-pro');
+
   const menuItems = [
     { id: 'dashboard',    label: 'Dashboard',             icon: LayoutDashboard, roles: ['Admin','Manager','Doctor','Receptionist','Vet Assistant'] },
     { id: 'appointments', label: currentRole === 'Doctor' || currentRole === 'Vet Assistant' ? 'My Appointments' : 'Appointments', icon: CalendarDays, roles: ['Admin','Manager','Doctor','Receptionist', 'Vet Assistant'] },
@@ -37,7 +44,10 @@ export default function Sidebar({
   ];
 
   const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
-  const filteredItems = menuItems.filter(item => item.roles.includes(currentRole));
+  const filteredItems = menuItems.filter(item => {
+    if (!item.roles.includes(currentRole)) return false;
+    return isTabAllowedForPlan(item.id, userPlanId);
+  });
 
   const staffName = {
     Admin: 'Diana Prince',

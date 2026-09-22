@@ -45,16 +45,41 @@ const loginUser = async (req, res) => {
         // Fetch subscription info
         let subscription_status = 'active';
         let trial_end_date = null;
+        let trial_start_date = null;
+        let plan_id = 'plan-pro';
         if (user.clinic_id) {
             const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
             if (subs.length > 0) {
                 const sub = subs[0];
+                plan_id = sub.plan_id || 'plan-free-trial';
                 if (sub.plan_id === 'plan-free-trial') {
                     subscription_status = 'trial';
                 } else {
                     subscription_status = sub.status === 'Active' ? 'active' : 'expired';
                 }
+                trial_start_date = sub.start_date || sub.created_at;
                 trial_end_date = sub.end_date;
+
+                if (subscription_status === 'trial' && trial_end_date) {
+                    const today = new Date();
+                    const parseMid = (val) => {
+                        if (!val) return null;
+                        if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
+                            const [y, m, d] = val.slice(0, 10).split('-').map(Number);
+                            return new Date(y, m - 1, d);
+                        }
+                        const dt = new Date(val);
+                        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                    };
+                    const startMid = parseMid(trial_start_date) || new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const endMid = parseMid(trial_end_date);
+                    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+                    const totalDays = Math.max(1, Math.round((endMid - startMid) / (1000 * 60 * 60 * 24))) || 7;
+                    const daysPassed = Math.max(0, Math.round((todayMid - startMid) / (1000 * 60 * 60 * 24)));
+                    trial_days_left = Math.max(0, Math.round((endMid - todayMid) / (1000 * 60 * 60 * 24)));
+                    trial_current_day = Math.min(totalDays, daysPassed + 1);
+                }
             }
         }
 
@@ -70,8 +95,13 @@ const loginUser = async (req, res) => {
                     role: user.role,
                     profile_image: user.profile_image,
                     clinic_id: user.clinic_id,
+                    plan_id,
                     subscription_status,
-                    trial_end_date
+                    trial_start_date,
+                    trial_end_date,
+                    trial_days_left,
+                    trial_current_day,
+                    created_at: user.created_at
                 }
             }
         });
@@ -158,6 +188,9 @@ const registerUser = async (req, res) => {
         const trialStartDate = new Date();
         const trialExpiryDate = new Date();
         trialExpiryDate.setDate(trialStartDate.getDate() + 7);
+        const startDateStr = trialStartDate.toISOString().slice(0, 10);
+        const expiryDateStr = trialExpiryDate.toISOString().slice(0, 10);
+
         // 6. Insert Clinic, Admin User, and Subscription records into Database (using transaction for consistency)
         const connection = await db.getConnection();
         try {
@@ -185,7 +218,7 @@ const registerUser = async (req, res) => {
             await connection.query(
                 `INSERT INTO saas_subscriptions (id, clinic_id, clinic_admin_id, plan_id, status, start_date, end_date) 
                  VALUES (?, ?, ?, ?, 'Trial', ?, ?)`,
-                [subscriptionId, tenantId, userId, planId, 'Trial', trialStartDate, trialExpiryDate]
+                [subscriptionId, tenantId, userId, planId, 'Trial', startDateStr, expiryDateStr]
             );
 
             await connection.commit();

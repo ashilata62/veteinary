@@ -35,8 +35,11 @@ import SubscriptionExpired from './components/SubscriptionExpired';
 import AccountSuspended from './components/AccountSuspended';
 import Support from './components/Support';
 import PlansPage from './components/PlansPage';
+import TrialBanner from './components/TrialBanner';
+import { isTabAllowedForPlan, getRequiredPlanForTab } from './utils/planPermissions';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
+import { Lock } from 'lucide-react';
 
 import api from './utils/api';
 
@@ -44,9 +47,12 @@ const checkTrialExpired = () => {
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.isPaidPlan || user.subscription_status === 'active' || user.plan === 'paid') return false;
+    if (user.subscription_status === 'expired') return true;
     const trialEnd = user.trial_end_date || user.trialEndDate || user.trial_expires_at;
     if (!trialEnd) return false;
-    return new Date(trialEnd) < new Date();
+    const endOfDay = new Date(trialEnd);
+    endOfDay.setHours(23, 59, 59, 999);
+    return endOfDay < new Date();
   } catch (e) {
     return false;
   }
@@ -82,6 +88,13 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState(() => localStorage.getItem('role') || '');
   const [isSuperAdmin, setIsSuperAdmin] = useState(() => !!localStorage.getItem('sa_token'));
   const [isTrialExpired, setIsTrialExpired] = useState(() => checkTrialExpired());
+
+  useEffect(() => {
+    const handleTrialExpired = () => setIsTrialExpired(true);
+    window.addEventListener('trial_expired', handleTrialExpired);
+    return () => window.removeEventListener('trial_expired', handleTrialExpired);
+  }, []);
+
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [accountSuspended, setAccountSuspended] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState({ clinicName: '', plan: '', expiryDate: '' });
@@ -163,6 +176,7 @@ export default function App() {
   // Authenticated: redirect login, landing, root, and legacy flat URLs → /{role}/{tab}
   useEffect(() => {
     if (!isAuthenticated) return;
+    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/')) return;
     const home = pathForTab('dashboard', currentRole);
     if (location.pathname === LOGIN_PATH || location.pathname === '/' || location.pathname === LANDING_PATH) {
       navigate(home, { replace: true });
@@ -201,6 +215,10 @@ export default function App() {
 
   if (location.pathname.startsWith('/checkout/')) {
     return <PaymentPage />;
+  }
+
+  if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || currentTab === 'plans') {
+    return <PlansPage />;
   }
 
   if (location.pathname.startsWith('/super-admin')) {
@@ -304,45 +322,113 @@ export default function App() {
         />
 
         <main className="content-container">
-          {currentTab === 'dashboard' && currentRole === 'Doctor' ? (
-            <DoctorDashboard setCurrentTab={setCurrentTab} setSelectedPetId={setSelectedPetId} handleViewPet={handleViewPet} attendanceStatus={attendanceStatus} />
-          ) : currentTab === 'dashboard' && currentRole === 'Receptionist' ? (
-            <ReceptionistDashboard setCurrentTab={setCurrentTab} attendanceStatus={attendanceStatus} />
-          ) : currentTab === 'dashboard' && currentRole === 'Vet Assistant' ? (
-            <AssistantDashboard setCurrentTab={setCurrentTab} handleViewPet={handleViewPet} attendanceStatus={attendanceStatus} />
-          ) : currentTab === 'dashboard' ? (
-            <DashboardHome setCurrentTab={setCurrentTab} setSelectedPetId={setSelectedPetId} handleViewPet={handleViewPet} currentRole={currentRole} attendanceStatus={attendanceStatus} />
-          ) : null}
+          <TrialBanner />
 
-          {currentTab === 'appointments' && <Appointments currentRole={currentRole} />}
-          {currentTab === 'home-visits' && <HomeVisits currentRole={currentRole} />}
-          {currentTab === 'owners' && <PetOwnerManagement searchQuery={searchQuery} />}
-          {currentTab === 'pets' && <PetManagement searchQuery={searchQuery} handleViewPet={handleViewPet} />}
-          {currentTab === 'treatment' && <TreatmentNotes />}
+          {(() => {
+            const userObj = (() => {
+              try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+              catch (e) { return {}; }
+            })();
+            const userPlanId = userObj.plan_id || (userObj.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-pro');
 
+            if (!isTabAllowedForPlan(currentTab, userPlanId)) {
+              const reqPlan = getRequiredPlanForTab(currentTab);
+              return (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '55vh',
+                  textAlign: 'center',
+                  padding: '2.5rem',
+                  backgroundColor: 'var(--surface)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid var(--border)',
+                  margin: '1rem 0'
+                }}>
+                  <div style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: 'rgba(234, 88, 12, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.25rem',
+                    color: '#ea580c'
+                  }}>
+                    <Lock size={32} />
+                  </div>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                    Module Locked in Current Plan
+                  </h2>
+                  <p style={{ color: 'var(--text-secondary)', maxWidth: 460, marginBottom: '1.5rem', fontSize: '0.92rem', lineHeight: '1.5' }}>
+                    Access to <strong>{currentTab.toUpperCase()}</strong> requires the <strong>{reqPlan} Plan</strong>. Upgrade your clinic plan to unlock this module and all its features.
+                  </p>
+                  <button
+                    onClick={() => navigate('/plans')}
+                    style={{
+                      backgroundColor: '#ea580c',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '24px',
+                      padding: '10px 24px',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.3)'
+                    }}
+                  >
+                    Upgrade to {reqPlan} Plan
+                  </button>
+                </div>
+              );
+            }
 
-          {/* Reuse PatientRecords for medical, prescriptions, and reports-uploads tabs */}
-          {['medical', 'prescriptions', 'reports-uploads'].includes(currentTab) && (
-            <PatientRecords
-              currentRole={currentRole}
-              selectedPetId={selectedPetId}
-              setSelectedPetId={setSelectedPetId}
-              externalTab={currentTab === 'prescriptions' ? 'Prescriptions' : currentTab === 'reports-uploads' ? 'Reports' : 'Overview'}
-            />
-          )}
+            return (
+              <>
+                {currentTab === 'dashboard' && currentRole === 'Doctor' ? (
+                  <DoctorDashboard setCurrentTab={setCurrentTab} setSelectedPetId={setSelectedPetId} handleViewPet={handleViewPet} attendanceStatus={attendanceStatus} />
+                ) : currentTab === 'dashboard' && currentRole === 'Receptionist' ? (
+                  <ReceptionistDashboard setCurrentTab={setCurrentTab} attendanceStatus={attendanceStatus} />
+                ) : currentTab === 'dashboard' && currentRole === 'Vet Assistant' ? (
+                  <AssistantDashboard setCurrentTab={setCurrentTab} handleViewPet={handleViewPet} attendanceStatus={attendanceStatus} />
+                ) : currentTab === 'dashboard' ? (
+                  <DashboardHome setCurrentTab={setCurrentTab} setSelectedPetId={setSelectedPetId} handleViewPet={handleViewPet} currentRole={currentRole} attendanceStatus={attendanceStatus} />
+                ) : null}
 
-          {currentTab === 'my-revenue' && <DoctorRevenue />}
-          {currentTab === 'assistance-tasks' && <AssistanceTasks />}
-          {currentTab === 'billing' && <Billing currentRole={currentRole} />}
-          {currentTab === 'inventory' && <Inventory />}
-          {currentTab === 'hospitalization' && <Hospitalization />}
-          {currentTab === 'staff' && <StaffManagement />}
-          {currentTab === 'attendance' && <Attendance currentRole={currentRole} />}
-          {currentTab === 'reports' && <Reports />}
-          {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
-          {currentTab === 'notifications' && <Notifications notifications={notifications} setNotifications={setNotifications} />}
-          {currentTab === 'reminders' && <ReminderQueue />}
-          {currentTab === 'support' && <Support />}
+                {currentTab === 'appointments' && <Appointments currentRole={currentRole} />}
+                {currentTab === 'home-visits' && <HomeVisits currentRole={currentRole} />}
+                {currentTab === 'owners' && <PetOwnerManagement searchQuery={searchQuery} />}
+                {currentTab === 'pets' && <PetManagement searchQuery={searchQuery} handleViewPet={handleViewPet} />}
+                {currentTab === 'treatment' && <TreatmentNotes />}
+
+                {/* Reuse PatientRecords for medical, prescriptions, and reports-uploads tabs */}
+                {['medical', 'prescriptions', 'reports-uploads'].includes(currentTab) && (
+                  <PatientRecords
+                    currentRole={currentRole}
+                    selectedPetId={selectedPetId}
+                    setSelectedPetId={setSelectedPetId}
+                    externalTab={currentTab === 'prescriptions' ? 'Prescriptions' : currentTab === 'reports-uploads' ? 'Reports' : 'Overview'}
+                  />
+                )}
+
+                {currentTab === 'my-revenue' && <DoctorRevenue />}
+                {currentTab === 'assistance-tasks' && <AssistanceTasks />}
+                {currentTab === 'billing' && <Billing currentRole={currentRole} />}
+                {currentTab === 'inventory' && <Inventory />}
+                {currentTab === 'hospitalization' && <Hospitalization />}
+                {currentTab === 'staff' && <StaffManagement />}
+                {currentTab === 'attendance' && <Attendance currentRole={currentRole} />}
+                {currentTab === 'reports' && <Reports />}
+                {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
+                {currentTab === 'notifications' && <Notifications notifications={notifications} setNotifications={setNotifications} />}
+                {currentTab === 'reminders' && <ReminderQueue />}
+                {currentTab === 'support' && <Support />}
+              </>
+            );
+          })()}
         </main>
       </div>
     </div>

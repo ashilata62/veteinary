@@ -23,7 +23,7 @@ const PLANS = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 599,
+    price: 999,
     period: 'month',
     badge: null,
     color: '#3b82f6',
@@ -31,41 +31,41 @@ const PLANS = [
     features: [
       'Basic clinic management',
       'Up to 100 active pets',
+      'Appointment management & patient records',
       'Email appointment reminders',
-      'Billing & POS invoice creation',
       'Standard email support',
     ],
   },
   {
     id: 'standard',
     name: 'Standard',
-    price: 799,
+    price: 1299,
     period: 'month',
     badge: 'Most Popular',
     color: '#14b8a6',
     gradient: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
     features: [
-      'Complete features for growing clinics',
-      'Up to 500 active pets',
-      'WhatsApp + Email reminders',
+      'Everything in Starter',
+      'Billing & POS invoice creation',
       'Inventory & Pharmacy tracking',
-      'Priority 24/7 support',
+      'Home visit appointments',
+      'Priority support',
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: 1299,
+    price: 1499,
     period: 'month',
     badge: 'Unlimited',
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
     features: [
-      'Advanced multi-clinic management',
-      'Unlimited active pet records',
-      'Custom reports & financial analytics',
-      'WhatsApp, SMS & Email alerts',
-      'Dedicated account manager',
+      'Everything in Standard',
+      'Hospitalization management module',
+      'Custom branding & personal domain',
+      '🤖 Kiaan AI Assistant & AI features',
+      'Dedicated 24/7 account manager',
     ],
   },
 ];
@@ -182,15 +182,43 @@ export default function TrialExpired({ onLogout }) {
                 <Lock size={36} />
               </div>
               <h1 className="trial-hero-title">
-                Aapka <span className="trial-hero-highlight">7-Day Free Trial</span> Khatam Ho Gaya
+                आपका <span className="trial-hero-highlight">7-Day Free Trial</span> समाप्त हो गया है
               </h1>
+              <h2 style={{ fontSize: '1.25rem', color: '#cbd5e1', fontWeight: 600, margin: '0.5rem 0' }}>
+                Your 7-Day Free Trial Has Ended
+              </h2>
               <p className="trial-hero-subtitle">
-                Apni veterinary clinic ka full access wapas paane ke liye ek plan choose karein.
-                Aapka saara data safe hai — bas subscribe karein aur wahan se shuru karein jahan chhoda tha.
+                क्लिनिक का पूर्ण एक्सेस जारी रखने के लिए कृपया अपना प्लान अपग्रेड करें।
+                आपका सारा डेटा पूरी तरह सुरक्षित है — सिर्फ प्लान चुनें और तुरंत काम शुरू करें।
               </p>
 
+              <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => navigate('/plans')}
+                  style={{
+                    backgroundColor: '#ea580c',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '12px 28px',
+                    fontSize: '1.05rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 15px rgba(234, 88, 12, 0.4)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c2410c'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
+                >
+                  🚀 Upgrade Plan / Buy Now (प्लान चुनें) <ArrowRight size={18} />
+                </button>
+              </div>
+
               {/* Locked Features Strip */}
-              <div className="trial-locked-strip">
+              <div className="trial-locked-strip" style={{ marginTop: '2rem' }}>
                 <span className="trial-locked-label">
                   <Lock size={13} /> Locked Features:
                 </span>
@@ -205,8 +233,8 @@ export default function TrialExpired({ onLogout }) {
 
             {/* Plans Section */}
             <div className="trial-plans-section">
-              <h2 className="trial-plans-title">Apna Plan Choose Karein</h2>
-              <p className="trial-plans-subtitle">Koi bhi hidden charges nahi. Cancel karo kisi bhi waqt.</p>
+              <h2 className="trial-plans-title">Choose Your Plan</h2>
+              <p className="trial-plans-subtitle">No hidden charges. Cancel anytime.</p>
 
               <div className="trial-plans-grid">
                 {PLANS.map((plan) => {
@@ -275,7 +303,7 @@ export default function TrialExpired({ onLogout }) {
               {/* CTA Button */}
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  {PLANS.find((p) => p.id === selectedPlan)?.name} Plan Subscribe Karein
+                  Subscribe to {PLANS.find((p) => p.id === selectedPlan)?.name} Plan
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">
@@ -289,8 +317,8 @@ export default function TrialExpired({ onLogout }) {
               <div className="trial-trust-card">
                 <CheckCircle2 size={22} style={{ color: '#22c55e' }} />
                 <div>
-                  <strong>Aapka Data Safe Hai</strong>
-                  <span>Saare records preserve hain</span>
+                  <strong>Your Data is Safe</strong>
+                  <span>All records are preserved</span>
                 </div>
               </div>
               <div className="trial-trust-card">
@@ -304,14 +332,14 @@ export default function TrialExpired({ onLogout }) {
                 <HeartPulse size={22} style={{ color: '#ef4444' }} />
                 <div>
                   <strong>Instant Activation</strong>
-                  <span>Payment ke baad turant active</span>
+                  <span>Instantly activated after payment</span>
                 </div>
               </div>
             </div>
 
             {/* Support */}
             <div className="trial-support-section">
-              <p>Koi sawaal hai? Hamse sampark karein:</p>
+              <p>Have questions? Get in touch with us:</p>
               <div className="trial-support-links">
                 <button 
                   onClick={() => setShowSupport(true)}

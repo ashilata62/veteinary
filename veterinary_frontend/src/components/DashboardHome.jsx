@@ -422,7 +422,6 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <TrialPopup />
-      <TrialBanner />
       {/* Hero Banner — Admin gradient */}
       <div
         className="animate-fade-in-up"

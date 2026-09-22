@@ -32,6 +32,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5174,
       open: true,
+      watch: {
+        ignored: ['**/android/**', '**/node_modules/**', '**/.git/**']
+      },
       proxy: {
         '/api': {
           target: apiUrl,

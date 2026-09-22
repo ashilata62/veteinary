@@ -43,7 +43,14 @@ api.interceptors.response.use(
       }
     } else if (error.response && error.response.status === 403) {
       const code = error.response.data && error.response.data.code;
-      if (code === 'TRIAL_EXPIRED' || code === 'SUBSCRIPTION_EXPIRED' || code === 'ACCOUNT_SUSPENDED' || code === 'SUBSCRIPTION_REQUIRED') {
+      if (code === 'TRIAL_EXPIRED') {
+        try {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          user.subscription_status = 'expired';
+          localStorage.setItem('user', JSON.stringify(user));
+        } catch (e) {}
+        window.dispatchEvent(new Event('trial_expired'));
+      } else if (code === 'SUBSCRIPTION_EXPIRED' || code === 'ACCOUNT_SUSPENDED' || code === 'SUBSCRIPTION_REQUIRED') {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('user');

@@ -22,11 +22,11 @@ export default function AccountSuspended({ onLogout, clinicName }) {
             <AlertTriangle size={36} style={{ color: '#ef4444' }} />
           </div>
           <h1 className="trial-hero-title">
-            Aapka Account <span className="trial-hero-highlight" style={{ color: '#ef4444' }}>Suspended</span> Hai
+            Your Account is <span className="trial-hero-highlight" style={{ color: '#ef4444' }}>Suspended</span>
           </h1>
           <p className="trial-hero-subtitle">
-            Aapka account <strong>{clinicName || ''}</strong> temporarily suspend ho gaya hai. 
-            Iske karan aur support ke liye neeche diye gaye contact details ka use karein.
+            Your account <strong>{clinicName || ''}</strong> has been temporarily suspended. 
+            Please use the contact details below for reasons and support.
           </p>
         </div>
 
@@ -34,8 +34,8 @@ export default function AccountSuspended({ onLogout, clinicName }) {
           <div className="trial-trust-card" style={{ cursor: 'default' }}>
             <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
             <div>
-              <strong>Kyun Block Hua?</strong>
-              <span>Payment delay, policy violation, ya suspicious activity ke karan account suspend ho sakta hai.</span>
+              <strong>Why Was It Blocked?</strong>
+              <span>Account may be suspended due to payment delay, policy violation, or suspicious activity.</span>
             </div>
           </div>
           <div className="trial-trust-card" style={{ cursor: 'default' }}>
