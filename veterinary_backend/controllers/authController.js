@@ -46,6 +46,8 @@ const loginUser = async (req, res) => {
         let subscription_status = 'active';
         let trial_end_date = null;
         let trial_start_date = null;
+        let trial_days_left = 0;
+        let trial_current_day = 1;
         let plan_id = 'plan-pro';
         if (user.clinic_id) {
             const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
