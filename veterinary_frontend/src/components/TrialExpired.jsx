@@ -182,14 +182,14 @@ export default function TrialExpired({ onLogout }) {
                 <Lock size={36} />
               </div>
               <h1 className="trial-hero-title">
-                आपका <span className="trial-hero-highlight">7-Day Free Trial</span> समाप्त हो गया है
+                Your <span className="trial-hero-highlight">7-Day Free Trial</span> Has Ended
               </h1>
               <h2 style={{ fontSize: '1.25rem', color: '#cbd5e1', fontWeight: 600, margin: '0.5rem 0' }}>
-                Your 7-Day Free Trial Has Ended
+                आपका 7-Day Free Trial समाप्त हो गया है
               </h2>
               <p className="trial-hero-subtitle">
-                क्लिनिक का पूर्ण एक्सेस जारी रखने के लिए कृपया अपना प्लान अपग्रेड करें।
-                आपका सारा डेटा पूरी तरह सुरक्षित है — सिर्फ प्लान चुनें और तुरंत काम शुरू करें।
+                Choose a plan to regain full access to your veterinary clinic.
+                All your patient records and clinic data are safely preserved — simply subscribe to continue right where you left off.
               </p>
 
               <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -234,7 +234,7 @@ export default function TrialExpired({ onLogout }) {
             {/* Plans Section */}
             <div className="trial-plans-section">
               <h2 className="trial-plans-title">Choose Your Plan</h2>
-              <p className="trial-plans-subtitle">No hidden charges. Cancel anytime.</p>
+              <p className="trial-plans-subtitle">No hidden fees. Upgrade or cancel anytime.</p>
 
               <div className="trial-plans-grid">
                 {PLANS.map((plan) => {
@@ -303,7 +303,7 @@ export default function TrialExpired({ onLogout }) {
               {/* CTA Button */}
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  Subscribe to {PLANS.find((p) => p.id === selectedPlan)?.name} Plan
+                  Subscribe to {PLANS.find((p) => p.id === selectedPlan)?.name} (₹{PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">
@@ -318,7 +318,7 @@ export default function TrialExpired({ onLogout }) {
                 <CheckCircle2 size={22} style={{ color: '#22c55e' }} />
                 <div>
                   <strong>Your Data is Safe</strong>
-                  <span>All records are preserved</span>
+                  <span>All clinic records are preserved</span>
                 </div>
               </div>
               <div className="trial-trust-card">
@@ -332,14 +332,14 @@ export default function TrialExpired({ onLogout }) {
                 <HeartPulse size={22} style={{ color: '#ef4444' }} />
                 <div>
                   <strong>Instant Activation</strong>
-                  <span>Instantly activated after payment</span>
+                  <span>Immediate access after payment</span>
                 </div>
               </div>
             </div>
 
             {/* Support */}
             <div className="trial-support-section">
-              <p>Have questions? Get in touch with us:</p>
+              <p>Have questions? Contact our support team:</p>
               <div className="trial-support-links">
                 <button 
                   onClick={() => setShowSupport(true)}

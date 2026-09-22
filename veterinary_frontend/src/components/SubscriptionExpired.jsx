@@ -123,14 +123,14 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
                 Your <span className="trial-hero-highlight">Subscription</span> Has Expired
               </h1>
               <p className="trial-hero-subtitle">
-                Your plan expired on {expiryDate ? new Date(expiryDate).toLocaleDateString('en-GB') : ' recently'}. 
-                Renew your plan to regain uninterrupted access to your clinic.
+                Your subscription expired on {expiryDate ? new Date(expiryDate).toLocaleDateString('en-GB') : 'recently'}. 
+                Renew your subscription to restore uninterrupted access to your clinic.
               </p>
             </div>
 
             <div className="trial-plans-section">
               <h2 className="trial-plans-title">Renew Your Plan</h2>
-              <p className="trial-plans-subtitle">No hidden charges. Cancel anytime.</p>
+              <p className="trial-plans-subtitle">No hidden fees. Upgrade, downgrade or cancel anytime.</p>
 
               <div className="trial-plans-grid">
                 {PLANS.map((planItem) => {
@@ -189,7 +189,7 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
 
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  Renew {PLANS.find((p) => p.id === selectedPlan)?.name} Plan
+                  Renew {PLANS.find((p) => p.id === selectedPlan)?.name} (₹{PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">
@@ -203,7 +203,7 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
                 <CheckCircle2 size={22} style={{ color: '#22c55e' }} />
                 <div>
                   <strong>Your Data is Safe</strong>
-                  <span>All records are preserved</span>
+                  <span>All clinic records are preserved</span>
                 </div>
               </div>
               <div className="trial-trust-card">
@@ -217,7 +217,7 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
                 <Zap size={22} style={{ color: '#f59e0b' }} />
                 <div>
                   <strong>Instant Activation</strong>
-                  <span>Instantly activated after payment</span>
+                  <span>Immediate access after payment</span>
                 </div>
               </div>
             </div>

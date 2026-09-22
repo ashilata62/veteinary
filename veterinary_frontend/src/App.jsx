@@ -37,6 +37,7 @@ import Support from './components/Support';
 import PlansPage from './components/PlansPage';
 import TrialBanner from './components/TrialBanner';
 import { isTabAllowedForPlan, getRequiredPlanForTab } from './utils/planPermissions';
+import AuditLogs from './components/AuditLogs/AuditLogs';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
 import { Lock } from 'lucide-react';
@@ -50,9 +51,9 @@ const checkTrialExpired = () => {
     if (user.subscription_status === 'expired') return true;
     const trialEnd = user.trial_end_date || user.trialEndDate || user.trial_expires_at;
     if (!trialEnd) return false;
-    const endOfDay = new Date(trialEnd);
-    endOfDay.setHours(23, 59, 59, 999);
-    return endOfDay < new Date();
+    const end = new Date(trialEnd);
+    end.setHours(23, 59, 59, 999);
+    return end < new Date();
   } catch (e) {
     return false;
   }
@@ -159,6 +160,35 @@ export default function App() {
         .catch(err => console.error('Error fetching notifications:', err));
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleSubStatus = (e) => {
+      const { code, data } = e.detail || {};
+      if (code === 'TRIAL_EXPIRED') {
+        setIsTrialExpired(true);
+      } else if (code === 'SUBSCRIPTION_EXPIRED' || code === 'SUBSCRIPTION_REQUIRED') {
+        setSubscriptionExpired(true);
+        if (data) {
+          setSubscriptionData({
+            clinicName: data.clinicName || 'Your Clinic',
+            plan: data.plan || 'Free Trial',
+            expiryDate: data.subscriptionEndDate || data.trialEndDate || ''
+          });
+        }
+      } else if (code === 'ACCOUNT_SUSPENDED') {
+        setAccountSuspended(true);
+        if (data) {
+          setSubscriptionData({
+            clinicName: data.clinicName || 'Your Clinic',
+            plan: '',
+            expiryDate: ''
+          });
+        }
+      }
+    };
+    window.addEventListener('auth:subscription_status', handleSubStatus);
+    return () => window.removeEventListener('auth:subscription_status', handleSubStatus);
+  }, []);
 
   // Auto close sidebar when resizing below 1024px
   useEffect(() => {
@@ -425,6 +455,7 @@ export default function App() {
                 {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
                 {currentTab === 'notifications' && <Notifications notifications={notifications} setNotifications={setNotifications} />}
                 {currentTab === 'reminders' && <ReminderQueue />}
+                {currentTab === 'audit-logs' && <AuditLogs />}
                 {currentTab === 'support' && <Support />}
               </>
             );

@@ -26,7 +26,7 @@ export default function AccountSuspended({ onLogout, clinicName }) {
           </h1>
           <p className="trial-hero-subtitle">
             Your account <strong>{clinicName || ''}</strong> has been temporarily suspended. 
-            Please use the contact details below for reasons and support.
+            Please reach out to our support team using the contact details below to resolve this.
           </p>
         </div>
 
@@ -34,8 +34,8 @@ export default function AccountSuspended({ onLogout, clinicName }) {
           <div className="trial-trust-card" style={{ cursor: 'default' }}>
             <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
             <div>
-              <strong>Why Was It Blocked?</strong>
-              <span>Account may be suspended due to payment delay, policy violation, or suspicious activity.</span>
+              <strong>Why was my account suspended?</strong>
+              <span>Accounts may be suspended due to overdue invoices, policy violations, or verification requirements.</span>
             </div>
           </div>
           <div className="trial-trust-card" style={{ cursor: 'default' }}>

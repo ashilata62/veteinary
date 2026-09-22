@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity
 } from 'lucide-react';
 import './Sidebar.css';
 import { isTabAllowedForPlan } from '../utils/planPermissions';
@@ -40,6 +40,7 @@ export default function Sidebar({
     { id: 'attendance',   label: 'Attendance',            icon: Clock,           roles: ['Admin','Manager'] },
     { id: 'reports',      label: 'Reports & Analytics',   icon: BarChart3,       roles: ['Admin','Manager'] },
     { id: 'settings',     label: currentRole !== 'Admin' ? 'Profile Settings' : 'Settings', icon: Settings, roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'audit-logs',   label: 'Audit Logs',            icon: Activity,        roles: ['Admin'] },
     { id: 'support',      label: 'Support',               icon: Headphones,      roles: ['Admin'] },
   ];
 
@@ -80,6 +81,7 @@ export default function Sidebar({
       'staff': '#a855f7',
       'reports': '#10b981',
       'settings': '#94a3b8',
+      'audit-logs': '#0ea5e9',
       'support': '#f97316'
     };
     return colors[id] || '#94a3b8';

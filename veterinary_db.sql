@@ -1,2195 +1,996 @@
--- Fresh 100% Clean Production SQL Dump
--- Exported At: 2026-08-03T12:47:32.558Z
+-- MySQL dump 10.13  Distrib 8.0.26, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: veterinary
+-- ------------------------------------------------------
+-- Server version	5.5.5-10.4.32-MariaDB
 
-SET FOREIGN_KEY_CHECKS = 0;
-SET UNIQUE_CHECKS = 0;
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-
--- --------------------------------------------------------
+--
 -- Table structure for table `appointments`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `appointments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `appointments` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `pet_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `doctor_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `pet_id` varchar(36) DEFAULT NULL,
+  `doctor_id` varchar(36) DEFAULT NULL,
   `appointment_date` date NOT NULL,
   `appointment_time` time NOT NULL,
-  `appointment_type` enum('Clinic Visit','Home Visit') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `status` enum('Pending','Confirmed','Completed','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Pending',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `reminder_sent` tinyint(1) DEFAULT '0',
+  `appointment_type` enum('Clinic Visit','Home Visit') NOT NULL,
+  `status` enum('Pending','Confirmed','Completed','Cancelled') DEFAULT 'Pending',
+  `notes` text DEFAULT NULL,
+  `reminder_sent` tinyint(1) DEFAULT 0,
   `next_reminder_date` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `pet_id` (`pet_id`),
   KEY `doctor_id` (`doctor_id`),
+  KEY `fk_appointments_clinic` (`clinic_id`),
   CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_appointments_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `appointments`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `appointments` WRITE;
+/*!40000 ALTER TABLE `appointments` DISABLE KEYS */;
+INSERT INTO `appointments` VALUES ('APT-2026-45D01765','PET-2026-AF7721C3','u3-doctor1','2026-08-13','11:00:00','Home Visit','Completed',NULL,0,NULL,'2026-08-12 10:27:36','clinic-1'),('APT-2026-5DC22C3E','PET-2026-AF7721C3','usr-65987e84','2026-08-13','21:00:00','Clinic Visit','Pending',NULL,0,NULL,'2026-08-13 13:31:34','clinic-1'),('APT-2026-614A4985','PET-2026-837EB3C8','usr-65987e84','2026-08-20','10:30:00','Home Visit','Pending','Bella has been experiencing excessive scratching and redness around the ears for the past 5 days. Home examination requested due to difficulty travelling to the clinic.',0,NULL,'2026-08-14 05:32:16','clinic-1'),('APT-2026-6621C798','PET-2026-223EAF35','usr-65987e84','2026-08-13','10:00:00','Clinic Visit','Pending',NULL,0,NULL,'2026-08-13 13:52:17','clinic-1'),('APT-2026-9F6C5988','PET-2026-AF7721C3','u3-doctor1','2026-08-12','20:30:00','Clinic Visit','Pending',NULL,0,NULL,'2026-08-12 10:26:13','clinic-1'),('APT-2026-B75D309C','PET-2026-837EB3C8','usr-65987e84','2026-08-21','10:00:00','Clinic Visit','Pending','Loss of appetite, vomiting, and low activity for the past 2 days.',0,NULL,'2026-08-14 05:30:17','clinic-1');
+/*!40000 ALTER TABLE `appointments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `assistance_tasks`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `assistance_tasks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `assistance_tasks` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `doctor_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `doctor_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `patient_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `patient_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `task_type` enum('Surgery Prep','Lab Test','Treatment','Emergency') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Treatment',
-  `priority` enum('Critical','High','Medium','Low') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Medium',
-  `scheduled_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'ASAP',
-  `status` enum('Pending','In Progress','Completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Pending',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `doctor_id` varchar(100) DEFAULT NULL,
+  `doctor_name` varchar(100) NOT NULL,
+  `patient_id` varchar(100) DEFAULT NULL,
+  `patient_name` varchar(100) NOT NULL,
+  `task_type` enum('Surgery Prep','Lab Test','Treatment','Emergency') DEFAULT 'Treatment',
+  `priority` enum('Critical','High','Medium','Low') DEFAULT 'Medium',
+  `scheduled_time` varchar(50) DEFAULT 'ASAP',
+  `status` enum('Pending','In Progress','Completed') DEFAULT 'Pending',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  PRIMARY KEY (`id`),
+  KEY `fk_tasks_clinic` (`clinic_id`),
+  CONSTRAINT `fk_tasks_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `assistance_tasks` (4 rows)
-INSERT INTO `assistance_tasks` (`id`, `title`, `doctor_id`, `doctor_name`, `patient_id`, `patient_name`, `task_type`, `priority`, `scheduled_time`, `status`, `notes`, `created_at`) VALUES
-(1, 'Prepare Surgery Room (Ovariohysterectomy)', NULL, 'Dr. Sarah Connor', NULL, 'Bella (Golden Retriever)', 'Surgery Prep', 'High', '10:00 AM', 'Pending', NULL, '2026-08-02 22:43:42'),
-(2, 'Draw Blood for CBC & Biochemistry', NULL, 'Dr. Alex Mercer', NULL, 'Luna (Persian Cat)', 'Lab Test', 'Medium', '11:15 AM', 'In Progress', NULL, '2026-08-02 22:43:42'),
-(3, 'Administer Subcutaneous Fluids (200ml)', NULL, 'Dr. Sarah Connor', NULL, 'Max (Beagle)', 'Treatment', 'Medium', '01:30 PM', 'Completed', NULL, '2026-08-02 22:43:42'),
-(4, 'Emergency Triage & Vitals Check', NULL, 'Dr. Alex Mercer', NULL, 'Rocky (Husky)', 'Emergency', 'Critical', 'ASAP', 'Pending', NULL, '2026-08-02 22:43:42');
+--
+-- Dumping data for table `assistance_tasks`
+--
 
+LOCK TABLES `assistance_tasks` WRITE;
+/*!40000 ALTER TABLE `assistance_tasks` DISABLE KEYS */;
+INSERT INTO `assistance_tasks` VALUES (1,'dddd',NULL,'Dr. Sarah Connor',NULL,'jacky','Treatment','Medium','ASAP','Pending','','2026-08-13 15:05:49','clinic-1'),(2,'Perform Blood Test: Complete Blood Count (CBC)','u1-admin','Dr. Sarah Jenkins','PET-2026-837EB3C8','Bella','Lab Test','High','ASAP','Pending','Diagnostic order for Bella. Encounter ID: e41d43ad-8f5a-4936-96d3-211a6fae2466','2026-08-14 05:35:57','clinic-1'),(3,'Perform Ultrasound: Not required at this visit','u1-admin','Dr. Sarah Jenkins','PET-2026-837EB3C8','Bella','Lab Test','High','ASAP','Pending','Diagnostic order for Bella. Encounter ID: e41d43ad-8f5a-4936-96d3-211a6fae2466','2026-08-14 05:35:57','clinic-1'),(4,'Perform X-Ray: Not required at this visit','u1-admin','Dr. Sarah Jenkins','PET-2026-837EB3C8','Bella','Lab Test','High','ASAP','Pending','Diagnostic order for Bella. Encounter ID: e41d43ad-8f5a-4936-96d3-211a6fae2466','2026-08-14 05:35:57','clinic-1');
+/*!40000 ALTER TABLE `assistance_tasks` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `attendance`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `attendance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `attendance` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) DEFAULT NULL,
   `attendance_date` date NOT NULL,
   `check_in` time DEFAULT NULL,
   `check_out` time DEFAULT NULL,
   `working_hours` decimal(5,2) DEFAULT NULL,
-  `status` enum('Present','Absent','Leave','Half Day') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `status` enum('Present','Absent','Leave','Half Day') NOT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  KEY `fk_attendance_clinic` (`clinic_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_attendance_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `attendance` (7 rows)
-INSERT INTO `attendance` (`id`, `user_id`, `attendance_date`, `check_in`, `check_out`, `working_hours`, `status`) VALUES
-('att-29b5c05a', 'usr-asst', '2026-06-04 18:30:00', '17:05:52', '17:06:04', '0.02', 'Present'),
-('att-44c228a2', 'usr-admin', '2026-06-06 18:30:00', '12:09:45', NULL, NULL, 'Present'),
-('att-700a35c9', 'usr-mgr', '2026-06-04 18:30:00', '16:55:09', '16:56:46', '0.02', 'Present'),
-('att-76082a12', 'usr-admin', '2026-06-04 18:30:00', '16:54:44', '17:02:24', '0.13', 'Present'),
-('att-e0423bd3', 'usr-9eabad8d', '2026-06-04 18:30:00', '16:27:28', '16:36:41', '0.15', 'Present'),
-('att-efd47b3f', 'usr-admin', '2026-07-28 18:30:00', '12:41:18', NULL, NULL, 'Present'),
-('att-fbe31cd7', 'usr-mgr', '2026-06-06 18:30:00', '12:10:04', NULL, NULL, 'Present');
+--
+-- Dumping data for table `attendance`
+--
 
+LOCK TABLES `attendance` WRITE;
+/*!40000 ALTER TABLE `attendance` DISABLE KEYS */;
+INSERT INTO `attendance` VALUES ('att-1','u3-doctor1','2026-06-03','08:45:00','17:15:00',8.50,'Present','clinic-1'),('att-2','u4-doctor2','2026-06-03','09:00:00','17:00:00',8.00,'Present','clinic-1'),('att-2f607b33','u6-vetasst','2026-08-12','22:43:28',NULL,NULL,'Present','clinic-1'),('att-3','u5-recept','2026-06-03','08:30:00','17:30:00',9.00,'Present','clinic-1'),('att-897ba5df','u1-admin','2026-08-12','11:39:36','21:59:20',10.33,'Present','clinic-1'),('att-b9c248c8','u1-admin','2026-08-06','23:30:54','23:31:01',0.02,'Present','clinic-1');
+/*!40000 ALTER TABLE `attendance` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `audit_logs`
+--
+
+DROP TABLE IF EXISTS `audit_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `audit_logs` (
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `entity` varchar(100) NOT NULL,
+  `entity_id` varchar(36) DEFAULT NULL,
+  `old_values` text DEFAULT NULL,
+  `new_values` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `clinic_id` (`clinic_id`),
+  CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `audit_logs_ibfk_2` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+LOCK TABLES `audit_logs` WRITE;
+/*!40000 ALTER TABLE `audit_logs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `audit_logs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `clinic_settings`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `clinic_settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clinic_settings` (
-  `id` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `primaryThemeColor` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `logo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `autoEmail` tinyint(1) DEFAULT '1',
-  `reminderTime` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '24h',
-  PRIMARY KEY (`id`)
+  `clinic_id` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `address` text NOT NULL,
+  `primaryThemeColor` varchar(50) NOT NULL,
+  `logo` varchar(255) DEFAULT NULL,
+  `autoEmail` tinyint(1) DEFAULT 1,
+  `reminderTime` varchar(10) DEFAULT '24h',
+  PRIMARY KEY (`clinic_id`),
+  CONSTRAINT `clinic_settings_ibfk_1` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `clinic_settings` (1 rows)
-INSERT INTO `clinic_settings` (`id`, `name`, `email`, `phone`, `address`, `primaryThemeColor`, `logo`, `autoEmail`, `reminderTime`) VALUES
-(1, 'VetCare Pro Animal Hospital', 'info@vetcarepro.com', '12345785', 'No. 45, Temple Road, Colombo 07, Sri Lanka', '#4caea2', 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=150', 1, '24h');
+--
+-- Dumping data for table `clinic_settings`
+--
 
+LOCK TABLES `clinic_settings` WRITE;
+/*!40000 ALTER TABLE `clinic_settings` DISABLE KEYS */;
+INSERT INTO `clinic_settings` VALUES ('clinic-1','VetCare Pro Animal Hospital','info@vetcarepro.com','+94 11 234 5678','No. 45, Temple Road, Colombo 07, Sri Lanka','#14b8a6','https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=150',1,'24h');
+/*!40000 ALTER TABLE `clinic_settings` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `clinical_encounters`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `clinical_encounters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clinical_encounters` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `pet_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `doctor_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `pet_id` varchar(36) DEFAULT NULL,
+  `doctor_id` varchar(36) DEFAULT NULL,
   `encounter_date` date NOT NULL,
-  `complaint` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `duration` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `symptoms` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `diagnosis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `treatment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `follow_up` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `complaint` varchar(255) DEFAULT NULL,
+  `duration` varchar(100) DEFAULT NULL,
+  `symptoms` text DEFAULT NULL,
+  `diagnosis` text DEFAULT NULL,
+  `treatment` text DEFAULT NULL,
+  `follow_up` varchar(255) DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `pet_id` (`pet_id`),
   KEY `doctor_id` (`doctor_id`),
+  KEY `fk_encounters_clinic` (`clinic_id`),
   CONSTRAINT `clinical_encounters_ibfk_1` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `clinical_encounters_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `clinical_encounters_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_encounters_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `clinical_encounters`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `clinical_encounters` WRITE;
+/*!40000 ALTER TABLE `clinical_encounters` DISABLE KEYS */;
+INSERT INTO `clinical_encounters` VALUES ('1f19b46d-ce89-40e5-84bd-4be2cab886e7','PET-2026-AF7721C3','u1-admin','2026-08-12','ghgfhf',NULL,NULL,'fdfhdg',NULL,NULL,'clinic-1'),('2583b2dc-2c32-4d7e-b4e0-7dc72a45cde8','PET-2026-223EAF35','u3-doctor1','2026-08-14','Loss of appetite, mild vomiting, and lethargy for 2 days','2 days','Reduced appetite, occasional vomiting, low activity, mild dehydration','Physical examination indicates mild dehydration and gastrointestinal upset. Provisional diagnosis: Acute Gastritis','IV fluids administered; antiemetic treatment given; patient monitored for hydration and appetite',NULL,'clinic-1'),('6be77973-f25a-4c98-babb-f2b54dbd9696','PET-2026-ED7F06DB','usr-65987e84','2026-08-12','Diagnostic File Upload',NULL,NULL,'Lab Evaluation',NULL,NULL,'clinic-1'),('e41d43ad-8f5a-4936-96d3-211a6fae2466','PET-2026-837EB3C8','u1-admin','2026-08-14','Excessive scratching, ear redness, and frequent head shaking','5 days','Redness in both ears, itching, head shaking, mild ear discharge','Ear examination shows inflammation and mild discharge. Provisional diagnosis: Otitis externa','Ear cleaning performed and topical ear medication applied','Follow-up after 7 days. Keep ears dry and monitor redness, discharge, and scratching. Return earlier if symptoms worsen.','clinic-1'),('e564d5d5-8ca2-4a67-a6dd-b2f3988a195d','PET-2026-223EAF35','u1-admin','2026-08-13','Clinical Consultation',NULL,NULL,'Bsbsbs',NULL,NULL,'clinic-1');
+/*!40000 ALTER TABLE `clinical_encounters` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `clinics`
+--
+
+DROP TABLE IF EXISTS `clinics`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clinics` (
+  `id` varchar(36) NOT NULL,
+  `clinic_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `status` enum('TRIAL','ACTIVE','SUSPENDED','EXPIRED','INACTIVE') DEFAULT 'ACTIVE',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `clinics`
+--
+
+LOCK TABLES `clinics` WRITE;
+/*!40000 ALTER TABLE `clinics` DISABLE KEYS */;
+INSERT INTO `clinics` VALUES ('347e7a3f-0910-425a-937d-877df4a89303','Hamara Clinic','efga42687@gmail.com','6302145897',NULL,NULL,NULL,NULL,'ACTIVE','2026-08-12 07:44:41','2026-08-12 07:44:41'),('611dabff-1c91-4b0c-a477-3bf04ccbb5eb','Test Vet Clinic','landingtest1@example.com','9876543211',NULL,NULL,NULL,NULL,'ACTIVE','2026-08-12 09:44:24','2026-08-12 09:44:24'),('65783694-c111-4bfd-b48c-d76d6cda9ccd','Pro Vet Hospital','proadmin1@example.com','9876543299',NULL,NULL,NULL,NULL,'ACTIVE','2026-08-12 09:46:24','2026-08-12 09:46:24'),('67214fa4-4ef6-43a0-b798-3188be8c2318','Test Clinic','test1786550762719@test.com','9550762719',NULL,NULL,NULL,NULL,'TRIAL','2026-08-12 16:06:02','2026-08-12 16:06:02'),('6eee1bbc-ca0b-40fb-971a-d30b36f753dc','Vetenary Clinic','kushakriti524@gmail.com','5201364789',NULL,NULL,NULL,NULL,'ACTIVE','2026-08-11 12:51:00','2026-08-11 12:51:00'),('cba43d1a-e9ee-49a1-901a-ca73bf4a8a54','Test Clinic','test1786452432082@test.com','1234567890',NULL,NULL,NULL,NULL,'ACTIVE','2026-08-11 12:47:12','2026-08-11 12:47:12'),('clinic-1','Default Clinic',NULL,NULL,NULL,NULL,NULL,NULL,'ACTIVE','2026-08-10 16:41:58','2026-08-18 11:29:46');
+/*!40000 ALTER TABLE `clinics` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `diagnostic_reports`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `diagnostic_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `diagnostic_reports` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `encounter_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `report_type` enum('Blood Test','X-Ray','Ultrasound','PDF Report') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `uploaded_by` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` varchar(36) NOT NULL,
+  `encounter_id` varchar(36) DEFAULT NULL,
+  `report_type` enum('Blood Test','X-Ray','Ultrasound','PDF Report') NOT NULL,
+  `file_url` longtext DEFAULT NULL,
+  `uploaded_by` varchar(36) DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  `status` varchar(50) DEFAULT 'Pending',
   PRIMARY KEY (`id`),
   KEY `encounter_id` (`encounter_id`),
   KEY `uploaded_by` (`uploaded_by`),
+  KEY `fk_reports_clinic` (`clinic_id`),
   CONSTRAINT `diagnostic_reports_ibfk_1` FOREIGN KEY (`encounter_id`) REFERENCES `clinical_encounters` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `diagnostic_reports_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `diagnostic_reports_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_reports_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `diagnostic_reports`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `diagnostic_reports` WRITE;
+/*!40000 ALTER TABLE `diagnostic_reports` DISABLE KEYS */;
+INSERT INTO `diagnostic_reports` VALUES ('04391c16-1e57-4ff1-90d9-72a8e85e1989','e41d43ad-8f5a-4936-96d3-211a6fae2466','Ultrasound','Not required at this visit','u1-admin','2026-08-14 05:35:57','clinic-1','Pending'),('1790d798-f487-4ae4-93f2-4f87c50eaf0b','e41d43ad-8f5a-4936-96d3-211a6fae2466','Blood Test','Complete Blood Count (CBC)','u1-admin','2026-08-14 05:35:57','clinic-1','Pending'),('9856185d-d784-4d98-b823-17a430845f0d','6be77973-f25a-4c98-babb-f2b54dbd9696','Blood Test','supplier_product_catalog.xlsx','usr-65987e84','2026-08-12 16:44:48','clinic-1','Completed'),('ebfe2a28-3767-4065-af8e-ff374f85ce32','e41d43ad-8f5a-4936-96d3-211a6fae2466','X-Ray','Not required at this visit','u1-admin','2026-08-14 05:35:57','clinic-1','Pending');
+/*!40000 ALTER TABLE `diagnostic_reports` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `email_reminders`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `email_reminders`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `email_reminders` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `appointment_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `recipient_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `scheduled_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` varchar(36) NOT NULL,
+  `appointment_id` varchar(36) DEFAULT NULL,
+  `recipient_email` varchar(255) NOT NULL,
+  `scheduled_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `sent_at` timestamp NULL DEFAULT NULL,
-  `status` enum('Pending','Sent','Failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `status` enum('Pending','Sent','Failed') DEFAULT 'Pending',
   PRIMARY KEY (`id`),
   KEY `appointment_id` (`appointment_id`),
   CONSTRAINT `email_reminders_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `email_reminders`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `email_reminders` WRITE;
+/*!40000 ALTER TABLE `email_reminders` DISABLE KEYS */;
+/*!40000 ALTER TABLE `email_reminders` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `home_visits`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `home_visits`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `home_visits` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `appointment_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `pet_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `owner_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `doctor_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `travel_fee` decimal(10,2) DEFAULT '0.00',
-  `visit_status` enum('Scheduled','In Progress','Completed','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Scheduled',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `id` varchar(36) NOT NULL,
+  `appointment_id` varchar(36) DEFAULT NULL,
+  `pet_id` varchar(36) DEFAULT NULL,
+  `owner_id` varchar(36) DEFAULT NULL,
+  `doctor_id` varchar(36) DEFAULT NULL,
+  `address` text NOT NULL,
+  `travel_fee` decimal(10,2) DEFAULT 0.00,
+  `visit_status` enum('Scheduled','In Progress','Completed','Cancelled') DEFAULT 'Scheduled',
+  `notes` text DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `appointment_id` (`appointment_id`),
   KEY `pet_id` (`pet_id`),
   KEY `owner_id` (`owner_id`),
   KEY `doctor_id` (`doctor_id`),
+  KEY `fk_home_visits_clinic` (`clinic_id`),
+  CONSTRAINT `fk_home_visits_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
   CONSTRAINT `home_visits_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `home_visits_ibfk_2` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `home_visits_ibfk_3` FOREIGN KEY (`owner_id`) REFERENCES `pet_owners` (`id`) ON DELETE CASCADE,
   CONSTRAINT `home_visits_ibfk_4` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `home_visits`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `home_visits` WRITE;
+/*!40000 ALTER TABLE `home_visits` DISABLE KEYS */;
+INSERT INTO `home_visits` VALUES ('HV-2026-1E5F861D','APT-2026-614A4985','PET-2026-837EB3C8','own-6b4db7c3','usr-65987e84','No. 25, Lake Road, Colombo 05, Sri Lanka',1484.00,'Scheduled','Bella has been experiencing excessive scratching and redness around the ears for the past 5 days. Home examination requested due to difficulty travelling to the clinic.','clinic-1'),('HV-2026-841CD10D','APT-2026-45D01765','PET-2026-AF7721C3','own-7ac05428','u3-doctor1','saffd',0.00,'Completed',NULL,'clinic-1');
+/*!40000 ALTER TABLE `home_visits` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hospitalization_cages`
+--
+
+DROP TABLE IF EXISTS `hospitalization_cages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `hospitalization_cages` (
+  `id` varchar(50) NOT NULL,
+  `clinic_id` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `status` enum('Vacant','Occupied','Cleaning Needed') DEFAULT 'Vacant',
+  `pet_id` varchar(36) DEFAULT NULL,
+  `reason` text DEFAULT NULL,
+  `check_in` varchar(255) DEFAULT NULL,
+  `flowsheet` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`flowsheet`)),
+  PRIMARY KEY (`id`,`clinic_id`),
+  KEY `clinic_id` (`clinic_id`),
+  KEY `pet_id` (`pet_id`),
+  CONSTRAINT `hospitalization_cages_ibfk_1` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `hospitalization_cages_ibfk_2` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hospitalization_cages`
+--
+
+LOCK TABLES `hospitalization_cages` WRITE;
+/*!40000 ALTER TABLE `hospitalization_cages` DISABLE KEYS */;
+INSERT INTO `hospitalization_cages` VALUES ('ICU-01','clinic-1','ICU Unit 1','ICU','Occupied','PET-2026-837EB3C8','Severe vomiting, dehydration, weakness, and continuous monitoring','8/14/2026, 11:03:14 AM','{\"fed\":false,\"meds\":false,\"walk\":false,\"eveningFed\":false}');
+/*!40000 ALTER TABLE `hospitalization_cages` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hospitalizations`
+--
+
+DROP TABLE IF EXISTS `hospitalizations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `hospitalizations` (
+  `id` varchar(36) NOT NULL,
+  `clinic_id` varchar(36) NOT NULL,
+  `cage_id` varchar(50) NOT NULL,
+  `cage_name` varchar(100) NOT NULL,
+  `cage_type` varchar(100) NOT NULL,
+  `pet_id` varchar(36) DEFAULT NULL,
+  `admitted_by` varchar(36) DEFAULT NULL,
+  `admission_reason` text NOT NULL,
+  `special_instructions` text DEFAULT NULL,
+  `check_in` datetime DEFAULT current_timestamp(),
+  `check_out` datetime DEFAULT NULL,
+  `status` enum('Occupied','Vacant','Cleaning Needed') DEFAULT 'Occupied',
+  `flowsheet` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{"fed":false,"meds":false,"walk":false,"eveningFed":false}' CHECK (json_valid(`flowsheet`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `pet_id` (`pet_id`),
+  KEY `admitted_by` (`admitted_by`),
+  CONSTRAINT `hospitalizations_ibfk_1` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `hospitalizations_ibfk_2` FOREIGN KEY (`admitted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hospitalizations`
+--
+
+LOCK TABLES `hospitalizations` WRITE;
+/*!40000 ALTER TABLE `hospitalizations` DISABLE KEYS */;
+INSERT INTO `hospitalizations` VALUES ('6438bc11-0075-43f1-80e9-3acf9654eeec','clinic-1','ICU-02','ICU Unit 2','ICU','PET-2026-AF7721C3','u1-admin','sfsdf','fdfsfs','2026-08-12 16:02:54',NULL,'Occupied','{\"fed\":false,\"meds\":false,\"walk\":false,\"eveningFed\":false}','2026-08-12 10:32:54','2026-08-12 10:32:54');
+/*!40000 ALTER TABLE `hospitalizations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `inventory`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `inventory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `inventory` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `category` enum('Accessories & Toys','Hygiene Items','Food & Snacks','Vitamins & Supplements','Medicine','Service') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `supplier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `quantity` int DEFAULT '0',
-  `low_stock_threshold` int DEFAULT '5',
+  `id` varchar(36) NOT NULL,
+  `sku` varchar(100) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `category` enum('Accessories & Toys','Hygiene Items','Food & Snacks','Vitamins & Supplements','Medicine','Service') NOT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
+  `quantity` int(11) DEFAULT 0,
+  `low_stock_threshold` int(11) DEFAULT 5,
   `cost_price` decimal(10,2) DEFAULT NULL,
   `selling_price` decimal(10,2) NOT NULL,
-  `is_taxable` tinyint(1) DEFAULT '1',
+  `is_taxable` tinyint(1) DEFAULT 1,
   `expiry_date` date DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Pieces',
-  `barcode` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `batch_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('Active','Inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sku` (`sku`)
+  UNIQUE KEY `sku` (`sku`),
+  KEY `fk_inventory_clinic` (`clinic_id`),
+  CONSTRAINT `fk_inventory_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `inventory` (1734 rows)
-INSERT INTO `inventory` (`id`, `sku`, `name`, `category`, `supplier`, `quantity`, `low_stock_threshold`, `cost_price`, `selling_price`, `is_taxable`, `expiry_date`, `created_at`, `unit`, `barcode`, `batch_number`, `status`) VALUES
-('004f43f8-ca88-459e-8c59-5c0e4bfc41c2', '3182550831086', 'Satiety canine 6kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '2837.20', '3460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('008210f0-3baf-4706-9d60-0a4f32e5d9bb', '5296', 'Anxocare pcs', 'Medicine', 'Aldo Pet', 200, 5, '5.21', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0089cb6c-649b-4430-bfce-f0cbb404b502', '6364', 'Maxi Puppy 1kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '585.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('008cee19-415f-45e8-878b-2c5168c2b676', '5924', 'Tumor Removal', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '7000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('009d0a1e-44f9-4942-b88a-08048314613e', '5778', 'Lemon fragrance spray', 'Accessories & Toys', 'Aldo Pet', 20, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('00b42d4c-b07f-4363-b8a4-47cb2931dba1', '9003579308929', 'Intense Beauty Gravy Pouch 85g', 'Food & Snacks', 'Aldo Pet', 3, 5, '62.32', '76.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('00ca7449-eae6-49a1-9a10-4ce7defe0053', '6360', 'cat tail docking', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('00d0b89c-8efb-4e93-99b9-07a962606f69', '6057', 'pimopendent 5mg', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0197ba67-ed18-451a-8dfe-8e8d10ca0de8', '6954547214397', 'Fresh scent pet shampoo', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('01a8bf77-eab1-4e3b-8001-e45ef5e46d7d', '5542', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('01bb68f1-b796-41f6-a047-388d0cf931f2', '5681', 'gastro puppy treatment Inactive', 'Accessories & Toys', 'Aldo Pet', 995, 5, '0.00', '1700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('01f793ab-b4f5-4eee-b079-3cbef54e88d6', '5319', 'Metazox', 'Medicine', 'Aldo Pet', 0, 5, '102.46', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02029037-e50e-470f-a81f-088e3158bca2', '6173', 'Tumor Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0203824c-1768-442d-b7a5-bd58a7a6764a', '6638', 'Waterless cat shampoo white tea fragrance Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('024a3a8b-027d-4606-91b6-3ef74bcd168a', '4429', 'Zymad 200000 UI Amp x 2ml', 'Medicine', 'Aldo Pet', 0, 5, '168.35', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02567617-fc7b-4d77-a2ed-74700920b7e7', '4336', 'Bravecto 40-56kg', 'Medicine', 'Aldo Pet', 0, 5, '1795.00', '2700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02642299-1bb6-46d7-b791-654c6a7b8022', '5413', 'Elastic Adhesive Bandage 6cm', 'Hygiene Items', 'Aldo Pet', 0, 5, '115.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('027cc9a8-7ddf-4f2c-a0be-b396c1591f81', '3182550771054', 'Dog gastro intestinal 2 kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1429.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0283797b-7599-4971-b842-ea80882c9bb6', '6412', 'consultation after 8pm Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0286e8dc-9a75-4c5d-a7a3-4bf67df5e151', '6307', 'Cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('02be12d5-f8db-41e3-9571-141207af50b4', '4688', 'Euthyrox 50mg', 'Medicine', 'Aldo Pet', 20, 5, '3.30', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02c41759-2e23-4c5b-9741-5af2bed7045a', '5571', 'Vermi pet', 'Medicine', 'Aldo Pet', 6, 5, '0.00', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02c888a9-f7dc-49cc-b2b0-8905ee57be53', '5304', 'Multi-vit rabbit beaphar', 'Medicine', 'Aldo Pet', 0, 5, '230.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02d6dde9-b957-499f-8775-95b1902246de', '5350', 'Purina one adult salmon & tuna 1.2kg', 'Food & Snacks', 'Aldo Pet', 2, 5, '602.35', '925.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('02f441ba-8708-47d2-8a99-31f9defbd64d', '5738', 'NS 100ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('02f8e6dc-25ac-486d-b386-c86997a6e498', '6985412587551', 'Pet Grooming dryer Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('03045619-6f46-4ba0-9c03-dfe04142550f', '6054', 'xray Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('031f65bb-7187-4ced-8c6b-f8612777dd41', 'FSD27', 'Ferplast Sport Dog Body Leash', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('034d3613-e78c-454e-a99a-47e4a1a46308', '5218', 'Avirmecin inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0371936e-0035-4954-8b14-d6f38ce506e6', '6079', 'Vetwrap size XS', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0384cec3-2569-4153-820a-8bd840070fc8', '6260', 'valium', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('03d538a0-a768-4bde-88ef-f2bb31fa820d', '6247', 'Ownat classic adult chicken 4kg dog', 'Accessories & Toys', 'Aldo Pet', 1, 5, '913.04', '1225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('03d93ecf-7530-4e86-a62c-7bf33ce38aa5', '6658', 'royal canin hepatic dog 2.5kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1075.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('03f87f89-542e-407a-b8f3-432e4fe495ea', '5864', 'Thyroid Test', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('041d62de-d6b1-46c6-973d-55b7f3d1e28b', '6970117120158', 'Bioline ear care', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('04567423-96e1-486e-8cc0-453013f8c5f4', '5308', 'Nexgard spectra small 3.6 - 7.5kg', 'Medicine', 'Aldo Pet', 0, 5, '311.00', '690.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('04745cac-9305-4290-8e04-08384b92b547', '6549', 'Review Checkup Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('048e43f0-7b69-4b04-a028-49400a1b33ff', '4342', 'Amprolium 20% 100g', 'Medicine', 'Aldo Pet', 0, 5, '195.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0492074e-98fe-4775-b808-5c2846b1aa10', '6189', 'Mammary Tumor', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('04cac8bf-1f2d-42ea-89da-9825abc13a62', '6007', 'pet o vate Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('04d11fde-c7dd-4c5e-b2e0-64bc596462de', '6034', 'Xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('04f47a1d-fa6c-4747-8a73-18c91023c60e', '5518', 'Endi paw cleaning foam', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0518b08b-9996-48e0-9e84-a5ef4021781f', '6300', 'Appetite Sample puppy Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('052e1e05-bc23-4ec0-8908-2287a8427a77', '5583', 'Vermicanis pcs', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0570890c-f7a2-4727-aca0-f9eb8a4d3ada', '4619', 'Lactol Kitten milk Inactive', 'Food & Snacks', 'Aldo Pet', 1, 5, '358.80', '615.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0577cada-388f-4ff3-a650-23a50747c2ae', '5447', 'Turtle Shell Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0581b2b9-605e-438a-a980-4c9ef98b2aff', '5420', 'Elastic Crepe Bandage size 15cm x4.5cm', 'Hygiene Items', 'Aldo Pet', 0, 5, '22.00', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0583eb94-ea95-4f9c-8f6e-2c36e097dcb8', '6234', 'Radicate 6% Liquid Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('058add20-5312-4956-bbcc-811cffde931e', '6092', 'Nefrotec DS tab', 'Accessories & Toys', 'Aldo Pet', 1, 5, '258.06', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('05963762-2718-4093-bd28-e8a5b8f240a1', 'PC 226', 'Panda Collar l Inactive', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0597587c-e5fa-469d-bd49-0277df9fe2ee', '5260', 'Minor suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0621ed7f-2d4c-4f6b-8f8e-fe9dd047c702', '6983', 'E collar Large', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('06346fbc-0d53-4c99-a61e-bd7bbcb5dbfd', '6261', 'Trabar Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('065d68eb-bb74-4a9e-a941-feb20420b1a8', 'Drip set', 'Drip set Inactive', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('067524cb-2ca4-495f-a606-761c93d74f34', '4354', 'Dufafloxacin 10% inj 100ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '2.25', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('067b0a3c-594e-48d0-97c7-5d67d1bed6cd', '6262', 'Laser Therapy', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('067f11e6-8494-48b6-aa73-04a93ae9bf1c', '4326', 'Vanguard plus 5L Inactive', 'Medicine', 'Aldo Pet', 52, 5, '120.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('06dd368a-2c55-4a86-bc09-79757a55b9ad', '6737', 'Home Suture Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0707c78e-8ee2-4144-829b-d6effd3ee61c', '4356', 'Dufafosfan 10%  + B12 inj 100ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '3.15', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('074a1e6b-69e0-474f-924b-7d4eb64541b6', '4606', 'Jufex forte 100ml', 'Medicine', 'Aldo Pet', 6, 5, '101.75', '295.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0757d144-7a1b-4368-ba41-d27c7e979b44', '5346', 'Purina one urinary care pouch', 'Food & Snacks', 'Aldo Pet', 10, 5, '36.92', '60.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('076ad9a5-ebd1-4ba2-8f45-7573a832744f', '9003579311660', 'Mother&Babycat Can 195g', 'Food & Snacks', 'Aldo Pet', 3, 5, '159.00', '260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('079384df-ad9c-4f6e-b354-6bfa53ead30d', '5436', 'Telmisartan 10mg', 'Medicine', 'Aldo Pet', 0, 5, '358.00', '540.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07bec170-67f4-4cd4-bf12-b63fb37b4471', '6689', 'Maropitant Tabs 24mg x 10 Not for selling', 'Accessories & Toys', 'PNL', 0, 5, '732.00', '1100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07bf3a3e-d9f4-4df7-9574-98664f68ac30', 'CH9013', 'Collar Harness & Lead', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '285.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07ccccaa-6cdd-41c1-b6e1-a913e962d93a', '6394', 'moxicin Eye Drops', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07dc1a8f-f8fe-4c36-b9f6-10baaceb80aa', '5750', 'Xylolin ( Adult Nasal Spray)', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07e69335-1fd6-434c-8dd2-590c2c2938ca', '6244', 'grooming only', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('07f7f2d0-a1ed-4f84-9ac9-537916746bd1', '6556', 'Consumables Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('08280907-f1f4-4b9f-b8bc-8372064d6f2d', '4316', 'Domitor Inj 10ML', 'Medicine', 'Aldo Pet', 0, 5, '410.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0844a1d1-60df-4cb6-a520-884eb5c25254', '5364', 'Fancyfeast gravy lover chicken 85g', 'Food & Snacks', 'Aldo Pet', 0, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('084f88be-89fd-4fe0-98ca-dbc034b99f09', '4659', 'Digyton plus 100ml', 'Vitamins & Supplements', 'Aldo Pet', 8, 5, '265.88', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('086b8ef4-1cf3-4267-81d9-71e659e4f1fe', '6334567890793', 'aldopet pure rawhide xxl', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('08775f6d-bc25-4287-ae07-964d5875059a', '6363', 'Whiskas can tuna', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('087dc15c-6771-4770-9059-a6f97d3ce502', '6253', 'suture removal Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('089328f2-303b-498f-958d-8f005ddc9ffc', '69545472122966', 'Pet Conditioner', 'Accessories & Toys', 'Aldo Pet', 19, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('08f0a1e1-2fda-40b0-a6c6-d0dc79180b18', '6501', 'Review Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('090d7deb-b59e-4792-b10a-4bd8bf63e7b4', '5773', 'Revolution plus 2.5kg - 5kg', 'Medicine', 'IBL', 4, 5, '445.00', '775.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('092ab835-e15d-4814-9405-dc6457596273', '6604', 'Dressing', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('09f9b726-3c2f-4e47-8cfe-5a720f2330b7', '5229', 'extensive suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0a052fb9-d15f-4326-92d7-7b4fefae916d', '6086', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'kilogram', NULL, NULL, 'Inactive'),
-('0a115610-c4d1-4a38-83ae-64a179ccd296', 'FDA 3', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 20, 5, '0.00', '140.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0ad10d90-b354-4d54-bf47-bf22e5934e53', '6970117120271', 'Biloine puppy training spray', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0b427ad5-c89c-49de-acbc-e983eaa40a82', '5400', 'Nexgard Combo Cats', 'Medicine', 'Aldo Pet', 0, 5, '414.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0b5e0cc9-ead2-48d3-8456-2e4f7849b76e', '5767', 'Whiskas Chicken Adult (1.2kg)', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0c11cf08-3552-487e-97c9-ad0793459b0c', '6436', 'Ear Cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0c518fe7-10f3-46f8-9f0a-07d662a4f2bc', '5254', 'FIV/FELV Test Rapid', 'Medicine', 'Aldo Pet', 0, 5, '120.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0c567d89-5c2c-441b-9379-0672f91f2fe6', '5504', 'Massage steam brush', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0c80d390-248f-4f4c-9cd6-b3f08fdd7fe2', '5886', 'Charly bone PK 5', 'Food & Snacks', 'Aldo Pet', 5, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0c843090-a7a9-4674-8b61-83f0bc3cbb02', '6175', 'E collar no 7 Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0ca319b4-fd92-4c51-b431-242888e7eb21', '4544', 'Theophylliner 200mg', 'Medicine', 'Aldo Pet', 224, 5, '5.89', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0cb5da7e-4a2c-4954-9ad2-6fc4a595d7fb', 'FH576', 'Nobby Fluo harness S', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0cedc35b-1fc0-494f-8caf-1d6b20a04d6b', '5478', 'Vegebone Skin & Coat Care Inactive', 'Food & Snacks', 'Aldo Pet', 3, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0cf5ece5-4914-4553-9cbe-2f6e6dc4de9d', '4398', 'K-9 Derm Spray 100ml', 'Medicine', 'Aldo Pet', 1, 5, '229.40', '344.10', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0d01163a-997a-43ab-b9c8-fc1c6d694e59', '4588', 'Clindamycin susp 25mg', 'Medicine', 'Aldo Pet', 0, 5, '195.31', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0d71d1be-821c-45eb-9c04-07f89b08c067', '6947746485200', 'Cocoyo Pet Sheet M Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0da206e4-5d6c-4648-8cbc-e2aacbfbdbd7', '5236', 'Carprofen 50mg', 'Medicine', 'Aldo Pet', 129, 5, '9.28', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0e8b2e91-c16d-43fd-ae37-72c9d6df6007', '6500', 'Trimming Bath Dry Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0ea67d2e-7100-4e58-9ec9-ab063561ab9a', '6427', 'Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0eb7280c-1cb5-462c-af3c-c71fbc509cc5', '6163', 'Bandage', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0ebbaab8-fff0-4fbe-ad2d-d1cdcd7936aa', '6498', 'Pimobendan 2.5mg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0ecabdee-9937-454b-93c1-151a49ad9690', '6598', 'Wound Dressing Inactive', 'Accessories & Toys', 'Aldo Pet', 18, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0f08622f-b0cf-48f0-acc8-164dde568574', '6172', 'teeth Cutting', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0f26e6d9-abc9-4230-b65b-bae1fec1b767', '5792', 'Royal canin sterelised 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1339.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0f3c1f00-6d3e-4320-bf19-546004d712d0', '6373', 'Leash Chain', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0f3fec3e-99a6-4b9b-b0ce-6a1da06249cc', '5910', 'Service Time', 'Service', 'ALDOPET', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0f5b944f-9e34-447f-85ab-cd6ef7088dd5', '6400', 'Nail Trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('0f913be0-4e6e-43f9-8600-191bf8832dad', 'QDMF22', 'Quickly deffect muddy feet', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0fa70d51-e8c7-42bf-b7d0-9ad37f2cfcfc', '6318', 'Wound cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('0ff522cd-9484-4831-80eb-2ed96d7d3909', 'ASB2302', 'Anti slip bnowl M Inactive', 'Accessories & Toys', 'ALDOPET', 40, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('105d48e2-f528-4f90-b860-da3e62029c9b', '5480', 'Pet Toilet', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '699.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1062c698-fa20-408f-88e0-0bce003ac706', '5756', 'Moxipet k', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('109edb9e-1eba-4806-9427-7dbef115fa41', '6970117120288', 'Bioline keep of spray for dogs', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('10b09cd8-39ec-49ac-9448-a35d66bc51ff', '6463', 'Growth Removal Surgery', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('10c08c31-de51-448a-a35a-cf2a9139be33', '5819', 'Salmon Catnip Biscuits', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('10cba069-df1f-4612-9f0d-049bb1f2cc5a', '5936', 'Felix party mix seafood 60g Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '79.05', '120.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('10f008ac-db86-4cec-9215-e24987330c66', '6988', 'ASED (Autoloous serum eye drops)', 'Service', 'ALDOPET', 0, 5, '500.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('10fe8638-0ccf-423b-b1b5-9ffd65e8ee4b', '5913', 'Frontline plus  pcs Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('111257de-9d7e-4fdf-a761-a9e623f7eebf', '5989', 'Tricin Eye/Ear Ointment', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('111f0853-cbfd-4fb5-aa37-4258a8d73826', '5741', 'e collar', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('113afe56-9e82-471a-8912-e5809ee62ba5', '6483', 'Pet Perfume Tree Fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('119530cf-46de-4394-963a-41e605d0a21f', '5953', 'Cbc Test Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('11a4380f-4b9b-4a4b-948b-9ae089a51a30', '5441', 'Immunol 100ml', 'Medicine', 'Aldo Pet', 6, 5, '250.24', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('11bb3b7f-eff1-4f65-9640-8879026826d3', '6534', 'Full grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('11d359f2-a4e1-483b-b1d6-463a14d463de', '6836', 'Nail Trimming', 'Service', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('11fa28c2-738e-41c3-9117-5def99c78a80', '5558', 'Massage steam brush Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1248ac03-d137-487f-aa43-fb3331ff599e', '5739', 'Povidone Iodine solution', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('124cd5ef-22b3-470f-b108-53144121c221', '6543', 'Doxycyline 50mg', 'Medicine', 'Aldo Pet', 301, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('125e926b-7580-410c-a297-d83195a71a64', '6314', 'Boarding Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('126e3e77-9052-4ce9-8102-5463652f3649', '4633', 'Nexgard Spectral 30-60kg', 'Medicine', 'Aldo Pet', 0, 5, '953.33', '2450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('128f5948-e669-458d-8fdd-8c814252e011', '5875', 'Anesthesia', 'Service', 'ALDOPET', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('129f6efe-99dd-4d36-af33-11f85adb9f5d', '6859', 'Vit B12 Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('13220e2b-f014-42ab-8404-3f3fec3b2276', '6338', 'Resuture', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('136695e9-6b80-4ef2-b5f6-402ea15e637a', '5844', 'Megavit b complex inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('136cd23b-3fca-4998-a85e-414e9b92e63e', '6492', 'Dufamec Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('13ebf36e-193e-4f9c-893d-8bb562eb6aff', '4696', 'Dinovo 500/20mg', 'Medicine', 'Aldo Pet', 48, 5, '779.28', '974.10', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('140b0f11-0458-41de-acd2-56fc4f1384f6', '6468', 'Nebulization', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1438fb67-df6e-4add-b6c9-2086947b173d', '6015', 'Consumables Medium', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('14447262-1106-4d86-8259-eaeaabffea14', '6139', 'gastrostomy', 'Medicine', 'Aldo Pet', 19, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('14d2464b-9fca-4648-9c2b-64e094f60682', '5277', 'Metonin 4mg', 'Medicine', 'PNL', 23, 5, '38.66', '60.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('14e84d8a-ce7f-4083-95ac-dba9d3fd59bc', '5624', 'Dono pcs', 'Medicine', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('14fdcb6f-c4e3-4192-bff6-a3660b7acdd6', '6130', 'Euthanasia Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('154771d1-86f5-4138-9b40-ba6668f99b85', '5404', 'Transportation Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('156c965d-1e98-4a86-bd0a-eb9060dc0a9a', '5784', 'Full grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('15750e7c-37de-4547-b931-4f2c2d64e098', '5394', 'Vimectin 0.1% Inj', 'Medicine', 'Aldo Pet', 0, 5, '1.25', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('15a8804e-5243-47d8-aebf-8c70a673e9b0', '6954547200215', 'Orgo Breath Freshen', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('15ad5df4-4fb3-4b4c-822f-bf592e63bfad', '4363', 'Felivit 250g', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '450.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('15df188e-bebf-4c02-9760-c3320de85b90', '5703', 'Abscess Drainage Small', 'Service', 'ALDOPET', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16048b85-f3c1-4bc8-9c20-379822216bc7', '4677', 'Konakion 10mg', 'Medicine', 'Aldo Pet', 0, 5, '42.29', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('160a08bf-216d-4145-99df-dd2cec39166f', '5473', 'Endi Ear cleaner', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 23, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('164bf418-882f-4275-a824-ce68127e4689', '6147', 'Blue raincoat', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16917cc3-8e1a-447f-9c32-f49fed753fbe', '6753', 'Euthanasia', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16aee9f4-19c3-43eb-8fd2-ee6f0afa0812', 'LNC23', 'Led Pet Nail Clippers', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16b415d9-93db-43cf-bb40-541f40a52c11', '6230', 'Royal Canin Aroma Exigent', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16bf74b5-c080-4719-b31e-23ccd2760a91', '6954547213161', 'Exfamily nose spa', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 51, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16d281db-863b-48bf-84e2-7ed271395c14', '6180', 'Vaccination Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('16d692a0-668a-41bd-a9a7-5f89de734fb9', '6044', 'cytopoint 20mg inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('16f97431-dcbc-4eb2-b0e1-2d2f668f8b86', '6214', 'Drain and suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('17128737-1130-40e4-a89f-17398f852756', 'CM24', 'Cooling mat S', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 9, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('173ce70c-2d3e-4603-b072-486fd3400ece', '5522', 'Oxycitocin inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1784e6d4-cb6b-4264-b1a6-790186aebc51', '4426', 'Emitino 4mg Tabs x10 Inactive', 'Medicine', 'Aldo Pet', 8, 5, '7.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('17aed5e0-819f-4c64-a071-7ed6d422fb9f', '6598412436', 'Deworming Plus Dog', 'Medicine', 'Aldo Pet', 658, 5, '11.57', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('17b48353-1f21-448e-a706-4815acb2c7ee', '5880', 'vegebrand treat Inactive', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('17eebcbd-b487-48c3-924b-099f7540b271', '6395', 'Tumor Removal', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('17f403a7-d813-44fa-8396-71376dee6482', '6226', 'Trabar Inj Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('18f8582c-c219-4174-bd5b-861734ca9747', 'BC333', 'Bandana Collar s Inactive', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('19184260-598d-4ec9-a373-112910be8c0f', 'VSS52', 'Vegebrand small shampoo Inactive', 'Accessories & Toys', 'Aldo Pet', 23, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('192b6f5f-9949-4210-a928-539a2aec7476', '6972635211059', 'Hair cut three piece suit Inactive', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('196e3f7b-5bf9-450f-898f-bad76093b391', '6159', 'Kyrovit C inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('198bcc24-ccd0-44d4-856a-48016ebb000b', '6040', 'Heartworm Tab', 'Medicine', 'Aldo Pet', 20, 5, '0.00', '115.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('198fc25c-d77a-4e93-8239-fb2d5f8d562a', '6682', 'Full Grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('19acd45c-e897-42ec-9256-4699e96d6e11', '5976', 'Expired neutered satiety balance Inactive', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('19fdb120-a6f6-4ea7-a94a-5e621c989615', '6001', 'Skin Disease Shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1a452a33-5978-47e0-8c0a-2758226fdd6d', 'ML2728', 'ML2728', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1a669068-b0a5-4d9d-a248-e4a9efdb82a6', '6557', 'Boarding Time Additional 30mins', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1a847e94-d626-4ed6-a4b9-38ca9032ca80', '5933', 'Ownat care renal 3kg Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '1404.00', '1850.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1af11189-3817-4d2e-bc44-06c9c219801f', '6579', 'Water Tapping', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1b03a609-0f6d-4b6a-b421-e5c911964413', '6880', 'Vime ATP syrup', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1b38dede-39bb-4650-b539-acc77214f6d7', '6636', 'foreign body removal surgery', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '10000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1b5a2867-e5b1-4c29-87c7-1e4082a15893', '6201', 'Eye gentle tear stain wipes for dog Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1b7dd6ed-3958-4850-85f1-4ff29c44e685', '6854', 'Wound Suture', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1b8a94de-93aa-4ed9-8db9-2a6609858ded', '6576', 'Dicynone 500mg', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1bdf56fe-2e98-474e-ae27-283142f70eec', '5590', 'Transport 5-10km', 'Service', 'ALDOPET', 0, 5, '800.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1bdf67d2-e14f-43b2-ab0c-83b56c252822', 'BOBO22', 'Bobo Body Leash', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 12, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1c9b047b-eebd-4afc-a1cf-de8f8934fc17', '6620', 'Bath & Dry Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1ce39742-6536-4c5d-99a7-0dd99fc0c511', '5302', 'Fusosemide', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1cede05e-8aa8-46bd-97e7-28a52e4f8ac5', '6934', 'Antezole Box', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1d0e4e28-5104-4680-9185-a3ff66b6aeda', '6615', 'radicate cat Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1d32e87c-a1ba-465b-9252-6593b4c2db89', '5416', 'Vitamec inj', 'Medicine', 'Aldo Pet', 0, 5, '6.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1d6b1ce3-488a-4e86-b7cb-95bb19728b67', '6414', 'Leg Protection xL', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '690.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1d74e5bf-46a9-4914-b91b-e9b4100a3810', '4528', 'Mebo Ointment 15g', 'Medicine', 'Aldo Pet', 0, 5, '271.21', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1d7b63b9-7831-4e32-9c53-4f86d7c033ef', '5477', 'Vegebones Dental Care Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1d93c718-576b-4372-afab-369002a7cbef', '6642', 'Cystotomy Surgery Dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1dbf0e74-3407-44dd-bf5f-b360d8aaf16f', 'BC44', 'Bandana Collar m Inactive', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1dbf90ab-f2a2-42e3-b694-03e7e114c0dd', '6366', 'Intra vaginal tx', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1dd32c3a-e749-49f2-a8d0-ab9ebf5a1ea2', '5707', 'Bully Fuel', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1025.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1dde2251-98e4-4b0f-b9ba-7a9939992e90', '5241', 'Radicate 6% Liquid Inactive', 'Medicine', 'Aldo Pet', -20, 5, '99.83', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1e1ec800-7a23-42e1-aeda-59424f00d05c', '5458', 'Carprofen 25mg', 'Medicine', 'Aldo Pet', 315, 5, '6.12', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1e654eb7-eba0-4010-9be3-ebd0eba3cd84', '6774', 'Radicate Cat Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1e694958-0c0a-4b08-94f4-4ef0b6cbea82', '6012', 'Minor Suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1e7c1561-d6a8-4735-b4cb-5a7d0bf03cf4', '6264', 'Bird Deworming Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1e9e50e7-7fcd-43fa-86af-666023df3dc1', '5879', 'whiskas pouch', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1ea87a17-c937-474e-b976-027f9758fd3a', '6668', 'Puppy Gastro treatment', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1ebdd7f3-ae55-490f-bd51-9ea426a52a76', '6231', 'Gastropexy Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1eeea5ed-f0ce-49f6-8514-df51997e87e9', '4369', 'Pro kolin 30ml', 'Medicine', 'Aldo Pet', 0, 5, '615.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1efe944f-1919-487d-a10b-2b0afebb2597', '4717', 'Felix Adult Sardine Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 5, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f050795-52ac-4000-8cb9-7aed294d23bf', 'TCC2324', 'Transparent carrier S Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1f169af6-151d-464a-91eb-d09fc8de6ea0', '6119', 'Heat inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f37ea48-a2fb-4af6-a39a-1d8a30deffe4', 'CS3255', 'Heavy Duty Dog Collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f3be5f0-6aed-4bfa-b2e3-11acf49b85ee', '6066', 'xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('1f5a8de4-fdea-4f33-b5b6-607bb672a579', '6703', 'Revolution plus Not for selling', 'Medicine', 'IBL', 0, 5, '1105.00', '1785.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f80bcfb-47df-46a3-9698-cae779638780', 'BG226', 'Bath groom brush', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f86192e-41af-47f4-b81c-06929a47cc64', '4572', 'Itraconazole 100mg', 'Medicine', 'Aldo Pet', 10, 5, '13.31', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1f95e849-f3e1-4d4e-8b72-985ff071ba2f', '89726889939', 'Pet Sterilization Liquid', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 13, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1fc0a262-ddf9-45cb-a115-b7e3c85e04ff', '6945', 'Wound Cleaning', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('1fd1a022-11c4-430d-8407-35930f0ad6e9', '5188', 'Enucleation', 'Service', 'ALDOPET', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('20028f03-3c0c-41b8-91a7-e613ebe05894', '4350', 'Dufamec inj 50ml Inactive Not for selling', 'Medicine', 'VETOPHARMA', 122, 5, '240.00', '6250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2057106c-b463-4cc3-ba1f-2577d58fc242', '6841', 'Vaccination Puppies', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('205ff9bb-f90e-4ef3-8e16-80e40fc293b7', '5300', 'Himalaya Liv. 52 Tabs', 'Medicine', 'Aldo Pet', 18, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('206c0a2b-97c4-4814-938e-edcc1a37ac07', '5284', 'Lignocaine 2% 20mL', 'Accessories & Toys', 'Aldo Pet', 0, 5, '7.55', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2097e1b0-ac63-4634-b5f1-f019874e5a4e', '5330', 'Diniwo', 'Medicine', 'Aldo Pet', 0, 5, '15.58', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('209a9dfc-41e4-4820-8204-3192c4263b2f', '6340', 'ownat classic adult canard 4kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '1217.39', '1525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('20b41f31-5050-46d4-9b8e-fdb3646b9245', '6883', 'Vitalidog 150 tabs', 'Accessories & Toys', 'Aldo Pet', 8, 5, '278.40', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('20dbaac3-3e65-4030-a2e3-a507e80479fa', '4319', 'Sebbarox Shampoo 250ml', 'Medicine', 'Aldo Pet', 1, 5, '470.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('21011cdb-56db-4d49-bc76-d6296788f1c7', '5981', 'Relaxzyme Small dogs and cats Tabs', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2104ef15-ad26-479f-860f-a550f1b714ab', '6559', 'Policedog leash', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '599.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('212e6c2e-683c-4424-be67-06a65b33250f', '6027', 'Tail docking', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2165eaad-8a05-40c4-a223-f3956bbb5111', '6954547213086', 'Fig Smothing dog shampoo', 'Accessories & Toys', 'Aldo Pet', 35, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('217bc1a1-e448-4472-846f-c6cee1c274ce', '4443', 'Vanguard plus 5L Inactive', 'Medicine', 'Aldo Pet', 22, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('21992ec3-48ac-4121-9822-0938a5697ad3', '9003579307717', 'VD recovery cat/dog can 195g', 'Food & Snacks', 'Aldo Pet', 6, 5, '139.40', '190.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('21a5140e-f2d6-4e10-94f0-27c8ee3dddd3', '6108', 'Superdog Joint and Bones', 'Medicine', 'Aldo Pet', 3, 5, '600.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('21e7e4cd-71f6-44ff-a06f-b03bd26b50a8', '5357', 'Alpha Chymosin Fort inj', 'Medicine', 'HEALTH ACTIVE', 0, 5, '3.80', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2222ccc4-a0fb-4b34-8d3e-ecf90ea75330', '6606', 'Full Grooming', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('22526c16-cf6a-452f-8ffc-d92704cf7265', '3182550402132', 'Medium puppy 15kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '3255.40', '3970.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('226cda9f-c521-4828-9287-3578912d9958', '4542', 'Tacroeye Eye Drops 0.03%5ml', 'Medicine', 'Aldo Pet', 0, 5, '296.00', '445.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('226dc09e-6af6-40f2-9017-35f8e4d9a7e2', '6142', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('22ace2e0-6aa9-42d9-94da-6f5c457077b5', '5723', 'Fluzon', 'Medicine', 'Aldo Pet', 4, 5, '0.00', '120.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('22decead-3165-4f5b-a2a4-b9bc3a68fcfb', '6064', 'meloxicam 0.5 for cats', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '310.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('23402d35-e703-49a6-934a-bb9e75a0b41c', '4446', 'Simparica (40kg-60kg)', 'Medicine', 'Aldo Pet', 13, 5, '725.00', '870.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2365ac8a-7d59-472a-92fa-1a404c27028b', '4721', 'Felix Kitten Tuna Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 0, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('237f3c7e-3420-4cb5-82bf-9c686b64df61', '4456', 'Drontal cats', 'Medicine', 'Aldo Pet', 12, 5, '68.75', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('239e3404-7392-46c6-8cc4-5b123eb08df3', '5947', 'Euthanasia', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('23a30d98-c0ac-4dfa-b0b9-8e5244b49271', '5806', 'Rose cat collar Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('23c2682b-dc8f-475b-9cca-11483580701a', '6575', 'Omeprazole oral suspension 10mg/ml', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('23e19348-232e-4fcd-8f4f-55b80d3c5d74', '5786', 'Leg Protector L', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2407edbb-1d0b-4a32-bab9-3d2d53d8dbd8', '6728', 'Petmedin 10mg tabs Inactive', 'Medicine', 'Aldo Pet', 60, 5, '0.00', '65.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('241eeed3-d813-4e6d-a771-85e9515ccac1', 'DM777', 'Durable muzzle size 6 Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2429276a-2ba6-4d76-8330-e3a69bc6956e', 'SL4524', 'Small Leash with metal', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('246c13e4-0fe3-49e4-b39a-ce91360e9929', '5650', 'Cherry Eye', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('248e0224-6d87-4a18-a8e6-028d65986765', '6957919909389', 'Aroma Groom Oatmeal&honey', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 12, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2491f7d7-d10a-4aca-a144-3170c9460e58', '5908', 'AT 558 Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('24dc8f16-d745-4dfd-bd96-5c56f2a3fabd', '5851', 'Ear Hematoma Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('25549eda-80e6-4c0d-ab4e-c40fd80bb3a9', '6751', 'Intensive Care', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('25561e4a-6196-4f6f-8a27-2b7aa813aa68', '6970117120455', 'Bioline flea and tick spray 175ml', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '240.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('258cbe57-7d7e-472f-a803-eb88e95c81c4', '6283', 'Growth Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2602d4be-30c4-47a9-ac63-652b8c493eb1', 'Sm5338', 'Grooming Gloves', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2614aa1b-e52b-4431-9da1-0e903bc5d5a4', '6237', 'Cleaning Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('264ca3b1-8a28-4fcf-a256-aa5f0aa6afd3', 'DM677', 'Durable muzzle size 5', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 25, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('266302f3-3cf7-4f97-ab23-d4448f7032d9', '4724', 'One Adult Indoor Chicken gravy', 'Food & Snacks', 'Aldo Pet', 9, 5, '425.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2690b00a-f6ea-43f4-a0b9-b660b7cf08c4', '6121', 'Wound cleaning Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('269e6551-4720-4d0f-82ae-16685d2d92b4', '5968', 'Eye Enucleation', 'Service', 'Aldo Pet', 0, 5, '0.00', '3500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('26a9e1dd-6e71-4417-8ae3-fd60b88317ae', 'major wound cleaning', 'major wound cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('26b47666-d1c3-4dcb-916a-48da031e9b8c', '5293', 'Fytobact', 'Medicine', 'Aldo Pet', 0, 5, '12.64', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('26fd1b26-9982-48e0-85ad-f06f75dd5f38', 'BP 350', 'Bobo Pet Leash', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('270c87e3-3558-42ff-8cbd-3076e66dda78', '5943', 'Grooming Plus hours', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('27171ca7-70f6-4fbf-ab55-a289154f0927', '5376', 'SMT 897', 'Accessories & Toys', 'Aldo Pet', 30, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('276cc49a-b023-44e9-bbee-1cfa590c0bb2', '4694', 'Elecamin sol 20ml', 'Medicine', 'Aldo Pet', 0, 5, '159.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('277d33dc-9764-44c8-ab0c-430d476705e0', '4441', 'Carprofen 100mg', 'Medicine', 'Aldo Pet', 363, 5, '16.92', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('27a5571f-d6c5-4bd8-a5be-6f07255eec7a', '4412', 'Omezol Loy-Inj 40mg', 'Medicine', 'Aldo Pet', 0, 5, '157.95', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('27c71e9d-0691-42e7-ac23-dd54dafb7d02', '4579', 'Amlodipine 5mg', 'Medicine', 'Aldo Pet', 0, 5, '3.95', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('27def625-b74a-410b-8798-43c5f47e763d', '6539', 'Metonin 4mg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('27ebed4b-cccb-4fde-8280-c15b06071b96', 'BCC75', 'Bohemia Cat Collar', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2818ae5f-54b7-4bd9-b58e-aa8baefb248d', '4715', 'Mucomyst upsa', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2822bd50-a571-4ae9-8d6a-8a83d49d9927', '6551', 'Pexion 100mg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '4700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2834fab1-c347-4917-b5bc-05ab765901f7', '5474', 'Milk feeder bowl', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '490.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2836f9bb-39c6-437c-9d2a-22ab424269d8', 'PK884', 'Pet comb M', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('284153a8-a408-4440-b63b-b21e9e088b04', '3182550711159', 'Cat Urinary SO 1.5kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '746.20', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('28899370-8117-4dc2-90d7-10a608435b4b', '5464', 'Dental Scalling', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('28dc867b-b79b-4a00-92fb-7fdb4631ac23', '6383', 'Pantec IV Inj', 'Medicine', 'Aldo Pet', 0, 5, '109.29', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('290b3fe1-e90a-41dd-8259-e49c170e270e', '6822', 'Endi Eye Cleaner', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('292c0967-16eb-42e5-aa1b-014d12f47aba', 'Rs 1500+', 'Consultation after 21hr30 Inactive', 'Service', 'Aldo Pet', 94, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2933a437-6eec-4a6b-b066-5036b753ba96', '5797', 'FDA 1', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2935c5d0-167f-4f20-ac46-3bedc7b9d3b8', '4413', 'Cefotil 500mg x 12Tabs', 'Medicine', 'Aldo Pet', 0, 5, '16.08', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('294a3810-b0ea-48b2-94c6-fc5b3b2ab3c1', '6304', 'wound cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('29672e30-d50f-4313-9758-31cd66cd0a67', '6736', 'Pimobendan 10mg Tabs', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '65.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('297a22bf-e3b5-4feb-a7be-5e4e7e3ff673', '3W12', '3 wheeler toy', 'Accessories & Toys', 'ALDOPET', 5, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('29852cb8-fcc2-435f-8f7b-cccbdd135ba3', '6065', 'xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('29f12ce9-c7ba-469f-a41f-5545d7160dc3', '5870', 'Simparica (20kg-40kg) Inactive', 'Accessories & Toys', 'Aldo Pet', 23, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('29f7c427-94c0-4426-afc7-c2ead58e90e2', '6141', 'Wound Dressing', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('29fe93b8-2bc6-4b04-b017-a014cc7e99bc', '4313', 'Nutrostim Gel 50ml', 'Medicine', 'VETOPHARMA', 2, 5, '215.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2a0cf1a7-9a0c-4dae-a93b-17cab8f7c50b', '5979', 'Vetospray 250G', 'Accessories & Toys', 'Aldo Pet', 2, 5, '340.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('2a17b69f-f2d9-432e-b884-e8e59a700a13', '4532', 'Gupisone 5mg', 'Medicine', 'Aldo Pet', 53, 5, '4.00', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2a2d0b12-83b8-4f72-b714-8316b3eaf072', '5939', 'Felix play tube tuna and crab Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '62.79', '95.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2a668093-a23a-4a83-895e-fc249cad9007', '4320', 'Heptonic 200ML', 'Medicine', 'Aldo Pet', 1, 5, '350.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2ac02c65-84c5-49c7-9010-c3c218aae18b', '4573', 'Ivetmectin 272mcg', 'Medicine', 'Aldo Pet', 74, 5, '25.15', '40.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2b0a2c87-c2bb-4fb6-a4a9-2e2fd19e88e2', '4541', 'Potassium Chloride 10% 10mL', 'Medicine', 'Aldo Pet', 31, 5, '51.00', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2b18fe6a-df9d-4af2-9fc8-7fc92bdb8feb', '5986', 'Vet Natlife Paste 30ml', 'Accessories & Toys', 'Aldo Pet', 2, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2b5189a9-3ce0-407f-8f02-ce2fe9ed6970', '5639', 'Charly Bone S', 'Food & Snacks', 'Aldo Pet', 6, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2b5ec127-6993-4ac6-9fb5-04245f81bf82', '4536', 'Butalin 4mg', 'Medicine', 'Aldo Pet', 74, 5, '5.10', '10.20', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2b6b3474-dd39-43ea-9ab7-7c132ea1048c', '6450', 'furosemide', 'Accessories & Toys', 'Aldo Pet', 15, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2bf0dd3d-6864-431a-8ad0-b588766e6147', '3182550859554', 'Urinary cat SO 7kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '2886.40', '3610.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c0855ea-4d9c-4cf3-a035-189213bf353a', '6942', 'Orthopedic Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '7000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c0b92cd-7f1e-4531-94ce-360b80b0b20a', '6273', 'Eye Surgery', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c194a3e-4c6f-4937-b01c-ca6ce97334c7', '6371', 'Wound Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2c221092-aeef-41a8-9c23-39a3c2caf3ba', '5326', 'Pet O Ease', 'Medicine', 'Aldo Pet', 0, 5, '163.11', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c43521e-c46d-4022-a6e3-e7328766804d', '4525', 'Atropine Sulfate 1mg/ml', 'Medicine', 'Aldo Pet', 0, 5, '1.60', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c66a70e-67b0-40d7-8277-875cb1231130', 'FBL2022', 'Fluo Body Leash', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c8a1b96-503e-4854-ab4d-2ede0e78f49c', '4595', 'Depomedrol 40mg/ml', 'Medicine', 'Aldo Pet', 0, 5, '161.71', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2c909e3d-a007-46d8-b1eb-fe42020da445', '4434', 'Simparica (20kg-40kg)', 'Medicine', 'IBL', 4, 5, '385.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2cc246bf-560b-4e12-bf76-b507e4dc76e8', '5371', 'Friskies meaty grill 1.1kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '328.88', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2cf85d21-9680-4e21-ac8a-252d28803eec', '5235', 'xray', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2d465039-aaa9-4969-81b4-15c7e2494030', '5997', 'simparica 5 10KG Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '265.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2d6f21bf-1335-4c5b-ad42-3b64b09c9179', '5887', 'meloxicam 0.5 for cats Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('2d714209-2810-4375-af55-b2dc98ce286a', '6954547212935', 'Exfamily Rose Vitamin wash powder', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2dabad83-f936-4fb1-979f-1ee76f780194', 'CPWS395', 'Cat play with spring Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2dcabd2c-5106-4814-8cb3-006712c58679', '6302', 'kitten gastro treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2dceb244-3331-4120-b953-2510cf6c6d79', '6964', 'Cystotomy Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2df978c2-b685-499e-8399-168c6480e30c', '5762', 'Dedrizyme Spray', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2e121612-2155-4a31-8876-abd089a59ba4', '5982', 'Anti Scour Oral 30ml', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '165.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2e1677f4-bdaa-4e3d-b7b6-8de329afbdf3', '6391', 'Epiend', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('2e315dda-8c32-40bd-be8d-3ffc2085675f', '6460', 'Boarding Dog', 'Service', 'ALDOPET', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2e4e5795-3c71-47e4-ba2f-7c7c701c39c8', '6978', 'Poop Repel Pcs', 'Accessories & Toys', 'Aldo Pet', 30, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2e7e93fa-622b-4e5a-a935-4c70e8d1a46a', '4442', 'Otitis Xterna 15ml', 'Medicine', 'Aldo Pet', 3, 5, '96.00', '155.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2e8b5e94-035f-42ab-9d78-1052a8144ed6', '5358', 'Supercoat puppy dog 2.6kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '728.01', '1100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('2eb5bb51-7f3b-4e49-b52a-7dba682038f2', '8698931092298', 'Silycumin cats+small dog(100tabs)', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '675.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2eef4a28-9479-4022-bb32-2cda21a12fbc', '6408', 'Tumor removal surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '10000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f061f45-32f3-437b-ad25-942e300ef51e', 'CL244', 'Chocker Leash', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f2691a6-ac47-43c5-ba67-e3554235d862', '6924', 'Breed Vit E', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f5700de-8912-437b-a9da-a34dd68fcfee', '5374', 'Fluid Therapy Small Dog <5kg', 'Service', 'ALDOPET', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f626282-3afe-4098-9c90-00532e8dfc2f', '5903', 'Inflamin Cream', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f7b70aa-f7b1-49bd-bd12-75aa149dc73e', '6975', 'D Kaltabs', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '420.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2f8373fa-9c4f-4eef-b03f-f67e034290ac', '5525', 'Dono pcs size XL - Female', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('2fe996ad-125f-43b8-bab5-08836354e935', '6276', 'Extensive suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('30296fe5-143c-4ed2-997b-0f0cbcb6e5a5', '5753', 'H800', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3064c00f-5b30-45d5-9189-1a0b4313d24a', '5787', 'Stick Cat toy', 'Accessories & Toys', 'Aldo Pet', 33, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('308c6994-49a0-4617-b28b-3ae6d643bb57', '6120', 'vegebrand 7 dental effect Inactive', 'Accessories & Toys', 'Aldo Pet', 18, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('30992f19-3f21-4e3b-969d-7a1ae009ff00', '6033', 'R.Canin Exigent 2kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('30e54a74-cc2c-4628-98fd-e69c18d72dc8', 'PC2502', 'Pet carrier', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '975.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3177a16b-c850-4a38-b075-a4f61e42d489', '4671', 'Bonjela Adult 15g', 'Medicine', 'Aldo Pet', 2, 5, '251.36', '320.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31970338-a985-4817-ae67-0bd7292bda84', '4571', 'impact 4ml', 'Medicine', 'Aldo Pet', 5, 5, '207.00', '315.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31993897-ee50-4761-ba6e-761e96437fc3', '6026', 'Consumables Maxi', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31b95e90-4902-46bf-8635-96aafcc240d3', '6193', 'Tumor Resection', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31bf5a88-3e38-4b3b-a7f4-d1437d2cabf8', '6368', 'Methivet 5mg tab', 'Accessories & Toys', 'Aldo Pet', 147, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31ce6dc1-ae00-433a-a6aa-65a9772c380c', '6922', 'Multimix(Vitamin and mineral mix50g)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '265.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31da4cbf-4e36-4d54-8eec-ced0329b2331', '5322', 'Petkuff syrup 100ml', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '163.93', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31e6271a-2354-45ba-a480-cf2ab0e1fad3', '4533', 'Aminophylline iv250mg/10ml', 'Medicine', 'Aldo Pet', 5, 5, '75.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31f2e9a8-fb19-448d-9bdb-f47e7aa0bfc1', '5289', 'Tobra eye drop', 'Medicine', 'Aldo Pet', 20, 5, '68.16', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('31faa615-4ff8-49c0-9efe-99fecd972825', '6970117120921', 'Bioline toothpaste mint', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 16, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('32179b0d-dcc1-4acd-88ce-bd061e4ab560', 'RC224', 'Golden Panda Collar  S', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('325bc960-e640-483c-bc72-5a7e597cc5f0', '6548', 'Pimobendan 2.5mg', 'Medicine', 'Aldo Pet', 10, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('32845c5c-7067-477e-a9ea-8932031d56d7', '6389', 'Fenbendazole Oral Suspension 100Mg', 'Medicine', 'Aldo Pet', 6, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('328a3adf-83c3-4426-a9a4-e34e85eab59f', '6597', 'Transport Inactive', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('32961fe5-b574-4f78-8873-18d4aa051879', '8698931093394', 'BiodermDog(75tabs)', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '340.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('32be8d8d-6bcd-47ee-98ee-62fffc7cdef1', '5268', 'Electric Brush Spray Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 31, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('32e5cbdd-5830-4c82-957d-437270eefbaa', '3182550771061', 'Dog gastro intestinal 7.5 kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '2919.20', '3560.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('32f852b5-0a32-4a81-98af-392255d1275a', 'SC413', 'Stund Collar Inactive', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('32fb8993-d6e3-48e9-a918-3345fa650f3a', '4392', 'Calcishell powder', 'Medicine', 'Aldo Pet', 0, 5, '341.27', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('331b011a-afd5-4fdb-8768-731b860809a5', '6467', 'Minor Ear Cropping', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('333fea08-d7b1-40ae-83f8-d22a3546f051', '5411', 'Pro soothe soothing cream', 'Medicine', 'VETOPHARMA', 2, 5, '165.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('335f3751-ba19-42c0-8ed9-5d3390e4fde2', '6947746496381', 'Cocoyo Pet Sheet s Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3363c91b-6035-410b-a3c0-e3ce6d63d65f', '6512', 'Laxapet', 'Vitamins & Supplements', 'Aldo Pet', 1, 5, '0.00', '315.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('33730218-6d5a-4dcb-a430-99c516cf683e', '6203', 'Waterless cat shampoo green tea fragrance Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('33b0f81a-23a7-4d8d-ae38-dce4d8bed192', '6003', 'Cat Urinary Catheter', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('33b8cf0c-a117-4b59-bfeb-bf192c77b98a', 'T229', 'Oval teether', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('348d47af-d2f2-40ce-a1d3-894dc8f48592', '6042', 'vetronutri calcium tabs Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '355.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('34ae3f20-d761-4ad5-bf1d-485da2fb31d8', '6491', 'Furosemide', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('34fb2a02-0cf5-48ba-87f5-41235d06de69', '6229', 'vitakraft poesie', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('351ddf83-60ca-4f3e-8b93-e36dc4beeba0', '6533', 'Maggot Wound', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('351eff96-c10b-4e6d-bc49-e12465165c99', '6124', 'Trabar inj Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('35379887-7dd5-492a-b21c-f3110db66abc', '5828', 'Foreign Body surgery', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '3500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('35497775-63f1-4d95-bd66-6f2d08a01098', '5923', 'Consumables Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('354a9bd9-4275-4ae6-ab89-1fe1eeee8d33', '4338', 'Felocell 3 vac 1 dose Inactive', 'Medicine', 'Aldo Pet', 29, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('354d1460-eb0e-445b-a7bd-a127d0705dac', '5496', 'Vegebrand Milk Flavor big bone Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('357c5f1a-6679-42bd-b304-de7ef4f6ee24', '6954547212942', 'Exfamily Fig smothing wash shampoo Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 21, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('35c6a7d6-0567-4456-8ac2-d2007adb1fe2', '5331', 'Wormtek XL', 'Medicine', 'Aldo Pet', 3, 5, '33.98', '51.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('35f3e5e9-0f99-4ee4-87c8-59532e1487c0', 'HPK2460', 'Cat collar bowtie', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('36297442-c855-47ae-a174-7f14095612ce', '5699', 'Healthy Treats Puppy1kg', 'Food & Snacks', 'Aldo Pet', 2, 5, '0.00', '695.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('366a9bc7-b2a3-4e08-9cd4-0c20ae00439f', '4661', 'Inflamin vet cream 50g', 'Medicine', 'Aldo Pet', 0, 5, '161.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('36ae999c-5fce-43ab-8cae-e02d8525c345', '6773', 'Cat Trimming', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('36d2ab31-69f4-4fa6-b0d1-1e9ea05411cc', '5781', 'Flea doctor', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 63, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('37799440-145f-4a8c-ac3c-2702a9c06e1c', '4587', 'Cephalexin 500mg', 'Medicine', 'Aldo Pet', 249, 5, '17.39', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('378cfd84-2588-46fa-a2b2-9635a5cc8236', '5901', 'Green Brush', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '340.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('378ee9bb-9d05-4398-a170-b32b9e35541f', '5460', 'Metropet 50ml', 'Medicine', 'Aldo Pet', 3, 5, '320.00', '490.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('37a28290-5738-470c-b047-5bba29b4d874', '6644', 'CleanEar Lotion', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('37e216bb-348a-4c90-babf-20a3de53f827', '4333', 'Primadex 100ml', 'Medicine', 'Aldo Pet', 0, 5, '6.85', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('37e4b275-184e-4df7-a628-e0feb92372dd', '8698931093639', 'VitaliCat Junior (Multivit Paste)', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '480.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('37fac8b0-d31a-42fc-9b61-0dc8e2b304f0', '6255', 'Lager', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('383ff9e5-e8b7-4df4-ba7f-d30ae07a0ac5', '5369', 'Friskies kitten discoveries 1kg Inactive', 'Food & Snacks', 'Aldo Pet', 1, 5, '328.88', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('386190bd-6e81-49ca-b1b7-c16c4a378180', '5393', 'Radicate Dog 20 - 40kg', 'Medicine', 'Aldo Pet', 3, 5, '342.00', '595.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('38da3c7c-1c91-45de-92b6-914ed1890c58', '5665', 'Trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('38e8ead0-2018-430c-b958-2bb78c42a1dc', '5944', 'Polyaid plus', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('38fd9da5-8ad0-4aae-9027-e23d1bdff28e', '4594', 'Depomedrol 80mg', 'Medicine', 'Aldo Pet', 0, 5, '116.10', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3921aa02-cf48-4c66-94f1-1b8d3b1e0537', '5487', 'Purify Flea n tick shampoo Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('394a1ea6-7795-4aa1-b52b-589c91d62dd0', '5379', 'Protexin powder 60g', 'Vitamins & Supplements', 'VETOPHARMA', 0, 5, '250.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('397f8842-d3a0-46e2-a122-0bb365f98eba', '4359', 'Canical 250g', 'Vitamins & Supplements', 'VETOPHARMA', 0, 5, '350.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3993c485-2aa5-4cb2-8c29-ec0bff3140fc', '5845', 'Cestodan inj', 'Medicine', 'Aldo Pet', 0, 5, '34.80', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('39cf3560-7bf7-44b2-9609-1abf950b7642', '5689', 'Zudicort Cream', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '145.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('39d4560a-0327-4a18-8a36-6cd4a8bfaf1a', '5415', 'Drip Gastro Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('39e10916-6f3a-4cf7-9f4d-d4ae423404f9', '6935', 'Needle', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '2.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3a1086e1-85c1-4dee-bc72-95b853d0b7b7', '5439', 'Meloxicam 1.5mg/ml 32ml Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '190.00', '285.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('3a1a7d08-9dd8-40d7-83a4-a45d8f215afe', '5389', 'Sebbaderm shampoo 250ml', 'Medicine', 'Aldo Pet', 1, 5, '375.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3a37f39c-509b-4e65-931d-60761074d07c', '5391', 'Calmagine Inj 100ml', 'Medicine', 'Aldo Pet', 0, 5, '4.30', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3aca60da-05d1-4982-8759-2444d5f440f3', 'FDA 1', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3ae45cce-fa08-4fd2-9903-eaf2556ea2ef', '6759', 'Glossy coat Inactive', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3ae72cf3-9579-4890-8bfa-d0f75edddd9b', '5882', 'Suture Materials', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3ae8c467-11b7-45cc-bfa5-04ee3d186167', '4630', 'Nexgard Spectra 15-30kg', 'Medicine', 'Aldo Pet', 1, 5, '1080.00', '1050.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3afee613-5f69-418d-b010-59a68a432ee0', '5438', 'Orthopedic Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '20000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3b3a6423-6656-4657-bed0-440417c574a5', '4669', 'Lasilix faible 40mg', 'Medicine', 'Aldo Pet', 23, 5, '4.65', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3b666ed9-c63a-45d2-84b2-d3b9caaf56ba', '5757', 'Tolvat 15', 'Medicine', 'Aldo Pet', 4, 5, '0.00', '135.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3b7971fc-7ede-4634-97fd-c24d3a24a833', '6494', 'Onvinc Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3b858a4b-c29f-4b66-94ad-836a5221ee74', '6176', 'Minor Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3b98b314-ef32-45a3-bb1a-82a8ce7b6b0e', '5275', 'Triaxone 500mg1.m Inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '257.49', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3baa50a2-3b9e-4312-a9b7-bfa22dad6173', 'PS2020', 'Techlink Petsafe Harness', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '699.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3bcf6103-ecd3-417a-99b8-72709204dc21', '6296', 'Vaccination Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3c130a99-820f-42fa-b364-7de8fd75769b', '5377', 'KG 250', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3c198aba-c94a-4fd4-a62f-e5ce55c751a2', '5803', 'Appetite Puppy Lamb (3kg) Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3c1b2af6-6109-4c5c-87c0-06701c7c2855', '6930', 'Xray 1 image', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3c35fa36-8672-40dc-9669-951b12fe0de6', '6406', 'Enucleation Cat', 'Service', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3c5e39e8-4ac3-4735-af12-913d27ee74eb', '6686', 'Vedamox C 50 x 100tabs Not for selling', 'Medicine', 'PNL', 0, 5, '576.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3c84d450-2c2c-4e64-aa3a-366776ff17c6', '6137', 'Bath and dry Inactive', 'Service', 'Aldo Pet', 7, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3c9a4875-ec4c-4a58-bdf9-99d5ac923a3f', 'BMC26', 'Black Military Collar', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3cc3e66d-84f8-42c2-873a-8146b2fc6848', '4322', 'Oxytetracycline 20% LA Inj 100ml', 'Medicine', 'Aldo Pet', 85, 5, '3.15', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3cc5f8e4-bca7-4e3b-92fe-74dccc2e918d', '5897', 'Mandible Repair', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3cd14ee1-ab67-4ac3-8d72-0aca3f0efc00', '6370', 'Wound Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3d1c27ac-3fd5-4050-b04b-73c8c8095e10', '5840', 'Pet N Sun', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3d28d142-d283-46b1-89a8-ee9f4a36be79', '5419', 'Elastic Crepe Bandage size 10cm x 4.5cm', 'Hygiene Items', 'Aldo Pet', 0, 5, '15.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3d5ec9ce-823e-45e3-9747-4d726c4eb2ac', '6084', 'Solid ecollar size M Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3d95939b-abe9-4073-9cec-d4b32b09d77a', '4664', 'Himpyrin 30ml', 'Medicine', 'Aldo Pet', 0, 5, '161.06', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3d9a1ba8-fe49-4c10-a4a3-ef0be35b73fa', 'T2205', 'Toilet', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '699.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3d9dad1c-13c1-404b-93f3-d76089cf0aab', '5237', 'Follow up xray', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3da0c66e-bb66-44e8-ba00-ad517f32e737', '6216', 'Foreign Body removal', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3da6a740-881f-4b32-adbc-1e6f3735c7e2', '5122', 'Spaying Dog', 'Service', 'ALDOPET', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3da6b498-1a6f-49ae-a264-f2504ccc61e4', '6931', 'Nisolux oral suspension 30ml', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '675.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3db012d9-4653-434a-b9b2-5026f7a33aee', '6954547212928', 'Exfamily Bergamot wash powder', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 17, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3db32bff-cfcb-4021-93bb-04b15d336d29', '6134', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3dd067e5-d05f-426f-b992-f00259464da6', '5387', 'Vanguard Plus 5 CV L Inactive', 'Medicine', 'Aldo Pet', 0, 5, '180.40', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3dd812e9-7ab8-423a-b2fd-ff9a650e1bf0', '6145', 'Bea Salmon Oil 425ml', 'Accessories & Toys', 'Aldo Pet', 0, 5, '312.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3de74a32-634b-4fb3-9ddf-1ee898fb8a28', '6962', 'Site Visit Fees', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3e0efb1b-edb4-40d5-a160-c3f0f599a5b4', 'AVA comfy cuddler', 'AVA comfy cuddler Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3e52497b-2a46-490e-8832-94537338194d', '6061', 'Tooth Extraction Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3e63645a-8234-4de6-8605-5fe88be7d22a', '6616', 'Radicate Cat Inactive', 'Medicine', 'IBL', 1, 5, '114.82', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3e67ba3f-64a2-4ff6-bd34-f44b78715bb0', '6356', 'Eye Cleaning', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3e89aa98-31b0-4228-9619-054bf3f68f5e', '4729', 'Purina One Healthy Kitten Chicken 380g Inactive', 'Food & Snacks', 'Aldo Pet', 2, 5, '291.92', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3ead3e0d-d917-46ea-b3fa-6c3a6c1b859e', '5658', 'Pyometra Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '6000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3eaedc77-3c5e-49e4-8c85-51837181cd77', '5459', 'Doxpanion 30ml', 'Medicine', 'Aldo Pet', 0, 5, '198.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3ec77243-cbe5-4137-998a-5fc176890ade', '8698931093905', 'Bulky+Power Protein', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '1475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3ed2078c-1bbb-4c83-808a-626fa03fdef7', '4626', 'Nexgard 4.1 to 10', 'Medicine', 'Aldo Pet', 0, 5, '264.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3ef9aa00-cc35-42dc-8698-138b0e8755a5', '6617', 'Obex syp', 'Medicine', 'Aldo Pet', 8, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3efcb234-3db7-4fd5-963a-849d0c6377c1', '5375', 'omega 3', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3f269eea-d507-4206-90cc-92e17de2e355', '5351', 'Purina one healthy kitten pouch Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '36.92', '60.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3f4644bb-5d56-45e4-9a71-5531ffa4769f', '8698931092052', 'VitaliCat(Multivit 150Tabs)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3f4686a3-18b2-444b-ace9-905bb79fe808', '5222', 'simparica 20-40kg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3f6e4aeb-ed36-48e2-ba63-9e2037215ba5', '6808', 'Silytek Plus', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3f9a1b19-103a-4015-9f71-999624490bb5', '6224', 'Cleaning Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3fac2b1c-81a7-4a4f-b432-67734cb32777', '6541', 'Omeprazole inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('3fd29a6b-66b2-4bee-acb0-4f2698da3c56', '5673', '7Dental Effects Inactive', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('3ffe023a-d90e-4f3f-90b9-c8f737d30b3c', '6305', 'Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4002b813-9a43-4efc-9d69-12ccd3783287', '6252', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4028b87a-191a-40d8-9a10-2d3da68ffa83', '6524', 'Fluralaner Chew Tab 1x500mg', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '660.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('402a5e56-1068-457f-97dd-72683f43a1c5', '5956', 'Mobiflex LD Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('402ab63b-5712-4fb7-979e-f798f22280be', '5445', 'Antezole Liquid Deworming', 'Medicine', 'VETOPHARMA', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4030f190-0056-4be1-8989-495ed4369f4a', '5492', 'Antislip Bowl s', 'Accessories & Toys', 'ALDOPET', 14, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('406119d6-95f6-4fd5-a8e8-2967ed631ec1', '4364', 'Mobiflex SD 250g', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '710.00', '1075.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('40930893-c496-4ab8-aa46-32b66bb5a72c', '6490', 'Emergency Care', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('40c54aac-e530-430c-bd2a-06004ac1ffb2', 'Apoquel 16mg', 'Apoquel 16mg', 'Medicine', 'Aldo Pet', 56, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('40ccc34c-01c6-499c-8227-224d68401164', '4658', 'Liv 52 forte vet 60s', 'Medicine', 'Aldo Pet', 4, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('40cde279-68af-4a5a-a901-22a0ca81db4d', '5940', 'Consultation Night Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('40eea677-7959-4e72-8c43-808fe6afc97f', '6886', 'DermaDog 1.5', 'Vitamins & Supplements', 'Aldo Pet', 8, 5, '298.56', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('410f3b58-2872-4b3f-b90c-b0688528ce61', '6367', 'Mitradog 4mg/ml per ml', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('41159e93-481d-4e89-beaa-ccd341d628c0', '6428', 'Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('41370e8a-7258-402b-9195-a5229a6aaa97', '6268', 'Doxycyline oral solution', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('414359ff-af04-453c-9a7a-4cd6414e18d1', '4556', 'Meloxicam 2.5mg', 'Medicine', 'Aldo Pet', 109, 5, '6.02', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('415afbb1-07ac-475e-85eb-8d93de27bc66', 'FDA 11', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 7, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('415ca68d-c682-4eba-83d4-99a749c76428', '4722', 'Felix Kitten Chicken Jelly Pouch 85g', 'Food & Snacks', 'Aldo Pet', 1, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('41714d63-aebf-41e4-842d-efb67aebcdd5', '6954016611160', 'Pet toothpaste', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('418db1f5-43e6-4bda-8611-d4e6833b14a2', '5978', 'Flunixi inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('41cb8f2c-1daf-4c0a-b3ee-3b39103e27ec', '6690', 'Maropitant Tabs 4mg x 10 Not for selling', 'Medicine', 'PNL', 0, 5, '386.60', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('41cd78f7-3af2-44cd-88e5-ab83f7cce496', '6550', 'Pexion 100mg', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('421d1b9b-c184-45c8-987c-6821ed90cba4', '5895', 'Ivermectin 22-45kg', 'Medicine', 'Aldo Pet', 70, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('42534dba-553a-49fd-ae6a-cf92478dee3a', '6236', 'Home Consultation Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('425843ce-96d1-40d0-8279-d5a2f038a389', '6618', 'Review check up Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4294aef9-6c3c-44db-8f2f-7eb209d7f906', 'SPC2402', 'Solid pet carrier', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('42a82b95-82b5-4831-a6e3-b0cba3d198fb', '5916', 'omega 3 fish oil', 'Medicine', 'Aldo Pet', 9, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('42c9e54a-c17c-4fdd-a3dd-4531a7f33ac0', '5921', 'Chemotherapy', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('42cd7adc-5b74-453c-9130-63ef630debbf', '5876', 'e collar Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('430876db-f950-4257-a4e8-ce9513dc3064', '5544', 'Nail trimming + gauze Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('43392f18-d1d0-4a4d-987a-deeb8a233a12', 'SCT220', 'Cat Toy Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('433978e3-c697-4be7-9365-8ae6f733ff9b', '6143', 'ear tapping', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4357edd5-a5da-43c6-a23d-28d5b00ed499', 'SCL2405', 'Solid cat litter box Inactive', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '825.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('43643967-0e14-478c-8de7-1bcb91024c1d', '4523', 'Ondansetrone 4mg-2ml', 'Medicine', 'Aldo Pet', 0, 5, '50.00', '40.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('439f613f-c734-48f2-8e0f-f8178efe06af', '5764', 'Marbocin 20mg', 'Medicine', 'Aldo Pet', 1, 5, '8.16', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('43a57813-fda8-4d4c-9510-1cacf0981897', '5307372076806', 'Elaimei eye drop', 'Accessories & Toys', 'Aldo Pet', 23, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('43e41bfa-4bf7-450e-a582-ac9d35c8ba65', 'PB246', 'Paw ball', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('440cc508-eb2d-4940-a992-3a896a909c99', '5648', 'Bc99', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('442d9ba8-4ad9-429d-9d68-03aa597cec2d', '4440', 'Meloxicam 5mg/ml inj', 'Medicine', 'Aldo Pet', 0, 5, '2.06', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('444006ec-451d-46c3-8f19-deec361d0ed0', '6970117122008', 'Bioline antiparasit spray', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 15, 5, '0.00', '240.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('444d5e46-01bc-4323-a5f4-13b44a792198', '5343', 'Emitino 4mg', 'Medicine', 'Aldo Pet', 42, 5, '8.23', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('44716a3e-6a42-424b-a6a9-989fb6f03e77', '6973320660145', 'Koiking 454g', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('447f5a19-f760-42e6-b882-a87ac6686ac7', 'e250', 'E collar 3 Inactive', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('44a19312-5b10-4b55-bf3e-e240696c8e5d', '5874', 'Ear Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('44b4f0bb-22fa-4164-a6e9-b253c3d884a3', '6303', 'Wound cleaning Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4515d37c-c852-4e3b-a7a4-d8daeda7c00a', '5295', 'Aciloc 150 mg tab', 'Medicine', 'Aldo Pet', 75, 5, '77.27', '115.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4530f107-86b1-47f2-96f7-45a9c0cb42cc', '5795', 'Cage Medium', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '5400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('453b7697-c42b-4cda-b271-1126205392cd', '6257', 'Maggot Wound Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('453b8682-ad8e-4256-9fae-5b26f9970311', '6499', 'Bioline eye care Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('455cddbd-8c7c-4a01-9ef7-9b9c804e5865', '4689', 'Neurorubine forte', 'Medicine', 'Aldo Pet', 1, 5, '10.74', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('45b8c759-4099-4f0f-bb08-ae406fa12094', '6477', 'Betadine', 'Medicine', 'Aldo Pet', 8, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('45c36f64-20f8-48f5-bb90-e44f536e8320', '5476', 'Vegebones Hip & Joint bones Inactive', 'Food & Snacks', 'Aldo Pet', 3, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('45d768d0-4251-49d2-a556-b2da93ba45fd', '6619', 'Perineal Hernia Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '10000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('46a98b78-917e-4341-b0ea-68a41f352a5a', '4395', 'Digipet Syrup 200ml', 'Medicine', 'Aldo Pet', 0, 5, '229.40', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('46c2ad1e-abed-49f8-b16a-0320a82bfb44', '6595', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('46cb30a7-33d3-4b33-92c8-6d4abfe12f1d', '6970117120110', 'Bioline catnip spray 50ml Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('46ec15b7-87da-459b-8cb9-63c366b46718', '5256', 'Drontal for dogs Medium', 'Medicine', 'Aldo Pet', 24, 5, '112.50', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('46f50f12-3f51-4f56-b4a4-2a6f465aaed3', '6599', 'Tolfine Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4719c3ca-b99a-4799-8338-491750aff236', 'PC 224', 'Panda Collar s Inactive', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('472539fa-1471-4337-a08c-7f8029a84566', '4545', 'Vedamox c-50', 'Medicine', 'PNL', 331, 5, '5.76', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('47787c6f-0cc4-4b2a-a5ac-4421a76b1762', '5603', 'Pet Milk Bowl', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '490.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('478ab78d-1d66-4262-8a10-00bdf28fbf66', '6123', 'Eye Enucleation', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('47b5c80e-487e-484d-a4a0-1d375d97db61', '9003579309537', 'Digestive Care Pouch-85g Inactive', 'Food & Snacks', 'Aldo Pet', 14, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('47b7416a-2afa-4566-918f-1500660435c3', '6954547214441', 'Allerviate Itching', 'Accessories & Toys', 'ALDOPET', 1, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('47c09a35-ae2f-4b0c-b387-6a07781b9c76', '6862', 'Mandibular Wiring Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('47cb95d4-6b01-4688-8980-8e9fb326fd1d', '5663', 'Aldopet pet toy', 'Accessories & Toys', 'ALDOPET', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('47ce1ce7-2364-42fd-ab84-57d3e0afbb9f', '5264', 'Prozil ML', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('480a2f3b-3c5d-4838-8b78-f2418d30cfd3', '6308', 'Vegebrand 7 dental effects cheese Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('493ec599-a343-493c-b63a-988b0f3e1f93', '4583', 'Kardiofit Benazepril', 'Medicine', 'Aldo Pet', 207, 5, '6.07', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4957b702-2fef-4efb-9415-b9f46042ba1c', '6957919913812', 'Wipes Waterless Grooming Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('497fdf43-dd9e-451e-bfda-48a1fa34e43a', '5938', 'Felix play tube chicken and liver 60g Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '62.79', '95.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('49a6edae-3b1e-4df3-8d87-6e0729e1da63', '6019', 'Ear Surgery', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('49aeb384-2812-49b2-af17-9378634481f0', '4390', 'Ondansetron oral sol 60ml', 'Medicine', 'Aldo Pet', 0, 5, '225.41', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('49af7146-6b3d-4f19-9242-6e6ea6a71e19', '5721', 'bath and dry Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('49afaee4-45a0-430c-8708-36dc3a2d1e73', '6970117120141', 'Bioline eye care', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('49ff9f33-1a03-44a0-92be-e28c92ad6d30', '6285', 'cytopoint half', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '2250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a02a0fa-e5d8-43cc-a932-ece2280f4044', '6093', 'pexion 400mg box', 'Accessories & Toys', 'Aldo Pet', 1, 5, '4460.00', '7100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a5154ec-3a4e-4e63-bf90-ff504f099d2f', '6102', 'vetronutri multivitamin tabs Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4a51a7ec-a6ea-491f-8d8f-0452afdd95bf', '6581', 'Pet O VATE', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a6207b7-83e7-4c91-ac63-f4bb48c60dae', 'FDA33', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a680eb1-afda-4052-ac96-221bc1d6b087', 'U100', 'Urinary S/O Pouch R.canin', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a8bb03e-1154-4c27-80ca-2daffbf3ef97', '8698931093400', 'BiodermCat(100tabs)', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '340.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4a9d53c6-40d5-4c1a-91ad-f7628f8b25af', '6110', 'Wound cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4acaa556-9d29-4c7d-8191-51a5d1a39f6a', 'FLM24', 'Fluo Metal Leash', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4acc9b79-4b37-4e52-90c9-4742f148b798', 'ASB5204', 'Anti slip bowl L Inactive', 'Accessories & Toys', 'ALDOPET', 38, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4b1016ef-18db-4929-a18f-4222ea102844', '4373', 'Pet 0 cal syrup 450ml', 'Medicine', 'Aldo Pet', 4, 5, '245.95', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4b61ba63-5844-49d7-8a3f-d843f441164f', '4337', 'Acrisulph ointment 50G', 'Medicine', 'VETOPHARMA', 1, 5, '225.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4b7519e3-ea03-419d-b8ec-693683e468de', '6918', 'Betisol(Vitamin for moulting)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4b9f6c7d-bcea-40c6-9c8b-f7f774276628', '6204', 'Waterless cat shampoo white tea fragrance Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4bab8bd5-fec1-4091-bf6c-467d0c7e0eb4', '6403', 'Leg Amputation cat', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4bdcaf18-ae72-4f17-8d51-b2302f307ff5', '4727', 'One Adult Salmon/Tuna 1.2kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '602.35', '905.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4be0f4dd-6db5-4d31-9f38-007ef15b3aec', '6090', 'Beef Biscuits for cats', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4c37e638-bdf0-43b0-a9ef-e0cc43c87a99', '6435', 'Fenbendazole Oral Suspension Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4cafece3-fcf7-402f-9f95-4b11af69c90f', '6716', 'Apoquel 16mg', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4d55315b-f241-41a9-a30b-3effd5669b0f', '5486', 'Gel Cooling Mat XL', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '890.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4d5f9d18-a4d7-46fa-9bcd-be192d90d641', '5263', 'Nuvita Gel 120g', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4d6ef3b0-8b8f-4e2a-86e6-c8c45521bec9', '6218', 'Pro Bnp Test', 'Service', 'Aldo Pet', 0, 5, '0.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4d767bd5-2d0e-4c5e-9905-f69219997b87', '4406', 'Pet O Vit Syrup 200ml', 'Medicine', 'Aldo Pet', 0, 5, '204.92', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4db559e4-3957-49e6-9f8e-0fa4cd3ed556', 'PGL54', 'Panda Green Leash', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4db7e5f1-a1d8-48c2-8268-6e8c15040258', '4611', 'Amlycure DS pet liquid 200ml', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '169.72', '255.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4dc15943-0487-4890-944c-5565ea30bef5', '6056', 'RL 50 Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4dc6b8f4-c538-46a8-b26d-243d3068b40e', '6855', 'Ringworm Ointment Kyron', 'Medicine', 'VETOPHARMA', 2, 5, '200.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4dd2151b-857d-423f-8f86-04dbb7a535b7', '8698931092076', 'glucopet', 'Medicine', 'Aldo Pet', 8, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e1d0e08-1f2f-4998-a2ae-2305aa028b21', 'MC366', 'Metal Collar L', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '790.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e1e0726-a6c1-4266-ba9c-d254b1d3eb88', '4349', 'Dexamethasone 0.2% inj 50ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '3.50', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4e3c5edc-3960-437c-9cf2-141a2a6792fe', '6515', 'Emulsified Multivitamins', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e676042-a09d-4fbe-beb6-138c661a35eb', '6345', 'Catalysis Folrex Pet Oral Solution', 'Accessories & Toys', 'Aldo Pet', 0, 5, '139.14', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e86da6f-0f47-412d-9c09-982394c9fee8', '4609', 'Gramocef 0 100 dry syrup 100ml', 'Medicine', 'Aldo Pet', 1, 5, '195.64', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e8e8069-d856-45c3-bee6-d4a4f509ea90', '4353', 'Multivit inj 100ml', 'Medicine', 'Aldo Pet', 94, 5, '2.30', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4e935d88-78a4-40c1-a8f6-1d15a8ebd647', '6838', 'Bath & Dry', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4eb748dd-58f0-4573-b3cc-f2555b09c665', '5454', 'Appetite adult dog Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4ef8ffec-f271-4ef7-86f2-1a76c827dcf0', '5227', 'Anesthesia Inactive', 'Service', 'ALDOPET', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4f1f4e41-2b26-4686-b501-58338613c197', '8698931094575', 'DermaCat Paste', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '480.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4f55806b-f9fe-44ef-b883-8250e3ddd776', '3182550732055', 'Maxi Puppy 15kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '4590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4fa0e8f4-171c-4702-a4de-53d0bb31828d', '6866', 'Macromax Syrup', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('4fa978a6-9405-4cbe-88fb-cd0af9307d2e', '6522', 'Fluralaner Chew Tab 1x25mg Inactive', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4fb09fd3-9674-416c-8cf5-c1bc62cbb839', '4610', 'Neeri pet liquid 200ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '169.72', '255.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4fc83618-eebd-4457-a228-1a88250c6521', '5279', 'Anesthesia Inactive', 'Service', 'ALDOPET', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('4fff33ac-7ff9-488d-8959-0a3c9cdd5bc4', '6804', 'Fluralancer 1400mg(40-60kg)', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('501121fa-f470-4785-accc-594350c093ad', '6628', 'Bath & Dry', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('501202c5-d12f-4d8a-ba24-fb27984cc0fb', '6917', 'Multisol(Multivit for birds)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('506cd014-c050-4a35-b8ca-15f6d6628462', '6635', 'service time (after hours)', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('507faf4b-f94a-4144-b384-104caad3ef8b', 'vaccination cat', 'Vaccination Cat', 'Service', 'Aldo Pet', 0, 5, '220.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('50862a55-eb5d-4e19-9710-ca90e5d91954', '5971', 'NS 100ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('51290586-855a-4bba-b530-f3d08fef3602', '5514', 'Pet Whip', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('513df62c-ee13-4635-bbd7-db908ba12ca9', '6418', 'Grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('514b578e-d264-4733-b524-6507d824db28', '6035', 'Abscess Drainage Large', 'Service', 'ALDOPET', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5157c693-416c-429c-ba9f-3524f2c48120', '3182550711036', 'Urinary SO dog 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '1127.50', '1375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('51aed33f-effb-4bbb-b13b-f1cedb47d7a4', '5972', 'CDV-CPV-CCV-GIA Ag combo Test Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('52053b3b-c577-43af-9c4b-8a706f7f2d9e', '3182550727822', 'Mini adult 4kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '1361.20', '1705.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('525428ea-960e-4425-b6d0-68fd1cf39131', '5353', 'Purina one adult ocean fish pouch', 'Food & Snacks', 'Aldo Pet', 0, 5, '36.92', '60.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('52755e40-88ea-4df7-8974-0d313337be6f', '4411', 'Delipic 20mg x 30 Tabs', 'Medicine', 'Aldo Pet', 29, 5, '10.12', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('52b980fb-87f0-4e94-a87d-22070ef5d9b5', '5822', 'High Calcium', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('52c91a36-fa0b-4afe-9dd1-ae58c3f12227', '6600', 'Abortion Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '3600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('52d4caad-319c-401e-9288-79b370231cb3', '9003579311301', 'Sterilised gravy pouch 85g', 'Food & Snacks', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '62.32', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('52e3a783-ddf3-4f7c-96a1-3162cd2f665d', '6538', 'Ondansetron', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('53bc8144-7c23-4497-9a43-a6ffd15790dc', '5252', 'Ivomec Inj', 'Medicine', 'Aldo Pet', 18, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('53ec4ff0-f6b9-4f4c-b258-24bd9cb1b364', '5341', 'Beclo Rhino Aerosol', 'Medicine', 'Aldo Pet', 0, 5, '338.48', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('53f0a5af-e246-46eb-851e-63dffcd86941', '6160', 'Urinary Care 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('53f0e103-513c-45db-b138-4283d69d341f', '8698931092502', 'VitaliDog Paste(Multivit Paste)', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('53f835bd-731f-47f7-bdf1-704965fa845e', '5547', 'Activated Charcoal 5g', 'Medicine', 'ALDOPET', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('542e5cf6-b643-47d9-9e22-560874087224', '4428', 'Zymad 80000 UI Amp x 2ml', 'Medicine', 'Aldo Pet', 6, 5, '110.51', '170.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('543de87b-f394-4ad8-a717-a267a2799929', '8698931092083', 'DermaDog 1.5(100Tabs)', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('545d83e9-8e6f-4118-8d57-698e91884373', '5221', 'Digyton syrup Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('54800f2f-7d88-43c8-b475-cf0fdb74a254', '6687', 'Vedamox c250 x 100 tabs Not for selling', 'Medicine', 'PNL', 0, 5, '1610.32', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('54817570-2a9f-425a-8552-887c3facd02b', '5337', 'Paraffin Oil 100ML', 'Medicine', 'Aldo Pet', 0, 5, '50.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('548a495c-f5c4-440d-835c-a5aa27f01bbf', '5805', 'R.Canin Hypoallergenic cat S/O (2kg)', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '1825.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5491bb0c-441d-46aa-b0d1-fde3aad97df9', '6349', 'Catalysis Diamel Pets Oral Solution', 'Accessories & Toys', 'Aldo Pet', 0, 5, '188.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5499ffa8-504c-48cc-ad38-9c2e3b0108c0', '5340', 'Bongela Adult 15g', 'Medicine', 'Aldo Pet', 0, 5, '251.36', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('549b0fd5-9673-4095-abae-93bb8130abe8', '5867', 'Grooming plus 1hour', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('549e3271-2896-431e-bace-93c39492ef65', 'RBD58', 'Round bone dotted', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('54b6e9df-dcb9-492e-a6a3-c33fdf94f0c6', '5433', 'Vetronutri Hip & Joints Tabs', 'Vitamins & Supplements', 'Aldo Pet', 4, 5, '332.76', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('54bdabf2-870f-485a-8d2d-b9c0bc2c1cc8', '5307', 'RL 500ml', 'Medicine', 'Aldo Pet', 0, 5, '45.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5502a142-8abd-4558-9b06-1e94544fe16e', '6316', 'Bandage', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('55099f75-9895-4134-9078-f4ba436491bb', 'CCC78', 'Colorful cat collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5512d1c2-7426-4eab-ae6d-30429112aa3c', '6833', 'tumor Removal E', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('551d6584-2a45-4539-9a24-6af0b997a0d8', '6344', 'Catalysis Carminal Pet Oral Solution', 'Accessories & Toys', 'Aldo Pet', 0, 5, '149.57', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('552ec35b-34b9-4e6d-937d-5d4e48475b13', '6217', 'T4 Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('558c281e-ea5f-4114-a96b-14ab71b45ded', '6058', 'vimectin Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('559694c1-5eaf-4ce7-a762-5e8c81662c2d', '6925732135407', 'Pet Milk Bottle Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 15, 5, '0.00', '290.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('55af375a-9dd9-4287-80b5-118d3e157178', '6928', 'Calsi Bird', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('55c37c1b-a651-446b-a6d6-d7adafbcad54', '6820', 'Intensive Care Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('55c9af1b-09a2-40b6-9144-3e652267dc26', '6503', 'Salmon Oil Difurui', 'Vitamins & Supplements', 'Aldo Pet', 4, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('55e6a1cc-ffd2-48b1-a246-01f7878c58da', '5945', 'Bandage Dressing Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('55f82925-2344-43cd-a7e7-c3d16d2de367', '6286', 'full grooming', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5651159b-d268-4ad7-b94d-ed72ce9d369c', '5442', 'Liv 52 Syrup', 'Medicine', 'Aldo Pet', 0, 5, '258.06', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('56c36fbb-7cb4-4706-8583-99199c14551f', '6272', 'Mitracat 100 per ml Inactive', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('56db2168-ea0b-42bb-ad9a-a7cd2c1abfee', 'minor wound cleaning', 'minor wound cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('56de2c3d-8e1a-437a-8f88-b4eb1fbd3716', '6081', 'Vetwrap size M', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('56fed64c-b3ec-47ee-a9be-3d823fef4648', '5785', 'Leg protector M', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('570174fb-fa23-4259-815f-1c0696936edf', '4427', 'Betadine Solution Gyneco 125ml', 'Medicine', 'Aldo Pet', 1, 5, '101.48', '155.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5753af7b-65c2-4416-b6bd-39aa4380f438', '6213', 'Tooth Extraction Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('57747a17-f50f-4fdf-87c5-97ec3afcfe87', '4309', 'Bravecto 4.5-10kg', 'Medicine', 'Aldo Pet', 0, 5, '785.00', '1375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('578ce07a-28e7-4dc1-a2eb-c0a8de1a8c51', '4720', 'Felix AdultTuna Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 2, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('57d64bf5-63fb-44ad-ac23-7202002a5787', '5395', 'Dextrose saline (DNS) 100ML', 'Medicine', 'Aldo Pet', 0, 5, '55.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5801f03e-4322-47b0-a4e2-5f2d22de560e', '6954547213024', 'Exfamily shampoo 3800ml', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '2700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('58056f35-6d86-48c3-9c4c-cb64e40289c2', '6109', 'Wound cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('5817f96b-a628-4d21-b619-f0511aa67664', '6957919909426', 'Aroma Groom Neem Tree Oil', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('584978d9-98a6-4836-b6df-fb5a45ce4bc6', 'PC226', 'Golden Panda Collar L', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('585daf29-85c2-4176-a788-5e6347bed1f1', '6513', 'Drez Powder', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '235.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('589680ec-1390-4fc1-b1cb-f7a112b94205', '5314', 'syringe 5ml', 'Hygiene Items', 'Aldo Pet', 0, 5, '4.55', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('58af1a7b-a17c-4353-8c73-830666da1511', 'Nail trimming', 'Nail trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('58b3f99a-a7e9-4c6a-bf16-a8497a85b22a', '5914', 'Oral Hygiene Kit', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('58c9853c-82df-4ef0-888b-a7e4099df8c2', '4438', 'Vetacam 0.5mg/ml x 30ml Inactive', 'Medicine', 'Aldo Pet', 10, 5, '179.83', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('58e9fa0c-e485-42f3-9289-a4bc8560c806', '5791', 'Purina Felix kitten Pouch (chicken)', 'Accessories & Toys', 'Aldo Pet', 25, 5, '0.00', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('58fab3dd-3751-41c6-a2c6-d9f841ce26fd', '6105', 'R.canin Aroma exigent', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('595f58ec-df90-445b-87dd-480e36a72dc6', '6469', 'Emitino 8mg', 'Medicine', 'Aldo Pet', 10, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('598bb0a4-6004-4227-8d95-0c79c6bedb8d', 'a800', 'anesthesia Inactive', 'Service', 'ALDOPET', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('59947d97-a5ed-4054-b4fa-b28028321b82', 'EC1006', 'E collar no6', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('59a20898-c5be-4f79-ac1b-361db03eaeef', '5383', 'Dectomax Inj 10mg', 'Medicine', 'Aldo Pet', 0, 5, '31.50', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5a37a665-b1a2-4d84-a7dc-3654f10b0d8b', '5941', 'Enema Treatment', 'Accessories & Toys', 'Aldo Pet', 0, 5, '75.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5a95dced-180e-4ffa-a9c3-b1c62da93423', '5740', 'Trisulmycine', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5a99cf08-9967-4bb8-9817-3868ca73f1b2', '6970117122589', 'Bioline dental hygiene gel', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5ab627ff-370e-4afe-8318-8763e88426fa', '6632', 'Mesotherapie Medium Dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5aba1fdf-1517-489a-9d47-ade1b67560ad', '8698931092069', 'GlucoChond(60tabs)', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5ae6dcb4-dfb4-47cb-a3e5-97219420e7dd', '8698931094438', 'Vitalicat 60 tabs', 'Vitamins & Supplements', 'Aldo Pet', 6, 5, '159.60', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5b16593b-2491-4a8a-873e-7981ce873a1d', '4618', 'Tambac suspension', 'Medicine', 'Aldo Pet', 0, 5, '233.30', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5b237ee2-6609-4b54-ab5b-caf24aa26759', '5898', 'xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('5b748a3e-0187-40a6-8a6e-5bd267bddabd', '5294', 'Onsett 8mg tab', 'Medicine', 'Aldo Pet', 3, 5, '10.38', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5b8cee71-be9d-4464-9f4b-83d3085f2493', '6246', 'Ownat classic adult chicken 1.5kg', 'Accessories & Toys', 'Aldo Pet', 3, 5, '695.65', '895.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5c851c57-eeb3-4eeb-9648-71ccfa0af253', '6547', 'Transport Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('5ccfb8c6-9826-46a7-8d60-cf22df66c1d0', '5385', 'Cytopoint 30mg Inj', 'Medicine', 'Aldo Pet', 0, 5, '2550.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5cfcfa89-a791-4562-9923-549156e96e67', 'Pantouff bed', 'Pantouff bed', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5d00cf0f-d377-4331-bcd7-7e575d1a6ffd', '6354', 'Suture Removal Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('5d2572e0-6afe-4a35-a5bb-0ac5d0c7bf6e', '4437', 'CK Reno Caps', 'Medicine', 'Aldo Pet', 10, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5dd8faff-ae80-428e-ac5a-e3b835df2f00', '4612', 'Boniheal pet liquid 200ml', 'Medicine', 'Aldo Pet', 1, 5, '216.42', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5e252dce-b267-4ea5-93af-086ab030f7b5', '8698931094551', 'ImmuneCat Paste(Immune support)', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '480.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5ebd0187-b6c0-4f95-9845-aa988f7bdb97', '4589', 'Clindapet 150mg', 'Medicine', 'Aldo Pet', 309, 5, '4.03', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5f04e823-1a89-4aa5-8fbf-451dac9a096f', '5980', 'Milkopup 250G', 'Accessories & Toys', 'Aldo Pet', 4, 5, '375.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5f1b8d52-e3a5-461d-a4b6-c6b63e42c841', '5957', 'Mobiflex Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1075.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('5f2a8d19-2707-456e-b9ea-0495e15e5f5c', '5422', 'Venteze 2mg', 'Medicine', 'Aldo Pet', 0, 5, '1.68', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5f2d776f-d710-4960-a60a-dc81af1fd7f5', '6374', 'Ipakitine powder', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5f4e5702-3d00-49bc-835e-9c457f8b6e9b', '6954547208488', '6 in1 shampoo', 'Accessories & Toys', 'ALDOPET', 11, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5f7c88f3-a6aa-4f67-ba65-bb64d18d450b', '5814', 'Ascopet (500g)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5fa8968b-b0a4-44c8-8b74-0a81d2b56aa7', '4687', 'Euthyrox 100mg', 'Medicine', 'Aldo Pet', 0, 5, '4.75', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('5fec17c6-4c90-45f6-acf4-fff765637320', '5428', 'Aromatherapy Shampoo', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('600b1e4f-87f9-4300-bd48-b7a12e88f5aa', '6970117121902', 'Bioline ear mite treatment', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 13, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('601179b2-fd43-4d91-9cd1-5c81775ee5b5', '6640', 'Simparica (10 kg- 20kg) Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6029e1cd-39b0-483d-966e-e7ced1f76e12', '6301', 'Review checkup + Cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('603e85fe-7452-409f-9145-fed73a0d742d', '6162', 'NS Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6086057c-14a0-4285-adf8-610798c82098', '6845', 'Rectal Lavage', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('60adc76b-bb83-4dd1-a1ca-6acac98d8c38', '6484', 'Pet Perfume Sweet Woody Fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('61107051-f088-4d4d-956b-bf0d786249b4', '6282', 'Cherry Eye', 'Service', 'Aldo Pet', 0, 5, '0.00', '3500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('61116883-2441-498e-9ba7-17d4c2d1bd37', '6482', 'Pet Perfume Floral Fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('613b7762-8503-4705-8d6b-5e7ef0a2b49c', '36', 'Triaxone 1g 1.M Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '303.70', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6148d1f9-ab05-45c4-b250-63fbfebea8cc', '5360', 'Vimespiro Inj', 'Medicine', 'Aldo Pet', 0, 5, '10.70', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('615b21ec-96de-4cd0-8f41-51d5222464bf', '5776', 'Maggot Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('616659eb-2fcc-451f-b591-4c886122cee8', '4624', 'Bea Parrot vit 20ml', 'Medicine', 'Aldo Pet', 6, 5, '223.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('619212dd-2ce8-47e5-8b14-8f24415a3a44', '6797', 'Deposit For Surgery', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('61d42c8d-bda2-44b4-b93b-2e37e542f3b1', 'MBL24', 'Military Body Leash', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('61d87da8-875d-4c8e-ab7a-e18ba4b7342e', '6785', 'Traumatic Ocular Proptosis', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('61dc6658-708f-4361-bcea-54232a22aebd', '6045', 'Grooming Gold package', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('622e8146-0987-4d44-9885-686a403ee971', '6954547214465', 'Deworming Flea& tick Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('623867ea-1b5f-476e-9f30-fdb260cbdd6f', 'W385', 'Whiskas Tuna Adult (1.2kg)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('62a98f91-be84-4008-a010-0f295695a17d', 'CC2624', 'Chock Chain Blue&green', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('62e21746-af92-4f26-89aa-a3ff0ad457ec', '6401', 'Nail trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('62ffe8ed-913e-4f20-b86c-bc5fcffb41ff', '6422', 'Salivary Gland Mucocele Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('63405f7a-da95-4983-8850-c821f0ac6935', '6970117120189', 'Bioline toothpaste beef', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6370ed2f-165f-405a-9447-60fafdd5d67c', '6053', 'Vet Trape', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('637d29b6-e26c-422f-9261-54a1aad3cc46', '5276', 'Propoven Fresenius 1%50ML Not for selling', 'Accessories & Toys', 'Aldo Pet', 0, 5, '380.00', '532.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('639f1c2e-482a-48bc-8f70-4ff892e6a5b8', '5865', 'Hypoallergenic Royal Canin Dog 3.5kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '2390.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('63eae49c-d535-42d7-b8fa-15f0f07714c5', 'ID9014', 'Puppy id collar', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('64189347-5923-4d9f-94e2-204b26776c25', 'BTL25', 'Strong Tress Leash', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '825.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6456c761-b2c3-4ce4-af54-28db92076468', '8906139000336', 'Flea& tick spray rosemary', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '321.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6457ac7c-596f-4f7b-a422-28b667bc2c09', '6271', 'Nexgard 25-50kg', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('64bf7473-6ce6-4755-8865-258254eb562c', '8906139000312', 'Flea& tick spray Peppermint', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '321.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('64e1f142-ded3-4318-a8c2-93a533695d35', '6924819016936', 'Dono Male Wraps s', 'Accessories & Toys', 'Aldo Pet', 20, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('655d2f6f-8512-4a59-b4b8-2b719c96279b', '6440', 'Bone removal from teeth', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('65f320fe-e5be-458b-ba8f-d66701433410', '4418', 'Betadine Scrub Sol 125', 'Medicine', 'Aldo Pet', 8, 5, '97.17', '160.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6607b349-3456-41d4-9d7f-ae2cc91a9075', '6135', 'Xray Bird Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('661708d4-6ae6-45b5-8f3e-0dfa9503c571', '5506', 'Ektekpharma Flea n tick spray', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '321.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('66680282-92e9-4779-bbe6-ed2f8f7dbf98', '5758', 'Dolac Tab', 'Medicine', 'Aldo Pet', 20, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('667d9e71-2860-4592-ab6c-bf4996d0d1f9', '6094', 'Kitty milk', 'Vitamins & Supplements', 'VETOPHARMA', 3, 5, '525.00', '890.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('66d21fdd-8cb3-4fd4-8ebc-141b2c215996', '5878', 'Dental Care Toothbrush', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('66feb1ec-2322-4cd9-94a7-851f8ca9446f', '5355', 'Furovet inj', 'Medicine', 'Aldo Pet', 0, 5, '1.93', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('67213c30-c059-474d-b551-97a3224e3e3f', 'FBC2023', 'FBC2023', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('673347b0-5716-450a-8fd9-fb0cd733e2c3', 'DES697', 'Dougez dog toy', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '599.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6774d5ce-2c32-467f-9b3f-61c6788910d4', '6390', 'Wormout tab Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('67abfd9d-1a20-4efb-a428-5565a49dd9ac', '6920', 'Deep Kaolin(Intestinal system crontrol)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('67cc44b8-0fe6-4025-ae3c-66011eaccf05', 'FDA 27', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('67e12111-8e23-491f-89c5-5736e0bcfd78', '6596', 'Abortion Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '2600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6807e969-1603-465e-ae8e-dd5fc14ced42', '5290', 'Ivy Calm Syrup 120mL', 'Medicine', 'Aldo Pet', 1, 5, '182.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('680abc7f-105e-49e4-bca7-3b7c45e83e7b', 'BOB39', 'Bobo Collar Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6825a6d4-2748-4fc0-b890-7f474e4165bd', 'FH578', 'Nobby Fluo Harness L', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '599.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('68362e6f-d8fc-459a-8fd2-18f7b512c9b5', '5417', 'Vitaject 100ml', 'Medicine', 'Aldo Pet', 0, 5, '3.05', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6870af2f-4c11-4be8-b2dd-a6ba67788f74', '6874', 'Renal Pouch', 'Food & Snacks', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 22, 5, '0.00', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('689604e6-5730-4710-a391-bf818a32045d', '6287', 'fenbendazole Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '270.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('68b5e78b-3035-4b1e-bb2c-1c14131ede02', '4598', 'Canine cream 30g', 'Medicine', 'Aldo Pet', 1, 5, '175.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('68d6e5be-126b-47f0-9ba8-4ac372e2c733', '6085', 'Full Grooming', 'Service', 'Aldo Pet', 94, 5, '0.00', '1700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('68ed5b94-5c25-4d96-89e5-02845d89a4f5', '5390', 'Tolfedine Chat 6mg', 'Medicine', 'Aldo Pet', 0, 5, '12.50', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6946b03f-6a6f-4659-a21b-85c05ca8fb79', '4987', 'Christopherus Bone', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('69523890-94b4-4fca-a70c-0ee61c240ace', '6228', 'purina felix salmon pouch', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6956a32d-e53b-46a3-a70e-d5cdc62e3455', '5811', 'Dono Diapers Female', 'Accessories & Toys', 'ALDOPET', 51, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('69df5d9b-2ed0-4da0-8d93-39e01d2c4a67', '6063', 'Basic Grooming', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('69f71e0c-400c-46ad-9ef4-508033ecd254', '6251', 'Ownat pouch gelee dinde 85g', 'Accessories & Toys', 'Aldo Pet', 105, 5, '86.96', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6a016422-c306-4f96-b68a-bb44d1281d2e', '6415', 'E collar Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6a362e70-3eb0-427a-a606-3c8a0f62c212', '5935', 'Friskies kitten discoveries 400g Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '140.40', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6a66f584-5bc0-4a2a-a011-b9fb7f5dff68', '6546', 'Omeprazole Oral Susp', 'Medicine', 'PNL', 1, 5, '280.04', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6a94dee7-6b15-4a38-b74a-799899acdfee', '5841', 'Multi tek', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6a9f64cc-4f9f-4752-a2ac-02cd4aae4b92', '6078', 'Consultation + Vaccination Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6aa22743-7e8b-4a12-864c-a57502426c11', '5977', 'Calmagine Inactive', 'Medicine', 'Aldo Pet', 11, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('6abc290b-6b22-4e05-aa6c-43d2d87b1c80', '6353', 'Parvo test', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6adebe59-9e6a-4f75-9555-c19d6756adc1', '6413', 'CLEANING Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6ae137c4-3041-442c-a027-42dc23133035', '5327', 'Pet O Coat 450ml', 'Medicine', 'Aldo Pet', 0, 5, '269.42', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6b0278e4-19ca-4ed1-a9f9-bee39cf61981', '5262', 'Prolyte Inactive', 'Medicine', 'Aldo Pet', 10, 5, '70.00', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6b1dbfa4-224b-4a48-a3fc-26ee6140a67b', '4447', 'Aminovit Inj', 'Medicine', 'Aldo Pet', 0, 5, '1.16', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6b35988b-9736-4831-b9ae-dcf3aa3d4693', 'CT444', 'Cat collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6b95fbe3-3dbc-4d3e-afc2-8488af46e33f', '6417', 'E collar large', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6b9c5e8c-33e7-4a0e-a01d-07ab1d372304', '3182550702317', 'Sensible33 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '828.20', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6be2fe3f-d4ec-44d9-9363-4bc4d3f20c03', '5452', 'Scavon Spray Himalaya Inactive', 'Medicine', 'Aldo Pet', 7, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6be78944-43d9-407b-964c-d8eb21f63eb9', 'Apoquel 5.4mg', 'Apoquel 5.4mg', 'Medicine', 'IBL', 110, 5, '45.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6bf75b09-429c-47fc-a187-d30b4ca65f82', '5444', 'Canine Papilloma Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6c05572a-ef3f-446b-9e04-ed463c21cca8', 'M3185', 'Muzzle XL Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '345.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6c0b16ef-5ccb-447c-9dbc-b77fa28461bd', '8016117015631', 'Bimar hi pet bowl', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '1299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6c167b19-0223-43ac-9cc6-fefa2111f9ee', '5370', 'Friskies seafood sensation 1.1kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '328.88', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6c328e40-baa3-4699-bcf4-988c19122d4e', '3182550939478', 'Hypoallergenic cat 2.5kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '1193.10', '1925.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6c34c19f-eff3-46d8-b46e-f9e3d87de8af', '5298', 'Scavon cream 50g', 'Medicine', 'Aldo Pet', 2, 5, '172.04', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cb8552f-9c6f-4559-a67d-645ace2d6df7', 'drip', 'Drip', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cd07943-154e-47bb-9e05-9b2402cae379', '6651', 'Hand Amputation', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cd4b694-3400-492f-b375-eea94c711cd6', '6387', 'vincristine inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6ced5947-4049-44eb-acea-08b4dbb2cb74', '6346', 'Catalysis Ocoxin', 'Accessories & Toys', 'Aldo Pet', 9, 5, '163.48', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cfde672-705f-4cf8-b1b1-439562f18b4b', '6178', 'Pink leash', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cfe8d09-fdb0-4f0b-8a29-0226d615e9ff', '6164', 'Hernia Repair Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6cff4390-6ff4-49cd-a746-97f5ff13f724', 'FDA 4', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6d2489a5-6b45-4c33-8489-c790fed65167', '5324', 'Poop firm tablet', 'Medicine', 'Aldo Pet', 27, 5, '6.83', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6d2969d6-6316-4f6f-b9db-23eb23c27218', '8698931094308', 'Calming Dog', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6d3a3a4b-0568-48bd-8adc-ddc9a5cce064', '6337', 'Glue removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6dca6160-d69f-498b-bf82-9c8ffc685c54', '6154', 'R200ml', 'Service', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6e845f3c-d8bd-499e-a214-721fdd7f6e14', '6017', 'consultation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6f44f80a-8bfd-46cc-93e6-5161cb512e45', '5934', 'Ownat care mobility 3kg Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '1365.00', '1795.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6f4e7eec-2993-4e56-bcd0-a0e580efaeef', '4660', 'Furglow liquid 200ML', 'Medicine', 'Aldo Pet', 3, 5, '304.81', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6f787a97-c9cc-4978-84a9-522365944a29', '5561', 'Fluid Therapy Small Dog 5-10kg', 'Service', 'ALDOPET', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6f94e56a-f6b9-4e0e-a20f-1354725ac26c', 'FDB251', 'Dog Planet Treat Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('6fa57eef-d925-4ec1-9652-26d45d896663', '6008', 'Spaying cat Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('6fad0d0e-5872-4701-a85d-568ad5c59278', '6588', 'Full Grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70094b54-8031-42c3-bfd8-d45a186668f5', '4409', 'Platogrow syrup', 'Medicine', 'Aldo Pet', 11, 5, '299.18', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7032e001-a885-4300-a584-694cc1e36b7a', '5850', 'MINNOR SUTURING Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('70465d4f-e9d9-4b04-bbe2-782b114147e7', '6834', 'Adrenaline', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70a45191-90f4-4376-a2d7-3e87b20a36d6', 'OFC 24', 'Orange Fluo Collar', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70ba9ace-080d-4a0e-a42d-2625a655fb6f', '4347', 'Pet tabs forte advanced', 'Medicine', 'Aldo Pet', 1, 5, '325.00', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70bbae62-4442-43f3-a0be-033d14775055', '6343', 'Catalysis Asbrip Pet Oral Solution', 'Accessories & Toys', 'Aldo Pet', 0, 5, '111.31', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70c3f756-25d2-4c69-aef8-d4c7f7407df8', '5285', 'Valium', 'Accessories & Toys', 'Aldo Pet', 0, 5, '38.27', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('70cb28c4-ab26-42b8-8fae-133343ac3db6', '4367', 'Pet tabs forte box Inactive', 'Medicine', 'Aldo Pet', 0, 5, '550.00', '850.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('70d0df52-ad9f-4ade-84a1-087d8c3e63bc', '8699245858235', 'Bentas cat litter lavender 5L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '150.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('715293c9-3cd3-47d6-a89f-b7a28ec36f1e', '4730', 'One Indoor Advantage Chicken 380g', 'Food & Snacks', 'Aldo Pet', 1, 5, '291.92', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('717b6689-21b7-4fb5-bf29-4a8c644d34c6', '5794', 'Cage Small', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('718a978f-c878-4c7f-9780-f4b8bdfd12e0', '8698931092274', 'Silycumin Large breed dogs(90tabs)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '1260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('71990ed1-7396-4f59-aeb8-e8040503f57f', '8698931091567', 'Bio Urinamin(40tabs)', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '610.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('71bf52d7-6983-46fb-a22d-c17b7a032af3', '6802', 'Fluralancer 500mg(10-20Kg)', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('71d42c74-9931-46cd-aa64-322bb254dfa1', '4615', 'Neeri Kft pet liquid 200ml', 'Vitamins & Supplements', 'Aldo Pet', 1, 5, '141.53', '570.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('71da318d-2522-47f1-b58e-9d241599fa2f', '6211', 'gastro puppy treatment Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('71ed5ff1-04ef-426a-bdbe-46be860a9258', '3182550732154', 'Maxi Adult 15kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '4289.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('723a5faa-eac2-485a-90cd-d42b0720459c', '6653', 'Veko KTD-XL  Deworming pc', 'Medicine', 'IBL', 11, 5, '41.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7264e92e-5c3f-49fd-8ef7-dbb73a9553a1', '6867', 'Vitamin k Inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('72704111-985c-4b34-b15b-1eafb6b76bc9', '6024', 'frontline Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('72bd658d-1c1f-419f-9c76-cefc115c0067', '6493', 'Adventure first aid kit', 'Accessories & Toys', 'ALDOPET', 0, 5, '0.00', '390.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('72f6ab4a-7c45-4720-8e11-62956fdf9085', '5517', 'Water Fountain for Dogs n Cats', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '1299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('72fd1aea-310c-48ad-ad47-7c44b68e24fe', '6320', 'Urinary s/o 1.5kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1090.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('73411efc-6263-4f2e-8e8a-e532ce1299a1', '4665', 'Dutasteride 0.5mg', 'Medicine', 'Aldo Pet', 30, 5, '16.65', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('73c926a6-e4df-4fc3-8929-1e1e7ab56294', '6274', 'extensive suturing Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('74244e86-56f7-4015-a769-a61348eff95a', '5984', 'Glossy Coat Plus 200G', 'Vitamins & Supplements', 'Aldo Pet', 6, 5, '308.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7451fcf9-8cbf-4908-85bc-e0d9e8fb139a', '5779', 'Biovet Allergry free shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7466589c-f37a-4c92-86a4-72c60edbe834', '9003579309513', 'Adult Instinctive Jelly Pouch 85g Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '62.32', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('746b6434-c2a3-4fe9-80c9-ad6f26b6bd68', '6140', 'Deposit of Surgery', 'Accessories & Toys', 'Aldo Pet', 75, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('74938b9b-87ec-4076-a9cd-f3a2f63e28de', '5233', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7493d457-65d1-4ec1-805c-8e9640f3b39c', '5889', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7497c630-a3a4-46d1-9aa7-f0ea139b2e27', '5466', 'Simparica Trio 40-60kg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1090.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('749d901b-e594-4b7b-af52-5ee0de7ff446', '5497', 'Vaccum cleaner', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('74ab14f9-02b3-40f5-8fbe-067c269641e0', '4357', 'Antezole cat deworming Inactive', 'Medicine', 'VETOPHARMA', 40, 5, '44.00', '70.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('74e4c254-8ade-40a3-adec-b6a5727ff073', 'TC5639', 'Travel carrier S', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('751526f5-de32-4454-8664-53f6e6b841c0', '4435', 'Simparica (5kg-10kg) Inactive', 'Medicine', 'Aldo Pet', -36, 5, '265.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('75d7c141-58f8-4c82-bb43-351134df6638', 'CL25', 'CL25', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('760a5e89-7c8b-4c71-8cbf-0f8994f78bd8', '4404', 'Pet O Lac Stage2 400g', 'Medicine', 'Aldo Pet', 3, 5, '307.91', '462.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('76435120-b681-4745-a48e-b732d95e09e2', '5366', 'Fancyfeast gravy lover salmon 85g', 'Food & Snacks', 'Aldo Pet', 8, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('76dedf52-0ec4-4caa-81a9-aefc9e5ec8c2', '4448', 'Babevit Inj x100ml Not for selling', 'Medicine', 'IBL', 3, 5, '136.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7711cdd2-2f84-462f-8151-f9bbc2cfed20', '6151', 'review checkup Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('773057fa-9607-47cf-b73e-f2ab2d27b296', '5746', 'Liv 52 tab Inactive', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7753e9ab-b057-4102-b409-eb2ec346b20a', '5408', 'Royal Canin Maxi adult 15kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '4339.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7764d1c8-8cb3-4b8b-82ee-aeab473360e8', '6799', 'Orthopedic Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '10000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('777b0aaa-fca9-4d2f-bfb8-8cd92afceef8', '5342', 'Flomist Nasal Spray 10ml', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7783bd41-609e-4865-a96a-641616e16e52', '4728', 'One Adult Indoor Chicken 1.2kg', 'Food & Snacks', 'Aldo Pet', 1, 5, '602.35', '905.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('77b475b8-3651-440a-8f08-8ba724e8d9b4', '5789', 'Antislip bowl Xl Inactive', 'Accessories & Toys', 'ALDOPET', 12, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('77bc9178-f30f-4962-9127-870e903a13d8', '5498', 'Charly Bone L Inactive', 'Food & Snacks', 'Aldo Pet', 8, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('77cc3f16-7536-4dc7-bcb8-44b09878fb3c', '6594', 'Full Grooming', 'Service', 'Aldo Pet', 0, 5, '0.00', '2300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('77ea9d43-091d-4166-906b-71cfe7351ae0', '5872', 'simparica 20-40kg Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('77ef55e4-12a9-4da1-81d7-da13b321d791', '5511', 'Blue pet brush', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('77f2638b-b4b4-4672-a473-c04acdaff4e8', '5431', 'Marbocin 100mg', 'Medicine', 'Aldo Pet', 262, 5, '15.57', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('780f4a5c-c7de-4dae-8994-32ff9dae8714', '6955', 'Cat Litter Box Inactive', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('78361dbe-66a1-4df5-a6be-634e172828ee', '6957919903004', 'Vegebrand Deodorization Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('785d60fa-b0d6-4561-a94e-5e7deea59d8d', '6144', 'Atomic enema', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('78839458-a468-4f4b-9db6-9d4c649ab1e2', '6475', 'Dexamethasone Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('78850925-4651-4efa-b6d2-59fb1a3c37f4', '6299', 'Ownat Classic Adult Complet', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('78a7d448-b5c8-48e0-abb6-b5b252687dd4', '6047', 'Leg amputation', 'Service', 'Aldo Pet', 0, 5, '0.00', '4500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('78ba53be-6082-4780-b7ad-97017b9d7394', '5961', 'Consultation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('78eddec6-b82f-474c-933b-efda737e3c90', '5800', 'Cherry eye', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('790ec8e0-b378-4c89-9261-1bbdef94fcca', '6386', 'Ceptrisul inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7912cc74-3ec2-4425-ad9b-3a888e433a85', '4695', 'Pet Amox plus 20ml', 'Medicine', 'Aldo Pet', 1, 5, '140.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('792af21f-0044-4a5b-937c-03fd1e4ae7c6', '8699245858143', 'Bentas cat litter activated charcoal 10L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '350.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7930cb54-39ff-4dd5-867a-8a253781f0b3', '6486', 'Hen Treatment', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79318383-7b85-41b2-b166-7b50447183af', '6839', 'Eye Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7943cdcb-5bc2-487e-94c4-519b8e11b48f', '6014', 'major maggot wound Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('795b28c8-d99d-4664-9c9b-8048d40e3648', '6420', 'Deworming For Cats Inactive', 'Accessories & Toys', 'Aldo Pet', 262, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('795ff380-8ecd-4c1a-9f75-241b1411c545', '6115', 'Abscess Drainage Medium', 'Service', 'ALDOPET', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79705007-3cfd-4f14-8fd8-263a039487ee', '6380', 'mitradog', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('798990bf-a575-48b9-b953-c46ff065d191', '5572', 'Ectotherm drop', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79ad7fcf-39ff-4019-8e7a-2b11c36dda23', '9003579010044', 'Urinary feline SO 85g', 'Food & Snacks', 'Aldo Pet', 36, 5, '795.40', '970.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79c24704-425e-4cf1-b9c2-76c47d5ddaab', '4552', 'Marbofloxacin 5mg', 'Medicine', 'Aldo Pet', 500, 5, '593.00', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79f7cf3e-ccbc-410b-972d-f3508c8e85d4', '5909', 'Cat collar CT444', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79f99da3-c0b3-46b7-9de5-20a4bc4bb772', '6940', 'Bovine Blood Collection', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('79ff0912-a333-4eb8-ba3e-9956861d53bd', '3182550702201', 'Fit 32 2kg', 'Food & Snacks', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '795.40', '1100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7a31ba49-ca8a-40aa-9096-e1d5b35357d4', 'BL2022', 'Belt Leash', 'Accessories & Toys', 'Aldo Pet', 4, 5, '550.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7a3780a5-04a2-4b7c-b81f-c23eb4b350db', '6409', 'Tumor Surgery', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7a77ad84-50d4-4815-ba36-1530a7e7e634', '4396', 'Digismile Suspension 170ml', 'Medicine', 'Aldo Pet', 8, 5, '142.74', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7a885fbd-87ef-48d8-909f-7f9af7e0e7dd', '6166', 'Grooming Basic', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ac3dd85-7a1b-4367-bcd7-5e4dc91aeb7b', '5493', 'Antislip bowl M', 'Accessories & Toys', 'ALDOPET', 23, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ad7c9c6-2fd4-48fd-8582-054d627f876d', '4343', 'Acrisulph ointment 500G', 'Medicine', 'VETOPHARMA', 1, 5, '700.00', '1050.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7af0ddfc-f09a-47b2-817e-adc42f1478ba', '6048', 'Mobiflex LD', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '0.00', '1475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7af13915-220e-4e3e-9f43-cdf593f1046b', '5291', 'Adrenaline 1mg/mL Inactive', 'Medicine', 'Aldo Pet', 0, 5, '53.00', '85.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('7b239f51-7796-444a-8b53-61816fc3ba35', '5309', 'RL 100ML', 'Medicine', 'Aldo Pet', 0, 5, '45.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7b25dbfc-fb66-48a8-85f0-0d8c3c670f6d', '6830', 'Vaccination Dog Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7b278ef4-d986-4016-ab43-813aea23cafb', '6275', 'Rabies Vaccination', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7b292c80-2333-4c21-9740-846bfcc3fc9d', '5714', 'Endi Ear Cleaner Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7b30cd0a-5b84-41dc-9cea-1d7678ff9ee4', '6637', 'service time after hours', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7b7d40c6-8a63-4876-9887-179460b2032f', '6221', 'Jomiji color protection shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 17, 5, '190.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7bb27ef7-27df-4dac-b020-fbe037c9def7', '6118', 'Transport 3-5km', 'Service', 'ALDOPET', 0, 5, '600.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7bcb5ed9-533c-4af6-b75d-34a2de0d0cc8', '4718', 'Felix Adult Chicken Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 2, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7bd25b53-3acc-4427-b41e-5e6f5eaaaf09', '6488', 'Hematoma drainage', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7be6e79b-d063-4193-b315-2d48e6315f76', 'CH228', 'Cattitude Harness', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7c25b1b4-7082-487a-b35b-9cc8bc1661e9', '6073', 'Worm Gel', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7c30af41-caa1-4c0a-995a-9722e3559b5b', '6700', 'Natgut Tabs', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7c65ee38-dd1d-42a4-bfc1-8268b2fc7e93', '5620', 'Beaphar Multivit', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7c6e4242-748e-4919-956b-45c33af7b3c3', '6426', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7c9c7019-e7e1-40b6-8936-6d214616b2a1', '5973', 'CDV-CPV-CCV-GIA Ag combo Test', 'Medicine', 'Aldo Pet', 0, 5, '200.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7cb5cf48-2f2f-4733-927b-d2885a429fcb', '8698931093561', 'Optibiomega Omega +', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7d41e641-c1ac-4b89-8c89-bc3e6f48e440', '5919', 'Boarding Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7dd7dd65-8c33-44c9-bf78-688e381471ac', '5430', 'Whiskazole 10mg|ml', 'Medicine', 'Aldo Pet', 1, 5, '359.12', '550.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('7ddffca7-a451-4c33-aa19-7822f6f8fdb9', '6245', 'Trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7e06319a-6dc4-478e-92b5-d11d6a81e7ff', '6020', 'Babevit Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7e177032-88bc-4823-a15d-8f96c637dde7', '6970117120417', 'Bioline flea and ticks collar for cats', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 20, 5, '0.00', '260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7e2b4b6d-6837-428b-b00c-75704914dc19', '6359', 'Kyron Vitamin K Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7e815991-8e09-435c-a053-a157d8d7b619', '6778', 'Prolapsus Rectal Puppy', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7e8b8d5c-5546-48df-be34-f9758daa65e4', '6835', 'Cardiocip Pet Tab', 'Medicine', 'Aldo Pet', 130, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ea57f83-e420-4f6a-be9d-824e4006a1e9', 'L3324', 'Long Silicon leash (s)', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ea72b37-5fdc-4384-8ac3-a747f5f225e9', '6150', 'Orthopedic Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '12000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ebabf2e-9751-4005-b68b-9e5ca017fb27', '5345', 'Pexion 400mg', 'Medicine', 'Aldo Pet', 85, 5, '44.60', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ec472d7-03ef-4fb9-9444-2c5d2075e171', 'FBL2023', 'Fluo Body Leash', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7ed24ca1-ea64-480a-9e6f-949ce026b3bb', '5967', 'NS 100ML Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('7eddce5f-9b46-47fb-b60a-d7bc70700c84', '5338', 'Tres Orix Caps', 'Medicine', 'Aldo Pet', 7, 5, '8.88', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7f5960d2-50db-48a4-a168-e1d560979f56', '5991', 'Cozzecat cat litter 10L Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '290.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7f681914-6683-4ccb-9657-a2a5a0c3f519', '4344', 'Charcoal Activated 500g', 'Medicine', 'Aldo Pet', 0, 5, '525.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7f70bfcb-1b68-496a-81d5-f6ab9ec374c5', '3182550767323', 'Exigent 33 Aromatic 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '828.20', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7f91d4ba-3bf5-4bfd-b888-5cacf97078e3', '6205', 'Cat block spray Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('7fc3f87d-9c48-43d6-9698-de3b82f86271', '5490', 'Pengiun double bowl', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 17, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7fd85497-d7ef-4c21-a87e-6596bd71ce49', '6111', 'Ventriliv Pet 200ml', 'Vitamins & Supplements', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('7fed5586-ce5f-4fbf-86fe-21f75417b144', '8994400024112', 'Pet N  Sun over 1-10 KG', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8004e0f3-04cf-4b6b-99d7-8a668eca2e8c', '6311', 'Major surturing', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8034ee8c-b0fc-4768-bc7d-ddf4e64cbad2', '6347', 'Catalysis Renal Of Pet Oral Solution', 'Medicine', 'Aldo Pet', 8, 5, '139.14', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8037a6af-a857-4abd-8d98-4e6eee289d3e', '5911', 'Frontline plus Dog  (M) 10 - 20kg', 'Accessories & Toys', 'Aldo Pet', 1, 5, '252.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('805baf61-40b3-4ae8-8780-ba2f1df92752', '5813', 'Extra Charges', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('80705f68-c93d-48f9-b10c-200dfb2c4027', '5958', 'major maggot wound Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('80c9ce86-31ca-4570-ab3d-d13e66c8ba7c', 'TCC2323', 'Transparent carrier L Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '1150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('80fb0af6-4459-4cac-9293-e34a09465bf0', '6805', 'Domicat Drops 100ml', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('81292039-547e-43bb-8344-2ee82f02d4c7', '6461', 'Sterile Gauze', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('813a0a19-dea0-4fd8-b243-4e517a5f8771', 'EC1004', 'E collar no 4', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('81456b5e-a425-4a5f-818c-617cbd6b37c2', '4605', 'Aimil Amheal spray 75ml', 'Medicine', 'FTM', 25, 5, '152.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('81474a68-0d5a-4c2b-a56b-bc43458c0a08', '6379', 'Treats', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('81aa0312-26d0-484f-9605-03c1ad47547c', '4459', 'calmagine Inj x100ml Inactive', 'Medicine', 'Aldo Pet', 98, 5, '2.15', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('81c02c78-5f01-4c79-8e64-08677c836835', '5361', 'Fancyfeast grilled salmon 85g Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('81d9be20-c7e4-461e-ac74-09ce18791a3f', 'FDA 2', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('81f1b360-ce5b-4cdc-983d-75b422a900d5', '5396', 'Normal Saline (NS) 500ml', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('820bb4e1-21e8-4aec-b629-07290b26fc4c', 'AT588', 'Aduck oval toy', 'Accessories & Toys', 'ALDOPET', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8221efcc-04c7-4c3d-81db-367e82ab3d14', '6049', 'Anesthesia Inactive', 'Service', 'ALDOPET', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8227bd40-ebdd-4dc6-8690-5c77167c24ee', '5457', 'Vetsemide 40mg', 'Medicine', 'Aldo Pet', 86, 5, '4.68', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('822a787b-82fb-4caa-9e38-08439675159b', '6310', 'Jerky Stick (Chicken) Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('822abcda-49eb-4b70-829b-5488350e6968', '4564', 'Doxycyline 100mg', 'Medicine', 'Aldo Pet', 339, 5, '5.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('825e651f-75c4-4e77-b8bd-419b5f33cb70', '4416', 'Tebast 10mg x 30 Tabs', 'Medicine', 'Aldo Pet', 0, 5, '7.87', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('826b4c7d-d630-447d-ab0a-ef4f8e347268', '8698931094599', 'CalmingCat Paste', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '480.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('82708a89-afad-46da-a60c-7b656a5ece76', '5952', 'Flunixivap', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('8316b3f3-1746-4d14-8a5a-50d104c22f27', '5521', 'Ultrasound (Echo)', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('834c8d33-709d-41f0-95b0-a6489eb3cf05', '6335', 'Tail docking Surgery', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8372ebb7-3626-4008-ab4e-289e29def9f2', '4332', 'Antisedan inj 10ml', 'Service', 'VETOPHARMA', 0, 5, '309.50', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('838cb739-8395-4233-bb0a-cbc9d5e96d80', '6574', 'Ferrimin syp 200ml', 'Vitamins & Supplements', 'Aldo Pet', 3, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('839f184b-86fe-4e65-afdf-ad8bf9a5a37b', '6156', 'Growth Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('83a8060e-7978-4056-b253-917836377edd', '6645', 'Vaccination Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('83ac211e-cbca-4565-b736-415fdeb3cac9', '6970117120226', 'Bioline keep off spray for cats', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('83d3c491-8a1a-4cb9-9b54-d36cbc4632ee', '5495', 'Bowl with water dispenser', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('83d995d2-5b45-4a62-ab95-31ae52bbd515', '6179', 'Transport 0-3km', 'Service', 'ALDOPET', 0, 5, '500.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84337ed3-cd66-4175-bdc7-76772bf8109c', '4522', 'Adrenaline 1mg/ml Inactive', 'Medicine', 'Aldo Pet', 21, 5, '53.00', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('847291f8-ef21-43a6-8c86-c1b456fad881', '5974', 'Epsom Salt', 'Medicine', 'Aldo Pet', 9, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84791bba-7340-4e9e-bd43-c0f13c134887', '635934608031', 'Purrify Shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 24, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84a702e1-f707-4a0c-a119-2065b21551e1', '6029', 'Consultation 8:30- 21:00', 'Accessories & Toys', 'ALDOPET', 0, 5, '1200.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84c88dd6-62f6-466a-b57d-ff55951a6c50', '4414', 'Motigut Sus x 60ml', 'Medicine', 'Aldo Pet', 0, 5, '108.42', '165.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84e86532-8b60-4d2b-98fa-96edb9a4a00a', '5305', 'E collar no 7', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('84ea6ae6-c9ba-4dd4-886c-56d5af8128f0', '5278', 'Vetronutri  highly  palatable calcium tablets Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('851fca78-5bda-42ba-a5c2-cc4c11cd194d', '4569', 'Impact 0.40ml', 'Medicine', 'Aldo Pet', 3, 5, '107.00', '160.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8586eed5-2725-4bea-b49d-a9161798364d', '5515', 'Ondenstron inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('858f51dc-5e19-4aa4-aed0-05806e7fa807', '6552', 'Vetronutri calcuim tab', 'Vitamins & Supplements', 'PNL', 2, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('85b143c9-218d-4a61-a064-b94e393d5dbb', '5462', 'Marbocin inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('85c452dc-831d-406d-8e12-e909a11b9d3f', '4421', 'Ironic Caps x 30', 'Medicine', 'Aldo Pet', 17, 5, '3.68', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('85c4740e-f216-434a-8bdd-40c36c7e8c5a', '6103', 'consultation Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('85f09822-5bed-4345-adbd-a4776fdb22d9', 'Inj', 'Renamide inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('860531a6-a5c0-4689-ba53-311d2a06dd11', '6241', 'Mitracat 2mg/ml x 30ml', 'Accessories & Toys', 'Aldo Pet', 7, 5, '419.78', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8614b40f-5baa-4cdc-b73d-e732794e4517', '6858', 'Liv 52 Pet Liquid 110ml', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('861912f8-6e04-4f4e-b798-5dc956c7396e', '6826', 'Wound Suture', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8623e57b-aced-49a1-b430-310d3f03619e', '6555', 'Na Campho', 'Medicine', 'Aldo Pet', 4, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('862fdbd2-65ed-4f7a-90b5-c9c80afcf26e', '5270', 'Ondansetron 4mg', 'Accessories & Toys', 'Aldo Pet', 0, 5, '50.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8679182e-c3d0-4830-97b2-743d18187fda', '6939', 'Medical Cotton Swab pack', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('869f4b3f-ad52-4bc3-b15f-fbae15827ed5', '5847', 'Anipro shampoo', 'Medicine', 'Aldo Pet', 0, 5, '352.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8705225e-5b63-46ac-b4a0-d00c0c3bcaa6', '6801', 'Fluralancer 250mg (5-10Kg)', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('874db69b-b73d-4f0b-a94a-04ab5051b823', '6553', 'Pimobendan 5mg', 'Medicine', 'Aldo Pet', 577, 5, '0.00', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8756bf60-c171-4d8d-8486-26fa7f43c301', '6995', 'leptospirosis rapid test', 'Service', 'Aldo Pet', 49, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('876c8c7e-b70d-4053-9e88-a78d1f38c30f', '6021', 'meloxicam Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8792e703-bc58-42bd-9691-78d0134fe417', '6293', 'dono diaper pcs', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '60.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8796aaf5-8eb5-41b3-b119-0f76b5c4e247', '6393', 'latep eye drop', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('87ba7d4c-c7fa-4b0c-b8b6-f71ac43d25a5', '5948', 'Transport 20-25km', 'Service', 'ALDOPET', 0, 5, '1400.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('87f3c986-f1a3-47e9-9ebf-30a30e7c795e', '6626', 'Metropet E Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('88179288-2a47-4f83-85fb-d48c244d0dfd', '5501', 'Brush set with scissors', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('88231981-f2f3-4fb2-8aba-bc888a005935', '6263', 'review xray Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('88613c51-9ace-4e64-a05e-cb184dac56e2', '6919', 'Deep Mineral(minerals for birds)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8875ece8-32ba-4723-911f-1db2afcbc2eb', '6186', 'Growth removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('89118dbb-e6d8-4939-8cf6-d0d58d57bc94', '5488', 'Purify Anti fungal shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 28, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('89453d7c-36b0-4351-a2cc-3ffc1d96d36a', '6240', 'Cefalexin oral suspension 50mg/ml', 'Accessories & Toys', 'Aldo Pet', 3, 5, '251.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('894daba3-64f6-432f-8534-a4b242b35bac', 'DM477', 'Durable muzzle size 2', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 18, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8964c385-3e16-456c-87d0-39ae49013207', '4707', 'Eazypet Puppy', 'Medicine', 'Aldo Pet', 1, 5, '135.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8977eb92-9d8f-45a2-a16d-d01e8ed88d22', '6377', 'fighting dog Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('89815f19-b400-45f6-a912-dcb404b64c3a', '5893', 'Transport Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('89b3bf67-8141-403f-aa1d-8368c8b2c3ff', '5451', 'FDA 3', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '140.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('89d18668-1408-4b7e-96e4-91a4d7da6adf', '5434', 'Bath and Blow', 'Service', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('89d8b5d4-c880-4c18-b69d-c60b69f07377', '3182550702423', 'Kitten 2kg Inactive', 'Food & Snacks', 'Aldo Pet', 2, 5, '856.90', '1045.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('89ddb481-b19b-4173-8e90-b994a7b8b461', '6466', 'Water tapping Inactive', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8a5f4b40-3bc7-4a4e-b400-96c82157505b', '6016', 'grey bed beige', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8a6bb698-2f09-4c01-b71c-08ba8c16208c', '6957919902441', '7Dental Effects Flavour (Assorted)', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8a87a9e4-91ee-43b0-99e7-484f7aeea4af', '6398', 'Wound Dressing', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8aa949fc-480b-4967-9d96-f1fb38cb1c4f', 'TC5637', 'Travel carrier XL', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '6800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8aa982df-7a08-47c6-b609-2f34947df43f', '5969', 'Glycerin BP 200ML', 'Medicine', 'Aldo Pet', 11, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('8aabbab8-0176-4ef9-9f51-778c64a32805', '5250', 'Tuna Catnip Biscuits', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8abc4a63-8a7f-4ff5-a3a4-44b3a9de6f59', '5234', 'Radicate Dog 10 - 20kg', 'Medicine', 'Aldo Pet', 3, 5, '248.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b05c079-991a-43ef-b352-db201dbb88f1', '4698', 'Allercet syrup 100ml', 'Medicine', 'Aldo Pet', 3, 5, '150.01', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b368f7f-6b21-4b97-b578-eb17d2a52d29', '6249', 'Ownat junior dinde 85g pouch', 'Accessories & Toys', 'Aldo Pet', 23, 5, '86.96', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b3fdff6-ae8d-446a-b5dd-40bbfe79c2e6', '6167', 'Cystotomy Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b58ef42-ad45-494c-aa80-121c45193bc3', 'Review check up', 'Review Checkup', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b7ea34f-eb1a-4091-b7f7-9910c29843d0', '3182550717137', 'Exigent 35/30 Savour 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '828.20', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8b7fc1bf-aab2-4a12-882a-e6b826532eb3', '6328', 'Bird suturing Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8b92be20-f03f-4f55-b75b-cc16e2203165', '5793', 'Purina Purina felix adult pouch (Chicken)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8bc39d6d-86ab-4ac7-9c41-adcc79715a0e', '5932', 'Ownat care dermatologic 3kg', 'Accessories & Toys', 'Aldo Pet', 1, 5, '1365.00', '1895.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8bec95d5-5dd9-414d-9df1-86374d3f0d02', '6970117121012', 'Bioline toothpaste orange', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 11, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8c42918a-e717-4596-b1ae-fafd164205af', '4381', 'Joint Active pcs', 'Medicine', 'Aldo Pet', 0, 5, '5.91', '25.65', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8c715829-be72-4195-98a3-d16219457808', '6070', 'Wound Cleaning Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8c829944-0621-4fad-8fc0-cddbb35094c0', 'H100', 'Pouch R.Canin Hairball Inactive', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8c95ee16-93ef-4cfe-ad63-8fadf5fd2129', 'FC126', 'Fluo cat collar', 'Accessories & Toys', 'Aldo Pet', 25, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8cc9a612-02b9-494b-a9d9-230edfee530d', '6796', 'consumables', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8ce2c62d-3775-4e56-878d-35642197feb9', '8698931093226', 'Bio Kitten (Kitten Milk200g)', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8ce4bf1e-9948-4ee0-b585-5c7d6522c1a4', '6378', 'fighting dog Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8ce7b811-bf0c-4864-a52e-ceb4c310dcd8', 'Beige large bed', 'Beige large bed', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8d3700bf-e462-4a31-bb61-638f941d16ab', '5577', 'Mirra cote 100 ml', 'Medicine', 'Aldo Pet', 0, 5, '275.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8d3dd2ed-f661-4878-825b-29cc149b9d21', '4410', 'Cratibun 200ml', 'Medicine', 'Aldo Pet', 1, 5, '229.40', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8d4ad312-f20b-4949-af08-33f097c7d94b', 'M450', 'Aroma Groom macadamia nut oil shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 18, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8dd0f0ad-b11c-480a-af66-5e02353a09b1', '6149', 'Deworming Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8df042fa-5f25-4fd8-856b-00480331ff54', '6128', 'Drain application', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8dfc8adf-40a2-4456-9093-4660427a8f72', '5856', 'Pink dog cloth', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8e0876fd-a476-41c7-8173-7938009119bc', '5907', 'Whiskas Chicken Adult (1.2kg)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8e6b3614-3936-4043-ba2d-fa4bdc6f2b18', '6933', 'Biopet Active Prebiotics Tab', 'Medicine', 'Aldo Pet', 11, 5, '0.00', '435.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8e7bb2cc-ea52-42a6-b384-c9cb460d5e7d', '6633', 'Mesotherapie Large Dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8e7e28ac-eda0-4015-83cb-90b7ccd73632', '4358', 'Antezole liquid 100ml Inactive', 'Medicine', 'VETOPHARMA', 0, 5, '1200.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8e83d1c4-6528-41ae-9145-5425781caf98', '6511', 'Gastro Treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8e84a6b2-0ee0-42c8-a04b-fa5049197dbb', '5930', 'Cat vaccine + Microchipping', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8e870fa6-5a29-4e8d-bad3-b0db132415f3', '6342', 'Catalysis Alzer Pet Oral Solution', 'Accessories & Toys', 'Aldo Pet', 0, 5, '139.14', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8ed297cb-7574-45fc-ad96-6c3eacd02b00', '5398', 'Whiska 480g Tuna Flavour', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8efddf05-2496-46a8-90d9-67b4309b192b', '5700', 'gastro puppy treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8f5bf72d-483c-4e4d-a41a-a0874b22e449', 'NS', 'NS 500ML Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('8fa6dacd-010f-4c1f-acc9-883d4ee727d5', '6294', 'Defensor Vaccine', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('8faa76aa-040c-4105-b82c-dcd6959147c3', '6153', 'Iron Dextran inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9005e75d-94d1-4428-ab19-eeab76667873', '5423', 'Metonin 16mg', 'Medicine', 'Aldo Pet', 181, 5, '59.92', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('905737f1-e356-4cef-9702-2333e7a57344', '5349', 'Purina one adult indoor 1.2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '602.35', '925.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('90c48270-a2e4-4bcc-b9ec-91090fe6d1ab', '5470', 'Vegebrand Salmon Flavour Snack Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('90c8f1ff-20f0-4c8d-a2be-89ba56cd355c', '6800', 'Collar Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('90e32617-577d-40ba-bc49-abc529a07634', '6472', 'injection Inactive', 'Accessories & Toys', 'vetacam', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('90ecde02-9483-4177-a12c-38fa075e8ff2', '6976', 'Poop Firm Box', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9108122b-497a-4785-9043-a66f8af01638', '6612', 'Simparica (10 kg- 20kg) Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9139c44d-cf63-4b37-83bc-eff8c95dcaa1', '5790', 'Appetite Kitten (1.5kg) Chicken Inactive', 'Accessories & Toys', 'Aldo Pet', 434, 5, '0.00', '435.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9140a7b2-1f78-4b89-9514-5b6f67188c0f', '5783', 'Silicon mitten', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 14, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('91638417-9b21-4c4c-9440-b8d53949f152', '6062', 'Grooming Gold package', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9178b8fe-6cad-46a5-91fb-88cf03c167c1', '5888', 'Comsumable Inactive', 'Service', 'Aldo Pet', 8, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('91ff4e24-9222-4fba-acf7-1e8403985f2c', '6704', 'Revolution plus 2.5kg - 5kg x3 Not for selling', 'Medicine', 'IBL', 0, 5, '1335.00', '2100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9211a69d-7a4f-4cce-bbdb-7dcf9a260c7f', 'CT299', 'Cat tunnel S', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('921b6e9b-18fc-4133-ba04-bab2effde367', '5674', '7Dental Effects Inactive', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9222f059-a76e-4163-8f90-ce4335961fee', '3182550932707', 'Mini Starter M&B 4kg', 'Food & Snacks', 'Aldo Pet', 2, 5, '1664.60', '2030.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9255f3e3-2de4-44e6-863e-747fe03f4344', '6185', 'abdominocentesis', 'Service', 'ALDOPET', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('92b094b3-e802-4841-892e-8d787bb18621', '6404', 'Simparica (5kg-10kg) Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('92d43f44-050b-4e12-bdc3-21bb03895613', '5960', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('92e245fe-841d-4de1-af23-fd64fc4a1ccb', 'BML203', 'Bob Martin Leash', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9331f7d3-bf0a-4016-a5ab-2a4169bca6ea', '4726', 'One Adult Ocean Fish Pouch', 'Food & Snacks', 'Aldo Pet', 10, 5, '425.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('93345670-fb4a-4eea-b6f7-5e6e1b756c7a', 'PK847', 'Pet comb S Inactive', 'Accessories & Toys', 'Aldo Pet', 72, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('93d06ed6-0dfc-4a97-9ecb-807c0b006931', '5802', 'Fancy Feast Chicken in gravy', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('93d54771-61ab-4c69-bf7d-5eaac8f12826', '4397', 'K9 Bact Powder 100g', 'Medicine', 'Aldo Pet', 7, 5, '173.32', '260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('944a87f4-516d-42d0-9253-b5139fff62d4', '4380', 'Puppy Fuel powder 300g', 'Medicine', 'Aldo Pet', 1, 5, '384.89', '590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('94a9ecdc-bb7f-4770-9c80-d95619c7d944', '5372', 'friskies meaty grill 400g Inactive', 'Food & Snacks', 'Aldo Pet', 2, 5, '140.40', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('94af9c1a-4f25-4762-8132-0970ab7d2ad9', '6281', 'Wound Dressing Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('94bc311e-94bc-40c9-92d4-4ceb6662db3d', '6502', 'Whiskazole -10 Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('94e3fda5-c455-4ba3-914a-decaca9e36a7', '8698931092090', 'D-Kaltabs (84tabs)', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '420.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('95304d01-54da-4148-a1d4-aeb660884e0d', 'KH250', 'KH250', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9557ee2c-8b5e-4e45-8173-f4d29cc2080b', '6957919900706', 'Vegebones Hip&Joint Care Inactive', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('95b165be-8ac5-4427-ad87-eedf58c5bc5f', 'BC444', 'Bandana Collar M', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('95c3e743-627c-4829-9c4e-e11627bade7e', '5780', 'Biovet Antifungal shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('961f61f4-d27a-4100-a796-0803426c712d', '6306', 'Xnc leash', 'Service', 'Aldo Pet', 0, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9633fc03-f2b7-4af7-abfa-a64a7874785f', '6611', 'Propalin Syrup', 'Medicine', 'IBL', 0, 5, '450.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('969ee27f-c95b-4e45-ab2a-b0b31c23fb40', '6828', 'ResiFlex Tab', 'Medicine', 'Aldo Pet', 40, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('96e924f7-5d05-4541-8fb9-c536c445e42f', '3182550925105', 'Adult large dog 13kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '3534.20', '4310.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('96fb1762-1718-4fa9-968e-ae0185147074', '5848', 'Levetiracetam 500mg/100ml', 'Medicine', 'Aldo Pet', 4, 5, '245.95', '400.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('971a400c-5782-4121-b6df-65497c0d726b', '4335', 'Supona spray 385ml', 'Medicine', 'Aldo Pet', 0, 5, '470.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9720d0d3-4a1f-44f3-aab2-146c54a00cd1', '5489', 'Scratching mat', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('97434a85-db86-48d8-a6e8-9ff35e58df1f', '5226', 'Anicort cream 60gm', 'Medicine', 'PNL', 11, 5, '209.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('977057b1-3407-4946-a89f-6ea593efcd61', '6803', 'Fluralancer 1000mg (20-40Kg)', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('977a57e9-20f2-459c-80a8-ce97bcf566fa', '5469', 'Vegebrand beef falvour Snack Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('97f22bb7-5de9-46fe-bce8-10148ca35a34', '6771', 'After 9 PM Service Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('97ffba13-9d54-4f02-b705-e0da90822bb1', '4716', 'Felix Adult Mackerel Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 4, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9831b531-8e46-4aae-b62b-d9216a7a0214', '5661', 'puppy gastro treatment Inactive', 'Service', 'Aldo Pet', 9, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('985efdaa-1672-4727-9931-9edcff470bc1', '5367', 'Alusol Aerosol 150g', 'Medicine', 'Aldo Pet', 0, 5, '342.00', '530.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('989c0a0f-18ca-40ff-86c9-93bed4d7999c', '5954', 'Felisine', 'Medicine', 'Aldo Pet', 4, 5, '490.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('98a25733-b7e1-4890-8256-492a3174a131', '6184', 'Maxi puppy 140g Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('98a82d0a-a3c1-4232-b94d-1cb353abfdfd', 'Add to location                                                   Remove from location', 'Add to location                                                   Remove from location', 'Accessories & Toys', 'Add to location                                                   Remove from location', 0, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Add to location Remove from location', NULL, NULL, 'Active'),
-('98b509f9-22dc-4a48-9669-7c3c2721e905', '4391', 'Bacderm powder 50g', 'Medicine', 'Aldo Pet', 6, 5, '90.74', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('98bdeaaf-3294-463c-ac3a-0a00f21cdc3b', '6906', 'Silycumin Large breed dogs(45tabs)', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '720.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('98d53622-fc25-4f7b-815c-e2baeb46f6f4', '6603', 'Asbrip syp', 'Medicine', 'Aldo Pet', 9, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('98dde4d3-11f4-4581-a432-a285a9482c33', 'CCC228', 'Corner cat litter Inactive', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('98fadf8c-a74a-4348-aa78-8ce6385c330d', 'ASB3204', 'Anti slip bowl XL Inactive', 'Accessories & Toys', 'ALDOPET', 27, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9920ec10-3414-4507-b640-725b6f397dc4', '6691', 'Nexgard 4.1-10kg (Box of 3) Not for selling', 'Medicine', 'Aldo Pet', 0, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('996b3e46-d1c1-45c2-b96c-8b8993882b2d', 'EC10010', 'E collar xl', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('99a8697d-2ca8-4013-bda2-63eea8d4ed89', '6051', 'Deworming Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9a09c944-572a-492b-b190-5dfa59d738ab', '5843', 'Penstrep inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9a38f8f0-2dc7-4197-a6da-92fe83593670', '5339', 'Ultra Omega 3', 'Medicine', 'Aldo Pet', 20, 5, '8.08', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9a9845d0-5a4a-43ab-9fb9-d10841a802d6', '6470', 'Maggot wound', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9a9f0cdd-9c36-414d-b5a6-7cf33d313305', '6421', 'e collar no 5', 'Accessories & Toys', 'Aldo Pet', 0, 5, '1.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9aa15c21-ecc5-49ba-b3e3-db551f189d1d', '5988', 'Vet Orthoron Paste 60ml', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9aaf371b-1f23-483f-a352-77dd4dd8d7e9', '6131', 'Euthanasia Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9acaed13-5054-4d03-bfff-80e5d26a5912', '5500', 'Swiss Roll -Dental Treat Inactive', 'Food & Snacks', 'Aldo Pet', 8, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9af607fb-aa04-4c40-b1d4-0f79a6071cdd', 'SCB22', 'Self cleaning brush', 'Accessories & Toys', 'Aldo Pet', 17, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9afd120d-2a94-4b59-b5e2-d3583f14f871', '6860', 'CBC Test', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9b0f14a0-e492-4b7b-a8e6-68a9a8db561b', '6018', 'Euthanasia Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '2400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9b3a26eb-6092-416e-929a-e5a0399a97b1', '5993', 'ehr/lym/ana/chw combo test', 'Service', 'Aldo Pet', 0, 5, '255.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9bc0cb09-277a-4a56-bd1f-90a9830642a6', '5449', 'sbc test', 'Service', 'Aldo Pet', 0, 5, '0.00', '2200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9bd27b37-63be-45c0-8878-12a7b088ff2b', '5523', 'Dono pcs size S - Male', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9c8c07f0-8b71-42aa-96c8-59bbf49f77ed', '6223', 'PET SHEET', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9cab80a5-6842-41ce-9c2e-cd370ff75a76', '5333', 'Ketotek tab', 'Medicine', 'Aldo Pet', 0, 5, '29.56', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9cb7fb28-a69f-4f2e-9740-3fdcfcae398d', '5443', 'Anxocare box', 'Medicine', 'Aldo Pet', 5, 5, '312.80', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9ce41aa7-96f3-4503-923b-927a1a378601', '6478', 'Travel bottle', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9d594798-47f4-4616-a919-f6e2540856d2', '4417', 'Zimax pfs 200mg/5ml x 15ml', 'Medicine', 'Aldo Pet', 0, 5, '56.73', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9d833632-25ef-49d7-9d52-a5572d6c4766', '6914', 'CatiMalt Plus 25ml', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9d8b6158-2bce-4b03-87d9-4efa16990996', 'NHH48', 'NHH48', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '699.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9dccbe36-7cb2-4888-a7d9-4b2addb26072', '6760', 'Kyron Vitamin k1', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9de2f823-f01e-4dbe-aba7-ec7ca03b106d', '6254', 'Inj Xylazine muscle relaxant', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9e276432-a6a1-4236-a37e-fa4ef78a8849', '5329', 'Syringe 1ml 25g', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9e39d6f0-abaf-4f02-a1a6-d9d3b418deae', '5545', 'Consultation Home Visit', 'Service', 'ALDOPET', 0, 5, '1000.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9e467328-daa7-4501-aa81-5901b1768acf', '5519', 'Clean Pet Brush', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9e96163e-501c-4fe7-9606-e883693d44b0', '6055', 'Euthanasia Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9ea1c25a-df36-4cbf-bfda-1796f976d92d', '6956', 'Waterless Grooming wipes', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9ea5c2dc-32d7-453b-8909-74b093baae87', '6702', 'KTD XL Tabs x4 Not for selling', 'Medicine', 'IBL', 0, 5, '164.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9ec319fc-ded2-4cbf-ba08-17035d2c3a55', 'HH232', 'Head Harness', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '599.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9f4c7035-c59f-4ae7-97f5-48723862aae6', '4425', 'Betadine Solution Dermique125ml', 'Medicine', 'Aldo Pet', 3, 5, '113.06', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9f7eceba-a27e-46d3-ba68-333e213bf3fa', '6198', 'Endi pet perfume aromatherapy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9fa82e1a-6682-4d35-88c5-b2ff111d49c1', '4355', 'Kyrovite k inj', 'Medicine', 'Aldo Pet', 0, 5, '38.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('9fb399e4-eacf-46ef-9639-f6aecdeae821', '5546', 'E collar no 6 Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('9fe57192-eabb-40db-8dcb-5d8d3415c7b1', '4317', 'Mirra Cote Biozinc 200ML', 'Medicine', 'Aldo Pet', 1, 5, '400.00', '675.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a06754bf-fab5-4790-8bd2-9bff5eef77c3', '5926', 'Transport 15-20km', 'Service', 'ALDOPET', 0, 5, '1200.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a091d909-0901-45ec-bcdb-72a19c1c759c', '5925', 'Transport 10-15km', 'Service', 'ALDOPET', 0, 5, '1000.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a0a6e6e7-9036-4ebe-86cb-abe67b6b55e0', '6957919906999', 'Fish Oil Flavour Fish', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a0b6619f-b961-40e9-82d3-ebd2739ec5be', '5992', 'fcv/fhv/fcov/fpv combo test', 'Service', 'Aldo Pet', 0, 5, '225.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a0c9b99e-7063-4bd3-af18-e66d32a44cb4', '5983', 'Vime Iodine 10%x500ml', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '226.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('a140c1ca-4e98-4c7a-bcb4-754254b79acb', '5999', 'Suture stapling', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a15816b3-04a5-4751-890f-2107c5d86c89', '5602', 'Snap Parvo kit', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a186ebc7-de14-4acd-8e97-8ffccd5975d6', '5704', 'CL 244', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a1c1890c-24ad-411d-8ae4-1749c1ab57c9', '4608', 'Amyron pet liquid 200ml', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '143.70', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a1cc6df2-f742-4595-be49-b2ceb11e098a', '6317', 'Hematoma drainage', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a1f77af5-0aed-47a0-9d07-5c8b82bd6139', 'NC2019', 'Chong lee nail clipper', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '390.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a21d0a24-1026-4ab7-acc3-603369bb360c', '6438', 'Nexgard 10.1 to 25', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a2892865-9fc9-4aec-b08b-56c7a30f04c4', '5124', 'Castration Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a2a8df5a-0b98-4b60-a6aa-b73fd0255c82', '6665', 'CPV RAPID TEST', 'Service', 'Aldo Pet', 3, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a2ceebb7-7c35-4435-9ae2-26896b1ecf9c', '6750', 'Emitino 16mg', 'Accessories & Toys', 'Aldo Pet', 30, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a3b1a9d8-0b15-48a0-bd2e-4aa48b29726b', '6924819017056d', 'Dono Male wraps m', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a3ec3ccd-fa18-498a-a4a5-8910c5b27bc3', 'YAB56', 'Yabeibi Cat Collar', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a409b0fa-02aa-4fa9-89a8-6bddc5e28800', '5247', 'Simparica 10-20kg Inactive', 'Medicine', 'Aldo Pet', -44, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a42f7e0c-901c-42b3-9948-b6de3c01c462', '4339', 'Felocell 4 vac 1 dose Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a48095b4-5d75-48c6-83d3-095157b56b3c', '5325', 'Joint Active Box', 'Medicine', 'Aldo Pet', 1, 5, '354.95', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a494fff5-d9bb-43c8-a008-e48219af01c0', '6352', 'Deworming Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a498d3c5-acd6-4069-bfcb-33f60544f5da', '5804', 'Purina Friskies Meaty Grills (1.1kg)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a4f7ac6d-be61-466f-a25d-63efc55f0493', '6068', 'Tooth extraction Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a501d667-64e1-4bb4-a5ef-2e050f4c3b52', 'BP220', 'Backpack carrier', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a510eeee-7598-43be-8269-1343bf467fba', '5885', 'Snap Giardia', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a53fac30-4397-421f-82b8-bfdc34b138c2', '5675', 'e collar n1 Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a55af373-2f71-4d9e-813a-1fd1e373d6c2', 'MLH23', 'Military leash&Harness', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a58e274a-89cb-4e1b-a534-be7d748ae858', '5516', 'Dono pcs size M - Male', 'Hygiene Items', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5970f52-f6ca-4001-a18e-f4ddbccbc401', '6725', 'Trabar Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5bd7843-eef9-41fb-b1f7-fb1b8909eaba', 'PGC899', 'Plastic golden collar', 'Accessories & Toys', 'Aldo Pet', 13, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5cd6718-3dea-413b-b213-3f441f2bb0f4', '4548', 'Pentoxifylline Tabs', 'Medicine', 'Aldo Pet', 115, 5, '6.92', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5cf8fc4-d3cf-448b-9148-85f085867a45', '4568', 'Impact 0.80ml', 'Medicine', 'Aldo Pet', 3, 5, '122.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5e5d1eb-9b65-4cb3-bb3e-147d73a62699', '5280', 'Atropine Sulfate 0.5mg/1mg', 'Accessories & Toys', 'Aldo Pet', 0, 5, '56.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a5e923d4-729d-444a-845b-65817e1d9ec0', '6504', 'Vimespiro inj Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a61a0098-5162-4e6f-8e2b-669072c52c1c', '5210', 'Metronidazole 100ml', 'Medicine', 'Aldo Pet', 0, 5, '105.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a67b527f-fcab-40e9-8883-0d9f733d6221', '5334', 'Wormout tab Inactive', 'Medicine', 'Aldo Pet', 0, 5, '35.00', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a72d2bc4-f9af-4e02-a528-524fe81514b7', '6554', 'inj Na - Campho', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a73cbe2f-5608-4940-baef-65a77ea15f73', '6277', 'Ownat Junior classic 4kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a75ae81d-5527-4242-8390-1ace24190666', '4454', 'Depo-provera 150mg/1ml Inj x1', 'Medicine', 'Aldo Pet', 0, 5, '200.80', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a7d37583-0af0-448d-b87b-4246989f06ec', '5352', 'Terramycin Wound Spray 150ml', 'Medicine', 'Aldo Pet', 0, 5, '456.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a7f04589-c80d-4ec0-a669-c7a02eabfcb5', '4457', 'tolfedine chien 60 mg x16 tabs', 'Medicine', 'Aldo Pet', 13, 5, '33.30', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8023ff1-5b8d-47e2-9b5f-64eec072942c', '6399', 'DFC 24', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a82ab4cf-a2b5-401c-9008-33afd02d57ae', '6196', 'Aroma groom pet perfume floral fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8323d8c-a446-40b3-b341-917edd19a51f', '6925', 'Bird Vita Fix', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a83de4ea-9443-4793-957c-ee7908652689', '5382', 'CK R reno Feline caps', 'Medicine', 'Aldo Pet', 0, 5, '5.30', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a86fef2e-102c-4d27-b0cb-095ddc3bc83e', '6041', 'Basic Grooming', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8a48f10-0f32-49a1-b6aa-87039b741c58', '6239', 'Itraconazole 25mg', 'Accessories & Toys', 'Aldo Pet', 10, 5, '7.51', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8c09599-1709-4cd7-8dbe-4c24cedaf369', '5576', 'Prolyte Sachet', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8c198fc-0095-4196-97fc-dc71db34bd60', '6114', 'Fluid Therapy Kitten', 'Service', 'ALDOPET', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8c7db55-76c5-4d05-bd3b-216a0a26c9e2', '6013', 'Ns Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a8d0bff6-34f5-45e5-984e-7785f64fd4af', 'RL885', 'Retractable dog leash', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a8eb1d6a-da84-4ce5-9f73-f7c6623f775a', '6250', 'Ownat junior poisson pouch 85g', 'Accessories & Toys', 'Aldo Pet', 23, 5, '86.96', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a910803e-27e4-47f9-a49b-e089c62561e9', '5975', 'FIV/FELV COMBO test', 'Service', 'Aldo Pet', 0, 5, '120.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a9272a6f-f440-400e-8371-d8e6e10f082d', '6487', 'Marbocin Inj Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a9298548-2948-4144-80b8-697dc0e12032', 'B2742', 'Clean', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a94344b0-ab97-4b9b-934a-59c0dc7beabe', 'FDB25', 'Eating sport for dogs', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 7, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a96271ea-d246-4b60-a85b-2f58f87b431b', '5347', 'Purina healthy kitten 1.2kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '602.35', '925.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('a9dde190-8ff1-4100-8ae9-e5c809f748f1', '5321', 'Parvolix-px syrup 100ml', 'Medicine', 'Aldo Pet', 1, 5, '163.93', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a9eb347e-781f-4a79-8c80-125a6abbbce4', '5255', 'Nebulization', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('a9fa01c2-b6f4-44b6-9736-e85f016a63b8', '5261', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('aa057b7d-408c-4f66-a656-16bbd637aa5d', '5224', 'Suture Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aa3e5566-e69f-4052-8e5c-796471e08f30', '5380', 'Ventriliv Pet 200ml Inactive', 'Medicine', 'Aldo Pet', 3, 5, '180.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('aa580461-2855-47ef-a70f-e1d881eabaa1', 'RG274', 'Red&Green Body Leash', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aa94caaf-670e-409f-94e1-f26069ed5553', '5748', 'mucomyst sachet', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aa997078-1bec-40e5-a828-9d2b671c1671', '6052', 'Amyron pet liquid 200ml Inactive', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('aaa03315-50e9-4994-bff0-220c93ac47f2', '4625', 'Frontline plus dog 40 to 60', 'Medicine', 'Aldo Pet', 0, 5, '463.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aaaa3b4e-d7ce-4bb7-9a27-8b8a8ca072b9', 'AH444', 'Acaro Harness', 'Accessories & Toys', 'ALDOPET', 6, 5, '0.00', '390.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aad719b5-c6d7-4c5b-92f0-eebad9d91274', '4561', 'Otitis Xterna 15ml', 'Medicine', 'Aldo Pet', 0, 5, '98.00', '155.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ab02d8f7-d6ce-4c98-9ad4-27903a90042d', '5820', 'Salmon flavor puffed cat snacks with soft filling', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ab1c7eb0-abf7-41ba-ac07-3f4f7dccf0eb', 'FDA 23', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ab83c448-9c89-4c36-9c27-64c43d09b646', '6233', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ab9e93fb-e303-42a1-ad43-2c5a7e67a30a', 'CM25', 'Cooling mat XL', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 9, 5, '0.00', '890.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ac41943d-0d81-4fa3-8a45-366a7d01ca09', '5861', 'Wound Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ac5d4ada-5a7b-4adb-a24b-9b682a635959', '6954547213154', 'Exfamily paw spa', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 26, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ac6fd28b-9d0f-42c8-aa8a-eabf0ae13ab6', '5287', 'Dextrose Saline (DNS) 500ML', 'Accessories & Toys', 'Aldo Pet', 0, 5, '63.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ac869026-b32d-461c-a928-cfffff42cae2', '6334567890779', 'Charly bone large', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ac9d8a5f-2797-4293-800b-b234043c1621', '6742', 'Babyltrl Xl', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 28, 5, '0.00', '599.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aca337ff-397d-4b7b-81d2-eb3f27d50add', '4431', 'Comycetin Ear Drops 10ml', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ace2dcaa-aec0-4774-a93f-dc76ba55cbce', '6661', 'Aurizon', 'Medicine', 'HEALTH ACTIVE', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('acf0fe21-5a8b-443e-9052-52da626273cf', '6445', 'Small Puppy Gastro Treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('acf23b8f-0513-4656-8b1b-4bab317fc918', '6188', 'Simparica 10-20kg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ad0e2796-05f0-4353-80d3-d6f75c7b5ed4', '4632', 'Nexgard Spectra 7-15kg', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ad152cd5-261c-4c5c-9084-76d956ace107', '5788', 'Appetite adult dog(3kg) Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ad1f0535-6758-469f-8c7a-5f7350e64b29', '8699245858402', 'Bentas cat litter lavender 10L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ad828601-c663-4ff8-88de-82251b04feba', 'PK897', 'Pet comb L', 'Accessories & Toys', 'Aldo Pet', 33, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ad8b923a-a8e1-46f6-a289-23009c8883cd', '4405', 'Pet O Liv Syrup 200ml', 'Medicine', 'Aldo Pet', 0, 5, '170.21', '260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ad964d18-28f4-4d79-a199-19cfff125582', 'Kyron Vitamin K', 'Kyron Vitamin K Inactive', 'Medicine', 'Aldo Pet', 0, 5, '68.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('adbec951-6d8a-4cf8-b890-8e28aa121d11', '5816', 'Nobleza Toy', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('add705b3-5b91-4fc7-bdf2-cbe1fca73716', '4371', 'Dufamox Inj', 'Medicine', 'Aldo Pet', 0, 5, '3.35', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('adf37e1e-b3f3-4f6a-9241-93a501723f22', '6138', 'fluid removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ae2bfc49-b5ec-465a-9207-72f106d3712d', '4553', 'Meloxicam 1.5mg/ml', 'Medicine', 'Aldo Pet', 11, 5, '151.00', '230.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ae406ffb-3275-430a-81fa-b413d724d8e0', '6816', 'Wound Suture', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('aeaab885-6d79-473f-8287-09f7c352dcdb', '5955', 'Dog collar Inactive', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('af145092-e40a-4d44-8405-944c7292669b', '6497', 'Vetronutri Multivitamin Tab Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('af1a6eb7-d573-4eb0-a8e6-fd05655dd0af', '9003579000519', 'Renal feline tuna cat food Inactive', 'Food & Snacks', 'Aldo Pet', 13, 5, '795.40', '970.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('af2f4cb3-2d98-4f33-8f68-87f7c7a425c7', '5507', 'Dry Shampoo Exfamily', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('af46c0d9-a123-4409-b0f4-a44f5bd7719e', '5418', 'Elastic Crepe Bandage size 7.5cm x 4.5cm', 'Hygiene Items', 'Aldo Pet', 0, 5, '12.50', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('af79ddd8-ea7b-42a2-9bb5-2972fc6937d6', '5328', 'Consultation 19:30 -20:00', 'Service', 'ALDOPET', 0, 5, '1000.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('afd27503-8c25-42ec-9eff-56119d0371a1', '5317', 'Pet O Coat 200ml', 'Medicine', 'Aldo Pet', 0, 5, '204.92', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('afd4a1fb-6adc-4bd1-8f2e-43c92931b584', '5796', 'Cage Extra Large', 'Accessories & Toys', 'Aldo Pet', 16, 5, '0.00', '6800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b011af00-ab81-4886-9196-26d6e8b95596', '6536', 'Mitracat 2mg/ml x 30ml', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b054dae7-513c-4c25-8ced-6d1e123341ff', '6825', 'Deposit For Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b0cf4a5a-34dd-4245-8a6d-68d65349335d', '5752', 'Long Silicon leash (L)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b0e066d2-f4fb-4c20-800d-ccf371165c46', '5761', 'Risek 20mg Capsules', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1016825-93ab-4a78-af52-a754294f1229', '4631', 'Nexgrad Spectra 3.6-7.5kg', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1088c3c-8eeb-47f6-bdb4-0e4e0702beb5', '6227', 'Triaxone 1g 1.M Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b11b9e46-825f-4a83-a629-b6e67df38b94', '5857', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b12f76fd-9c48-4014-8694-e79028b02d40', '4455', 'Simparica ( 1.3 kg- 2.5 kg)', 'Medicine', 'Aldo Pet', 16, 5, '223.30', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b138d930-327d-4067-ab1d-51bb14312657', '4340', 'Pet dent oral gel 60G', 'Medicine', 'VETOPHARMA', 18, 5, '215.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1445f28-3503-4f7e-9195-00ae34c6c2ec', '5927', 'Vegebrand Lavender Perfume Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b1675377-f6b9-4a07-866c-7c59db66c42b', '6936', 'Scabovate shampoo 200ML', 'Accessories & Toys', 'HYPERPHARM', 10, 5, '0.00', '0.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1694367-76d4-4cf2-86a4-6e963d87f8b8', '4574', 'Ivermectin 12-22kg', 'Medicine', 'Aldo Pet', 189, 5, '21.52', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b16f9ce0-91ae-4571-b303-b4b3d31feeb2', '4668', 'Lasilix faible 20mg', 'Medicine', 'Aldo Pet', 30, 5, '3.01', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b17c330f-d383-47f1-b027-b3bed21abd62', '6856', 'Additional Grooming Time', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b18e9c75-d90f-4587-9831-22dcbc479775', '5266', 'Royal Canin Kitten 2kg Inactive', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '1140.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b1c9544c-7b8f-4669-b836-e38db78833cb', '5994', 'Heartworm Tab', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1530.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1dd3b41-1e7f-4670-a44a-beadd99a4d11', '4527', 'Gupisone 20mg', 'Medicine', 'Aldo Pet', 32, 5, '9.90', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b1eedbf9-9e72-4aa2-b7ff-e0fc2e298978', '6873', 'Liv52 tab', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b28ea718-abca-4f94-b215-26d1b0cc0e80', '6030', 'Fluid Therapy Large Dog >40kg', 'Service', 'ALDOPET', 0, 5, '0.00', '1800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b2bad831-6d30-43ed-9994-e9133f83ee46', '6535', 'Grooming Trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b2c0f34a-ac0b-46b5-a1b7-fad3fffe378e', '5503', 'Hygiene Dental Donut', 'Food & Snacks', 'Aldo Pet', 10, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b320dd33-e5f6-4b35-aca5-2c79aa2b3c26', '4361', 'Debrizyme spray 150ml', 'Medicine', 'Aldo Pet', 1, 5, '400.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b334df91-9b9a-4323-9d42-ecf53da825f1', '5505', 'Pivodine Spray 100ml', 'Medicine', 'Aldo Pet', 12, 5, '200.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b3b8d5f4-6cf7-40a4-b385-2e70fde3ed71', '6587', 'Wound Suture', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b3d408dc-5e71-4b21-971a-33e3e00d6052', '6165', '7Dental Effects Inactive', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b3d7265b-c433-4183-bd6d-c8b4d8ec9ea5', '4330', 'Laxapet Inactive', 'Medicine', 'Aldo Pet', 0, 5, '175.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b3d89d3c-11fe-44a3-b811-c8485e947ab3', '5363', 'Fancyfeast grilled tuna 85g Inactive', 'Food & Snacks', 'Aldo Pet', 9, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b42b8b3f-e835-419d-8fdd-7fea29a98f32', '6540', 'Chemotherapy', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b4504346-1775-47b3-ba54-72f76fe12799', '5184', 'Anesthesia', 'Service', 'ALDOPET', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b45f70c5-450b-46ea-86bd-b4739676079c', 'BC 99', 'Bobo Collar Inactive', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b47250f7-131b-446a-ae3d-bd7afe88f88e', '6315', 'Cleaning Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b4881d0e-a6aa-4273-89a0-f3a11800a9fe', '5964', 'Grey mat', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b49a3b53-98f7-4796-84d5-6587aaf0f22b', '4681', 'Pause 500mg', 'Medicine', 'Aldo Pet', 76, 5, '12.60', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b4ab1ed9-d73e-4bc1-8662-4e633b034943', '4547', 'Vedamox c-500', 'Medicine', 'Aldo Pet', 378, 5, '22.61', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b4b397f9-937c-4c48-8b48-8ce348ea87d8', 'W185', 'Whiskas Chicken Adult (480)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b4c335da-516f-4161-a85d-802e81d0785a', '5551', 'Oxytetracycline Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b5450114-d3e9-4a9c-b84e-d33d1a203264', '5812', 'Dono Diapers Male', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 25, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b554f040-a98f-4df6-91ab-9c26480498ee', '6474', 'Tooth Extraction Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b55c0790-a816-4aa4-8889-ef15b65ce957', '6004', 'Dental Scalling', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6025f58-f2b7-4290-971f-e47cc63db2b3', '6464', 'Otikoo ear drops', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b61e236e-d6ae-4ac7-9e17-21a5596b4480', '5348', 'Purina one indoor advantage 380g', 'Food & Snacks', 'Aldo Pet', 2, 5, '291.92', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6219113-97ea-4684-b28b-f4b9356f0785', '6192', 'Vaccination Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b62af3bb-6561-45a6-9bd4-788682d247f6', '6080', 'Vetwrap size S', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b633be72-a059-48c3-879d-3a71ce09ff09', '6022', 'antezole Inactive', 'Medicine', 'Aldo Pet', 36, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b63d0dd7-2d98-4b8f-8df7-2263353b4e03', '6897', 'GlucoPet(60tabs)', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b642f8c0-ed82-45ce-84eb-79364c318037', 'FH577', 'Nobby Fluo Harness M', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6436a90-0a7d-429a-950a-dd5597a100c6', '6222', 'charcoal Inactive', 'Medicine', 'Aldo Pet', 9, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b67952b3-7f9b-469c-848e-1eb32617590a', '5253', 'Harness ( RG274)', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b67f8276-f0ee-44f4-8225-e127ddadf0dc', '8906139000329', 'Flea& tick spray Cedarwood', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '321.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b685a93b-8dca-46f5-af58-aa35244afc1b', '635934608048', 'Purrify Antifunal Shampoo', 'Accessories & Toys', 'Aldo Pet', 29, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6880993-9578-449b-b27f-2446e3919cf1', 'ZI96', 'Zichen Cat Collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6b7683f-da7e-4a89-a1c7-765a850a2d76', '6462', 'Tumor removal surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6bdac49-a752-469c-9490-512e39e1d59f', '5928', 'grooming more than 1hr', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6d9dfa1-7d47-419b-ae82-cd291fc2643c', 'cc220', 'cc220', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b6fb2d9e-f59e-4e09-acbf-77db1ed31801', '5392', 'Venlyte Pet 30g Sachet', 'Medicine', 'Aldo Pet', 1, 5, '44.00', '85.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b71ca0bf-8b0a-4d7a-b02a-0b061af1cca4', '9003579010471', 'Urinary feline SO 85g', 'Food & Snacks', 'Aldo Pet', 13, 5, '795.40', '970.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b738de5f-edcb-4eae-96bc-fac6f4e38e90', '8699245858273', 'Bentas cat litter marseille soap 10L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b73cf2ad-b05a-45bf-8e80-2e7befd23bad', '4655', 'Healthy treats 1kg PUPPY Inactive', 'Food & Snacks', 'Aldo Pet', 5, 5, '358.36', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b760d662-e664-4c8a-a408-f73bddf5d958', '6779', 'Service Time', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b7624ac1-79bb-4a60-8cae-a885310a4ae9', '6219', 'Long lasting scent of coconut oil dog shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '400.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b7768dfa-6f3b-4185-9924-218008efde6b', '6769', 'Nail Triming Inactive', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b7852e66-4b4c-4d16-b03b-0bed682101c3', '6970117121332', 'Bioline catnip spray 15ml Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '240.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b7bafa66-06b0-4060-b51a-7cdfaa660ae5', '6643', 'Additional for 1hrs plus', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b7d5a0eb-b2f7-4015-a2b5-d2034e2ddd3a', '6125', 'Vaccination Dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b7f35867-b143-4885-ac4f-d748bed86d0b', '5962', 'Vetwrap size L', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b82933f2-71c0-4797-8149-f36e1c616aff', '4360', 'Canivit 250g', 'Medicine', 'Aldo Pet', 0, 5, '350.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b841d7f9-d0cd-4d76-9ad7-ee4c6174bc4a', '5403', 'AD3E Vitamin Inj', 'Medicine', 'Aldo Pet', 0, 5, '6.70', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b854b763-0e2a-46a8-8bab-2dfb90739f22', '5335', 'Nuelin Sr 200mg', 'Medicine', 'Aldo Pet', 44, 5, '4.89', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b8746f44-396c-4ca6-a91d-38c2bd9031ab', '6083', 'Solid ecollar no1 Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b87485f8-9a49-4435-9289-e77289c73913', '4723', 'One Adult Urinary Care gravy', 'Food & Snacks', 'Aldo Pet', 10, 5, '425.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b89dddd0-b250-448e-8936-1b3d8422c11a', '5259', 'Euthanasia', 'Service', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b8ebbcf1-b8c1-4079-9fc6-d9f284db9fa3', '6772', 'Resuture', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b95a6aa6-799d-4cc8-b755-26c5184684c7', 'CCL230', 'Covered cat litter box Inactive', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b989da8f-ab46-4ec7-9b99-fd726daae4a3', '6407', 'Digyton drops 30ml', 'Vitamins & Supplements', 'Aldo Pet', 1, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b9943aa9-5237-4122-843b-b687b25c054d', '5427', 'Aromatherapy Conditioner repair type', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b9ab5f7d-276e-4128-a8ce-cffff3c17c58', '6279', 'gastro puppy treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('b9daa590-5b0f-4f0f-a64c-af35df85ac9a', 'Fluo bed', 'Fluo pet bed', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('b9dd3db5-5420-456e-8561-f2e6edfdab39', '6089', 'Green Tea Biscuits', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ba3419d0-81b3-4c47-9b40-4fbe7c300715', '5508', 'Fig smoothing shampoo Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ba3fbc12-1462-4d29-879d-b26ba2daf640', '4423', 'Shelcal-500 x 30', 'Medicine', 'Aldo Pet', 25, 5, '2.31', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ba5fb894-2b36-436e-b4b0-24b281e13931', '6005', 'Dream cat cat  litter Inactive', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bb0b905c-d7a9-4ca9-bf88-9482ad8b695f', '5282', 'Adrenaline 1mg/mL Inactive', 'Medicine', 'Aldo Pet', 0, 5, '63.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bb516034-d21b-4bff-9d71-afe227857042', '4555', 'Meloxicam 1mg', 'Medicine', 'Aldo Pet', 437, 5, '3.70', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bb6913b7-8408-4c0d-bfb7-3518ffe830c3', '5216', 'Vetronutri calcium syrup Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bb8a17f7-f493-4634-b8a9-d0244e74b691', '6361', 'Gauze pcs', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bb8eb128-a182-455a-beef-057f27c3419e', '6707', 'Drip', 'Service', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bb9de180-18a0-4f1e-abe2-45d73efb99e0', '6332', 'Travel certificate', 'Service', 'ALDOPET', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bba9ab5d-0358-4f1f-b4ce-f3abdf42f220', '4430', 'Prednisynth Eye Drops 5ml', 'Medicine', 'Aldo Pet', 4, 5, '77.05', '115.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bbb06cae-5aa1-48f6-aa3e-a3c85b707888', '5637', 'Fluid Therapy Medium Dog 10-20kg', 'Service', 'ALDOPET', 0, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bbcd0132-64cb-4163-8656-51db797df61a', '6634', 'foreign body removal surgery Not for selling', 'Service', 'Aldo Pet', 0, 5, '0.00', '10000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bc13007f-387a-42fb-8608-719866b930d3', '6375', 'Microchipping', 'Service', 'Aldo Pet', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bc1cb14a-d7ce-4a31-9ea9-7989aa353d6c', '6957919902434', '7Dental Effects Flavour (Milk)', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bc543142-f2cf-40f8-acf2-376e73abbddb', '6437', 'Dressing', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bc80b416-6f01-40f3-b281-04645676771f', '6411', 'Consultation - public holiday', 'Accessories & Toys', 'ALDOPET', 0, 5, '1000.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bcf29eee-c0f9-431f-adae-10f83e84241f', '6396', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bd0d44d8-36d6-4634-8f7e-407479296893', '5890', 'Puppy Gastro Treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bd2a8320-6a75-49d2-af07-13d9de37e80f', '8698931094148', 'Synbioflora Tabs Medium/Large Dogs', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bd2cbbf4-717d-4421-9e5d-b5d8d02e335b', '5659', 'Consumable Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bd378fca-0040-49b1-8add-f9aa49c92ace', '4308', 'Bravecto 2-4.5kg', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '1185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bd3a33ec-adc5-440d-ba66-368fd6ea7f85', '5407', 'Ivermectic 23-45kg', 'Medicine', 'Aldo Pet', 52, 5, '25.15', '40.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bd42eb9d-76ec-441a-b950-d39662897296', '4321', 'Rimadyl Aqueous Sol Inj 50ML', 'Medicine', 'Aldo Pet', 0, 5, '26.50', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bd819daf-70ed-4536-b4c2-a3f4698de3e1', '6127', 'Bandage Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bd979fee-1348-4bc6-980c-3033152dc49c', '6292', 'fluid removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bdb7758b-75cc-43fe-8aa5-8b2ebf5312b9', '4558', 'Metronidazole 200mg', 'Medicine', 'Aldo Pet', 288, 5, '4.55', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bdba22a8-4b39-4225-8677-215d29247b24', '5869', 'Wound Dressing Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bddca515-c902-401f-9dfd-5012bc8343fd', '6350', 'antezole Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '80.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('bdeb1583-90f0-4390-93e6-723201c988dc', 'PC 225', 'Panda Collar m Inactive', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('be373864-4003-40a7-ac79-5e3b976cb946', '4565', 'Fenbendazole 100mg/ml Inactive', 'Medicine', 'Aldo Pet', 11, 5, '190.38', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('be61caef-1957-43ba-8258-2ed60cea7348', '4323', 'Cerenia Inj x20ml', 'Medicine', 'Aldo Pet', 0, 5, '95.00', '195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('be672a74-e023-4e06-8b98-f166501aedee', '5871', 'SM5338', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('be785583-6d42-44e1-bf08-089eaa47660d', '5906', 'Pouch R.Canin Kitten Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('be9c7a21-612e-41e9-9079-d53dc9a45e75', '8699245858211', 'Bentas cat litter baby powder 5L Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '150.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('beb7815d-357b-437c-8c9e-ca2ce02c9636', '5892', 'Bath and dry small dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bec734c1-28f3-42a6-a56c-180d1718dba3', '6659', 'rc hepatic dog 2.5kg Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1075.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('becc961a-a12e-48ee-a904-85d2fce8ae5e', '5456', 'Eyemedin 60mg', 'Medicine', 'Aldo Pet', 133, 5, '5.09', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bf24b00f-3d1f-4eaf-b6ef-0691143114a3', '5946', 'star toy', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '240.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bf4cdf0a-9f06-4c08-a43f-3ec3ee750a18', '5534', 'Pet forte Box', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '850.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bf6c9c66-c944-416b-8386-306b18b5bb95', '4682', 'Marbocyl  inj', 'Medicine', 'Aldo Pet', 121, 5, '7.35', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bf8dd2f9-d604-4d85-8ecb-fb7f24f36e87', '6648', 'Vaccination Dog Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('bf983d87-df9a-41d6-8917-599a5bdaf952', 'Dicynone inj', 'Dicynone inj 2ml', 'Medicine', 'PNL', 0, 5, '33.71', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('bfd6fe8c-ab3b-4dce-a292-271193120d84', '4444', 'Venlyte Pet 30g Sachet Inactive', 'Medicine', 'Aldo Pet', 0, 5, '44.00', '85.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c0412cd7-3cc1-41c6-be99-c826f0fbcde8', '6326', 'Feeder syringe', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c065887b-8f81-4e20-aae1-c38da0e86fb7', '6238', 'Enrofloxacin 50mg', 'Accessories & Toys', 'Aldo Pet', 4, 5, '4.21', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c068be2b-5928-40dc-99c8-4e9fbc3d1bfa', '5817', 'Cat Shampoo Inactive', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c08a3c20-3932-49dd-a832-a80f6e03bd5b', '5388', 'Longamox Inj', 'Medicine', 'Aldo Pet', 0, 5, '6.50', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c08a986f-d874-4ef3-97f9-85eb8b570a33', '6148', 'ECG', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c0b50b28-24dd-4c42-9361-11ac5903a1ed', '6889', 'VitaliCat(Multivit 60Tabs)', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c0b9302a-3dbb-41a9-9d2b-bd936a2a717f', '4327', 'Vanguard plus 5 CVL 1 dose Inactive Not for selling', 'Medicine', 'IBL', 0, 5, '132.80', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c0d25a48-4eb1-4b58-b6e4-b9edf7169e82', '6954547208464', 'Skin disease type', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c101091c-f449-4300-b38d-ab4ef4464e8c', '4415', 'Protas 20mg x30', 'Medicine', 'Aldo Pet', 4, 5, '5.54', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c1069d30-d493-4ee2-b99e-641e8a794dbf', '6806', 'Cardiocip Pet Tab Box', 'Medicine', 'Aldo Pet', 5, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c15aca1e-db68-446a-add1-0b94f55b5068', '5267', 'Floral Cloth Inactive', 'Accessories & Toys', 'Aldo Pet', 36, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c1941110-bc39-4491-a937-8a52b8b0c9e1', '5461', 'Pimobendan 5mg Inactive', 'Medicine', 'Aldo Pet', 0, 5, '16.27', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c1a495c5-04c1-4bf8-b08d-248099078fb4', '6295', 'Salivary mucocele drainage', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c1b2d798-3f73-4426-90b2-9e04557f3fe9', '8699245858389', 'Bentas cat litter baby powder10L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c1b8a2af-4613-4638-b8e7-501b24af46a0', '6957919907071', 'Jerky Stick (Lamb) Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c1dfde06-6e09-494b-831b-32b07bfdcff9', '8698931093875', 'CatiMalt Plus 100ml', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c1e189f0-53ae-41a7-b2a5-c0af9b47d350', '6456', 'Durable ecollar L', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c228e14d-4e24-4591-a39a-5d4298961f5d', '5123', 'Spaying Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c272aba9-6a83-4ac0-8a40-6b8a18ef4d0e', '5866', 'Maggot Remove', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c297f44f-faa2-453e-b395-c053aa20229f', '6341', 'Retractabl dog leash', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c2ad5018-1399-43d0-a6df-298e75a86d8b', '5336', 'Gloves pcs', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c2bc1ee0-01b6-4ea9-8af4-a372c29d8b68', 'RB420', 'Red&Black Body Leash', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c2bf6760-cd37-487f-b90f-8b1f789d7617', '6439', 'Digyton Plus Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c2d99392-e6d7-4e30-9ee9-f644741daeb0', '5774', 'Revolution plus 5 - 10kg', 'Medicine', 'Aldo Pet', 0, 5, '433.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c2f3d0bd-fbb6-413e-9014-93ac7d7c798a', 'RH668', 'Redy Harness M', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c2ffb00d-76cd-4e88-8cd4-556604dde0e6', '6425', 'Shaving', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c321fef9-8d37-46fb-be2b-935ea21ad663', '5288', 'Normal Saline (NS) 100ML', 'Accessories & Toys', 'Aldo Pet', 0, 5, '11.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c329e6c4-5b99-4b97-ae50-f3a223b6fc84', '5966', 'Tooth Extraction Inactive', 'Accessories & Toys', 'Aldo Pet', 76, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c340d57b-7c32-4f55-b918-88b7ab101339', '6977', 'Poop Repel Box', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c37c3bd8-8d16-4d3a-8451-b860e453e3c3', '4400', 'Moxipet K Eye Drops', 'Medicine', 'Aldo Pet', 2, 5, '112.15', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c3841cb2-bb69-4dda-a967-20e06a73ac8c', '4719', 'Felix Adult Salmon Jelly pouch 85g', 'Food & Snacks', 'Aldo Pet', 1, 5, '35.44', '55.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c3a76e4b-de36-4c01-80ba-6ccee19e845c', '5513', 'Silicon bristles for muddy feet pets', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c3bf5d36-7681-4106-9409-4382f8160312', '5406', 'Dripset', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c3d4e4eb-6fcf-47da-b77d-2ca9db4be520', '5849', 'Minor Suturing.. Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c3df4711-19bd-447a-8452-20fbb035f5cc', '6957919900676', 'Vegebones Skin&Coat Care Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c3fee79d-fe67-46d0-9c9a-0df7037a3136', '5818', 'Chicken Flavor Puffed cat snacks with soft filling', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c46da2db-3666-4d6a-808a-ec226b75e4a9', '6010', 'Gauze', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c493e78e-a732-4336-9229-7b0d16ab2c6a', '6970117120448', 'Bioline teeth cleaning spray', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 11, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c4b5f687-31a6-44b0-a894-f7461deac02c', '6339', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c4bbd41e-9d21-440b-b1b7-15f25e7623cd', '5823', 'Vegebones (Soft Bones) Inactive', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c4c8418a-8cc6-4698-913c-70fa5e8036d7', 'SDT29', 'Spiny dog toy', 'Accessories & Toys', 'Aldo Pet', 60, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c4ef1051-7fce-4cbe-831f-a036dc9ac1fc', '6592', 'Simparica (5kg-10kg) Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c4f3c5f1-48b4-489d-90a1-f3c871234cac', '4436', 'Gutwell Powder', 'Vitamins & Supplements', 'IBL', -2, 5, '130.00', '195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c4f5c4d0-728c-4248-8e59-70105ed94988', '5365', 'Urotropin Inj', 'Medicine', 'Aldo Pet', 0, 5, '1.72', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c500855f-1912-403a-a0fb-caa6db6aed08', '5917', 'keep off spray for dog', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c51c861c-6235-4d69-95b8-5856400f8e77', '5633', 'Pet Nail Clipper', 'Accessories & Toys', 'Aldo Pet', 13, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c5417ce1-b501-4709-b665-7a4c43a716d9', '6957919908177', 'Endi eye cleaner', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c5449087-1de3-45f2-978a-96adb79d0506', '6514', 'Consultation', 'Service', 'ALDOPET', 0, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c5a93a7b-f244-4137-a202-02e38ca52846', '5929', 'Ceptrisul inj Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c5ca0dd4-59eb-41aa-8c6d-f946ed4bf1a2', '5931', 'Ownat classic kitten 1.5kg Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '695.65', '895.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c5e903c4-1f7e-494b-8451-23ced594662a', 'BF4724', 'Best Friend Leash', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c5f8d29f-87cc-4014-b153-e5717e81aec2', '6641', 'bath - dry Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c607c501-b5b8-43db-940a-46f9c5b07cf3', '5320', 'Minor Suturing. Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c64933a5-1ba4-4064-8549-24e8cc32b939', '5884', 'Transport >25km', 'Service', 'ALDOPET', 0, 5, '2000.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c65b08cc-821e-4d99-bdba-55b583100a45', '6809', 'Mega Stop 60ml', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c69aae0b-8508-41e6-95ce-67cc87241af4', 'Mate23', 'Matemon cat collar', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c6ca15bd-5fea-4d2a-b6b4-a79c61594d2e', '6973', 'Dog Clothe', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c6cdc6f7-bec8-4a81-a928-d997b6d67530', '6473', 'Bird Treatment Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c71c847e-51c2-4c5b-9347-56cf16f81b1e', 'TC5638', 'Travel carrier M', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '3400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c769f342-d795-4238-90cd-029b54b152cb', 'SFB24', 'Slow feed bowl', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 5, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c76b9659-2186-47b1-84fe-72374f84096d', '3182550703079', 'Giant Adult 15kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '3337.40', '4690.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7a2781e-727f-4205-887f-8ecf27811a44', '4420', 'Toularynx Bromhexine 180ml', 'Medicine', 'Aldo Pet', 1, 5, '187.41', '290.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7ab13e3-5e6c-4387-a088-6099f8de1920', '5896', 'C-Section', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7abca3e-4c79-4288-8a97-f9077843af56', '5344', 'Levetas 500mg', 'Medicine', 'Aldo Pet', 69, 5, '20.50', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7bdf94c-8832-4281-9f4b-ae7e82107eaf', '6927', 'Flora Control', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '510.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7dd9c6e-98a6-487e-936f-c2cade721f46', '6954547200208', 'Orgo High Calcium Cheese', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c7f63f75-2cbd-4ef9-9c87-3b857003b7aa', '4586', 'Cephalexin 250mg', 'Medicine', 'Aldo Pet', 254, 5, '12.47', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c8278d91-4216-4c78-b16a-f03726c5115f', 'Vitamin K inj', 'Vitamin K inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c84acab6-0217-4bf1-9d74-97c1ff6bcbed', '4629', 'Lactol Puppy milk Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '358.80', '615.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c84df109-35b6-4951-b55d-392b35c70dbd', '4351', 'Dufacalcio 50 inj 100ml', 'Medicine', 'Aldo Pet', 56, 5, '1.90', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c89ab96b-7814-476a-8e4a-0f218d29fa6a', '6365', 'Goat Treatment Not for selling', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c8bb396e-882d-427e-b857-2422a58c253e', '6449', 'Urinary cathetor', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c8c66260-9774-4e1f-be52-af235adace7d', '5432', 'Prednivet 5mg', 'Medicine', 'Aldo Pet', 152, 5, '7.23', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c8c960a0-3c13-476a-8bc5-f7da7f59c320', '4578', 'Livermarin', 'Medicine', 'Aldo Pet', 146, 5, '6.99', '40.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c94e0694-a5c0-484a-ab25-5880ba2cc75b', 'PC225', 'Golden Panda Collar M', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c9512970-f52e-4f70-ba2d-0f7dd64db5b5', '6954547200222', 'High Calcium', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c99c0352-9a48-4a03-b532-a651cb902a8a', 'CLB25', 'Simple cat litter box Inactive', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '675.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('c9b0c70f-b940-414e-87a2-d340821fcda0', '5771', 'Vetronutri Multivitamin Tab', 'Vitamins & Supplements', 'Aldo Pet', 2, 5, '305.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('c9f669d1-3d6c-4f8e-a851-ec189b65d061', '5356', 'Supercoat adult dog 2.8kg Inactive', 'Food & Snacks', 'Aldo Pet', 2, 5, '691.05', '1050.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ca064b3a-79c1-4d24-9bc6-b046914bc8b1', '6100', 'Fighting dog', 'Accessories & Toys', 'Aldo Pet', 10, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ca1f6fe9-4489-40db-b278-116fa1a8bdfd', '5912', 'Calming & Anti Anxiety Supplement', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ca93fd36-54c8-463a-ad5e-bd4e3e9fa13c', '5970', 'Appetite 15kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '2450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('cac0d5c6-0906-4ef8-b4ce-005601580abb', '5922', 'Tumor removal surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cb5da7fd-93e6-45e0-817a-d930b7a21c3d', '6739', 'Chews', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cb672334-6e20-4a54-af96-429354c1a5ca', '6181', 'Xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('cba47c7d-2ddf-46f8-8833-624eff681ff1', '6781', 'ventolin Inhaler', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '345.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cbc0392f-366d-45f8-b58f-86fede35cc1d', 'BP 220', 'Round Grey Bed', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '850.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cbd93d99-a1c8-467c-8e67-a12b081c40b8', '5502', 'Hygiene Dental bone', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cc0a1f8f-07eb-4db2-bebe-85509cac13eb', 'EC10020', 'E collar no 2+', 'Accessories & Toys', 'Aldo Pet', 23, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cc1e73be-a76f-49a1-ba33-6cdb62c78d74', '6195', 'Aroma groom pet perfume strong fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 2, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cc3cd9fc-9d8a-4027-b12d-ffdc742c843a', '6269', 'bromhexime inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cc90a76c-53d5-4ec9-910f-8d5f5368a83b', '5472', 'Silicon milk feeder Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('cc915616-892e-459b-a8c9-248d2ad38e15', '5877', 'Vimectin', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('ccaecb75-9b79-44dc-b7dd-6ae1d17fcc80', '5494', 'Antisilp bowl L', 'Accessories & Toys', 'ALDOPET', 0, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ccfb3525-b8dc-4407-9205-63d56d8bb4bc', '6444', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ccffe98b-58ae-45c7-8ded-f5d415429c93', '4551', 'Marbofloxacin 20mg', 'Medicine', 'Aldo Pet', 373, 5, '8.43', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cd2dab69-5c9a-47f5-9e03-0634937b43a7', '6291', 'Suturing', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cd83812e-a241-4707-b105-a61735313966', '4362', 'Demomange cream 50g', 'Medicine', 'Aldo Pet', 0, 5, '325.00', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cd8de20e-3c6e-4153-9cb2-d7a512ea1a9d', '6923', 'Spirulina', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cd8e47d0-ac40-438f-85ed-ca8e53f1b1e7', '4601', 'Meropitant Tab 24mg', 'Medicine', 'Aldo Pet', 36, 5, '71.30', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cd998c4d-81e7-413d-aefa-2d84a7383fe1', '5920', 'Major Suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('cdb20070-3221-4eb8-b37f-738f2744d03e', '5426', 'Ivermectin up to 5.6kg', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cdfef94a-b838-4b86-b407-e53b905595cc', '6381', 'Protexin powder 250g', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '0.00', '750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ce0a4ad3-c80c-4772-8056-e7d82d5a2fe6', '6745', 'Tooth Extraction', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ce2e0554-0504-4652-9f24-246615898ba4', '5471', 'Vegebrand 7 dental effect cheese in beef gum Inactive', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ce32b446-293d-45ac-94be-68bddd35e5f3', '5421', 'pet o cal 450ml', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('ce5cb95e-9283-4680-89b8-f195561c6563', '5078', 'E collar no 1', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ce82b6fd-db49-42e4-86ae-05975b1f1e09', '6112', 'Transportation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ceadd3a9-2001-40ff-a25a-3eb8942e84fb', 'FDB252', 'Tumbler pet toy food dispensing ball', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 11, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ceb11af0-8a4f-48c8-acea-2bfbb542db8a', '5475', 'Nose spa butter Inactive', 'Accessories & Toys', 'Aldo Pet', 41, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('cec07a89-4cfd-4220-a966-4c9a6ef3a01f', '6183', 'Ownat Classic Junior 4kg', 'Food & Snacks', 'Aldo Pet', 3, 5, '1173.91', '1495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cf381a95-727b-4c98-a06c-c0b7ad08c3ea', '6098', 'Cat play with string', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '395.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cfc7a3e4-13fd-407e-841e-f3c176910785', '5225', 'Pet tab forte pcs', 'Medicine', 'Aldo Pet', 104, 5, '4.58', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('cff4276b-da06-4e7b-acd0-df8cc6437a12', '6388', 'Snap calci Virus', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d0075734-776d-43b2-96d7-968d65b5bd3c', '5384', 'Hemofer B12 10% Inj', 'Medicine', 'Aldo Pet', 0, 5, '2.84', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d0ac0673-c892-4558-9aa3-10dfd2f88e26', 'DM577', 'Durable muzzle size 3', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 13, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d11c1d42-4f78-4687-a638-4dec400c9f92', '6631', 'Mesotherapie  Small Dog/Cat', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d1693d44-8f88-483f-9755-1c08eb36fd6b', '6259', 'Vaccination Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d17a3092-18f2-45a2-be81-54d72345622a', 'F8035', 'Flower cat collar', 'Accessories & Toys', 'Aldo Pet', 27, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d192f582-cebe-4013-962c-c3c374ff2beb', '5995', 'Wormout tab', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1530.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d2004423-b062-4bd6-a0a5-9e8494739b79', '6334', 'Review checkup + Cleaning Inactive', 'Medicine', 'Aldo Pet', 9, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d232ec2e-8ccc-4f01-8b02-3d6c7b8b2922', '6485', 'Puppy Gastro Treatment Inactive', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d25dc4b0-3e53-42e7-891d-29454a45546a', '6479', 'cat tree Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d2d0604a-0aeb-4c0c-bdab-779af05cb527', '6278', 'Ear Wipes Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d3112a08-8237-4201-a68b-e1d6177cc2b9', '6270', 'Nobby leash', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '799.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d3159a76-3bf5-4c42-ac43-75368029c4b0', '6297', 'Staple', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d3200500-be51-43cd-878a-350b8987a6ab', '5987', 'Vet Natgut Tabs', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d35216f6-f372-4dc1-a121-968561132811', '4450', 'Simparica (10 kg- 20kg)', 'Medicine', 'IBL', 9, 5, '291.67', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d3b33403-86dd-4dc3-9e38-a43420f5224b', '6847', 'Kyrovite C injection Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d3b3d504-cfbd-4f8d-b50b-9451f92e2d5d', '3182550737593', 'Sterilised37 2kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1339.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d3e5a25d-22af-48d4-b879-173eae392e6c', '6884', 'Vitalicat 150 tabs', 'Vitamins & Supplements', 'Aldo Pet', 12, 5, '266.40', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d3f746e7-4c0e-4955-82f6-1827c62a353c', '6446', 'Marbofloxacin inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d469c1c2-97f3-4598-baf4-10aad691deaf', 'SM250', 'Small mat', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d47d4f14-4068-4552-b685-d5934399f8e0', '6248', 'Ownat junior 85g cat pouch', 'Accessories & Toys', 'Aldo Pet', 23, 5, '86.96', '105.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d4f1b133-3c1f-44c0-9b51-9b6e2048d692', '5831', 'Automatic pet feeder', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '3450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d4fdc3a9-6ceb-4029-bbee-4f7bd5ca673d', '5220', 'Pet O Cal 200ml', 'Medicine', 'Aldo Pet', 0, 5, '163.93', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d4fde1a0-4192-4333-9a5f-3fb4dfb50b0f', '6146', 'Rabbit daily treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d51ef114-3222-48c2-bb82-8576674838f3', '6242', 'vedamox c oral susp 15ml', 'Accessories & Toys', 'Aldo Pet', 0, 5, '206.56', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d5499e86-327a-4883-872e-99747d5aa7e9', 'FDA 25', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 9, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d57d2631-1c74-4bd8-a071-b5fbf67a8609', '5313', 'Syringe 2.5ml', 'Hygiene Items', 'Aldo Pet', 0, 5, '3.95', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d5d56095-ca48-4377-b240-bff882e58ae7', '6392', 'Triam denk inj', 'Accessories & Toys', 'Aldo Pet', 0, 5, '91.40', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d661ee13-90a2-43c8-b645-e9606a90c5ce', '5873', 'ns Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Inactive'),
-('d67122e8-d34e-4fb8-90ab-1da1e9dcce35', '3182550760232', 'Adult small dog 4kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '1213.60', '1480.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d681f62f-0210-4036-b464-ea72f17100c5', '5985', 'Vet Wormstop 15ml', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('d682d78c-a582-471d-a9b3-5a5d0d2800a3', '6327', 'Puppy Gastro Treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d683b5a3-efbd-4116-83af-d7f515ad7809', '5810', 'Ear Cleaning', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d6a20c7c-b72c-4417-88c3-5c07e1d68522', '5760', 'Pimobendan 1.25mg', 'Medicine', 'Aldo Pet', 20, 5, '0.00', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d6bbfd68-d810-448c-8b59-8d54d68b4f9b', '6887', 'VitaliDog(Multivit 150tabs)', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d6c6cbad-2a44-4739-96a4-8651b3f38622', '6358', 'Vetronutri calcium syrup', 'Vitamins & Supplements', 'Aldo Pet', 1, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d6f5bdc5-8221-4676-9f68-ca650b3a6a37', '5286', 'Tobra D eye drop 5ml', 'Medicine', 'Aldo Pet', 9, 5, '91.22', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d70a2ec3-c3d1-4cda-aeea-1351b3ae4453', '6067', 'plaster of paris', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d70bb3f9-445d-4290-831d-0cb018d323e4', '6630', 'review checkup Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '900.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d7554e74-93a1-45dd-ac8a-d9e7d53934c0', '5163', 'Castration Dog', 'Service', 'ALDOPET', 0, 5, '0.00', '1700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d76740f7-f968-4f12-811b-143c99cd09c0', '5485', 'Gel cooling mat M', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '690.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d774b512-5b55-47bd-8ad1-291165b9eb6a', '5937', 'felix party mix classic 60g Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '79.05', '120.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d7c9423e-6696-4516-a184-82a1116de2cc', '5959', 'Transport Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d7d743f1-425a-4e3c-9188-b10240ce318b', '6191', 'Incubator use', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d7e815ea-f5a2-4cda-911a-ec2d52a18d51', '6091', 'Scavon vet cream 250g', 'Medicine', 'Aldo Pet', 0, 5, '312.80', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d8149b31-10ce-4bbd-a285-6ea829326899', '6957919911245', 'Baby powder fragrance Inactive', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 27, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d816d7f1-9b8d-4a61-94dd-4adfd0be15b4', '6647', 'Vaccination Dog Inactive', 'Accessories & Toys', 'Aldo Pet', 19, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d87894cd-ba87-4c3c-9f31-e8543fefbdd7', '8698931092359', 'Felilysine(90Tabs)', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '420.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d889c071-a184-4e13-917c-2067d6391dfa', '5271', 'Gupuisone 20mg Tabs', 'Accessories & Toys', 'Aldo Pet', 0, 5, '10.30', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d8986b9f-2540-477b-8521-eac01eb04a71', '5414', 'Syringe 3ml', 'Hygiene Items', 'Aldo Pet', 0, 5, '4.50', '10.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d8a0e4f0-9543-47d1-9dff-4b1b2e81fabd', '5244', 'Biovet Deinsectization Shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '0.00', '525.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d8f7a870-05f2-4589-bffd-be23c4cb4ede', '5751', 'Vermi pet Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d91840d1-5c8e-462b-9873-e7f2ef6cf8c5', '5440', 'Tarsoraphy Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d92ea0e6-547d-4449-ae4f-d63b2e72a019', '5453', 'Wire Passing', 'Service', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d9ade42f-885f-412f-9cf6-c448e64495c0', '6489', 'Intensive Care Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('d9c0253e-49f2-4dc3-89d9-4a85998dcb79', 'Vacuum cleaner', 'Vacuum cleaner', 'Accessories & Toys', 'Aldo Pet', 30, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d9c574e0-0452-4ff2-8c48-3ef05192b523', '6197', 'Aroma groom pet perfume tree fragrance', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 3, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('d9cd1ba2-e6ae-429e-8079-54541b01f8dc', 'FDA 12', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da2a11fb-d7e5-4910-ad98-da40688922e1', '5949', 'Dog Vaccine + Micro', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da2c0ca0-91d7-4033-8520-501837e883b5', '6921', 'Avilin(multivit for birds)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da457932-2514-4a76-8cc4-da5c1bedb96f', 'Canulaa', 'Canula', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da69b4ec-a8e1-41a8-abcc-e6d412be795f', '5894', 'vaccination dog Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('da7206cf-4f80-428c-bab1-cd16c05399a1', '5763', 'Marbocin 5mg', 'Medicine', 'Aldo Pet', 21, 5, '6.24', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da81a0f1-ec4e-4bca-83a9-dffc1258b15c', '5425', 'PT 3033', 'Accessories & Toys', 'Aldo Pet', 18, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('da8467f5-b48f-4989-be94-a06f10516f85', '5860', 'Marbovitryl Inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dab67b3d-a1d4-4c5e-8fa9-718c958b318f', '4365', 'Panthox', 'Medicine', 'Aldo Pet', 1, 5, '630.00', '950.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dad3989e-2c59-47d5-a5fc-116ba1cfd103', 'CM23', 'Cooling mat L', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 18, 5, '0.00', '790.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('daf7b619-506c-414b-a419-fed1df31b7bc', '4315', 'Dolorex 10MG/ML Inj 10ML', 'Medicine', 'Aldo Pet', 0, 5, '420.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('db163197-df62-4340-9363-b18fc6303663', 'XNC38', 'Xing Ning Leash Collar', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 1, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('db4c67b5-b3ec-470b-bd67-af36cbc2e1a2', '4372', 'Alkapet Syrup 200ml', 'Vitamins & Supplements', 'HYPERPHARM', 10, 5, '229.40', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('db7a1a5b-634d-40f9-b8f7-005a27584b24', '6072', 'Pet Amox', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('db7a9a18-0f62-4e9d-8b64-9462ab8ebc0d', '6451', 'Fluid Therapy Large Dog 20-40kg', 'Service', 'ALDOPET', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dc09f759-2975-4f04-ac6e-1275b338c2cc', '8698931091444', 'GlucoChond plus gel', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '585.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dc0b2fb4-2fac-48a4-8875-26b9d41b1583', '5368', 'Friskies seafood sensation 400g Inactive', 'Food & Snacks', 'Aldo Pet', 3, 5, '140.40', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dc25f4dd-f5ee-4f9f-a215-419d9f7b98d9', '5672', 'Puppy Gastro Treatment Inactive', 'Service', 'Aldo Pet', 9, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dc2b4b5a-6450-4227-8844-b15eb0a6af3d', '5381', 'SuperDog Health & Vitality tabs', 'Medicine', 'Aldo Pet', 3, 5, '425.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dc56fa1b-02ea-4286-8a3a-940d581404b4', '6076', 'Maggot wound Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dc612c74-b5d9-463b-865e-14099b897c64', '6423', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dc86c790-b212-48d7-9b8d-61f9e566a54b', 'DM544', 'Dog matrak', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '699.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dcd17c7e-a110-41ea-8e72-38f285f2afa6', '4662', 'Inflamin vet cream 250g', 'Medicine', 'Aldo Pet', 2, 5, '461.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dcd97dd5-ffad-4f8a-83bd-91bf7409c6d9', '6385', 'Sterelised pouch', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '85.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dcf35202-fd8a-4aa2-9f39-8e864ac6f61c', '6289', 'Consultation Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dcf6a55a-58a5-4bb8-86b8-ade2588d5c6a', '4592', 'Deworm Plus Cat', 'Medicine', 'Aldo Pet', 598, 5, '16.91', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dd6f5061-bc22-4be0-97d1-6331219964c0', '6129', 'Transport + dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dd841f2f-899a-4e0c-ba5a-b1f980567ede', '6298', 'Cleaning and suture removal Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('dd935198-1b79-4d00-9ad9-b146e123406c', '6104', 'ringers lactate 1000ml', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de13e8b7-7e60-4c13-9103-cb512c113122', '5597', 'Prednisynth Eye drop', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '115.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de147b2d-ee12-4e8b-9f83-355611001822', '5798', 'FDA 11', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 9, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de1b0a41-6746-49da-ab85-72b41d8fe799', '6280', 'Review Xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('de44c71f-6fcf-4569-af81-9c76b4fbb845', 'RS2924', 'Yellow frisbee', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de7b887c-f65e-4b03-aae7-855d9735b5db', '4407', 'Petovate Lotion 100ml', 'Medicine', 'Aldo Pet', 4, 5, '173.32', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de8a9e8e-26b2-48d9-8c3a-64514b90ab4e', 'Grey large bed', 'Grey large bed', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 15, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('de9011aa-8f79-42b3-8dd2-58f2512906de', '5868', 'Scavon Spray Himalaya 120ML', 'Medicine', 'Aldo Pet', 4, 5, '0.00', '295.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('deb34933-ff5d-4a66-ac68-9e784a08bbcd', '5846', 'Ringer lactate 500ml', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dede7bc0-f483-49e2-9b34-1abaacb50551', '6208', 'puppy Castro Treatment Inactive', 'Medicine', 'Aldo Pet', 15, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('def2786d-4b6e-415f-b58c-5db99061c961', '5354', 'Preso Inj', 'Medicine', 'Aldo Pet', 0, 5, '2.20', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('df05abb8-b74d-44bc-a0a9-0547343ccf93', '5272', 'Triaxone 1g 1.M Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '249.75', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('df704735-f510-490f-a2ab-d7533a81241a', '6926', 'Yeast Stock', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '490.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dfa0f285-8ba1-43a3-b94a-9f8484784534', '6590', 'Xray Film L', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dface6af-b849-4d28-b53c-23e90fca0abe', '6187', 'Ear Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dfbef186-3472-4804-ae34-7c217a8e7a47', '5801', 'Fancy Feast Salmon in searved salmon', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dfc237df-2b59-4c02-a506-e7cdaf703dda', 'PPB661', 'Pet Neckerchief', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '285.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('dfe02293-937f-49f9-a0c9-0d998fe553ce', 'FDA53', 'Bird Toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 15, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e02a7eb0-b829-4ef2-a704-2f8b039f28da', '5482', 'Vegebrand Mutton Flavor big bone Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e098b80b-b963-4563-a7b6-3207119ea93c', '5918', 'Royal Canin Kitten 2kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1190.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e0a1b5b8-8e01-4102-a228-80be25b4742d', '5963', 'Metronidazole 50ml Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e0c186a0-87ab-4ce5-bf8d-86b70e948a92', '6288', 'Scrotal Ablation Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e0cb8c9b-ced1-4994-aa68-08cd30e27112', '6376', 'microchip HV', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e0ef77ff-3312-4f84-a311-8342df23ab48', '6050', 'Babevit Inj x100ml Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e0efed0f-3f8f-470a-9a48-b708e890d4ff', '5359', 'Fancyfeast grilled  chicken 85g', 'Food & Snacks', 'Aldo Pet', 11, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e0f54b6e-a895-4cc1-a1c2-fb1ad6d17af7', '6505', 'Royal canin satiety weight management Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e1056a8d-57fd-49ee-b598-4556e6b5225f', '5424', 'Metonin 24mg', 'Medicine', 'PNL', 5, 5, '73.20', '110.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e14269ef-bc63-4147-acff-1eee2c7b863b', '6819', 'Fluid therapy Kitten', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e16366b9-85fd-4a7e-b7b0-eeaeeefc9ad1', '6837', 'Mirracote', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e205a2f9-9fa1-4357-a43a-ebc0d8c76969', '4577', 'Ketocox Spray', 'Medicine', 'Aldo Pet', 0, 5, '259.00', '389.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e236ba25-9810-4262-930b-9da236403536', 'ATC22', 'Arcadia Trail Collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e2531dd9-3ca8-4dfd-a8eb-d883bbcd5b50', '5248', 'Pet N Sun', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e29c1981-49ce-428e-8090-11c6ac43689e', '6925732104632', 'Bobo pet perfume', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e2c7c45f-3eae-42c7-add1-f5086e734df2', '5386', 'Cytopoint 40mg Inj', 'Medicine', 'Aldo Pet', 0, 5, '2940.00', '4500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e31b498e-fc48-43a8-b13f-25eeca93b047', '8698931093288', 'VitaliCat Paste(Multivit paste)', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '460.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e34ec79d-3ed0-4258-8041-db67d8408f8d', '6059', 'Dog snack bone', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e36802dc-92c2-402f-ad11-73a8fcebe5e0', '6726', 'Trabar Tab', 'Medicine', 'Aldo Pet', 55, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e3a2a654-1df4-4086-9475-7f89d2741fd8', '6106', 'R.Canin Exigent 2kg Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '1250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e3a2d9aa-4561-405e-a99d-49ef940977c9', '6767', 'Hernia Repair Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e3ccd3a9-b986-4917-9b52-6e9146a257a6', '6313', 'Review + cleaning Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e3d891c8-f61d-40c8-b675-6010a015384c', '6607', 'Wound Cleaning', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e3e6f657-2948-4751-8299-f6f8b8477862', '6729', 'Sebout Treatment Shampoo', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e3fa045d-81c9-4312-839e-b77ed2d82a0e', '6161', 'Nail Trimming Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e4155fe5-6c21-47a5-9f66-c8bc4209ab23', '9003579308943', 'Royal Canin Kitten Gravy Pouch 85g', 'Food & Snacks', 'Aldo Pet', 0, 5, '62.32', '85.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e495a40f-74ea-40dd-a40c-e27e19612794', '6319', 'intensive care Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e4b24915-7eda-420d-a676-2f33aa077da4', '4576', 'Ivertmectin 34mcg', 'Medicine', 'Aldo Pet', 78, 5, '12.42', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e4f9e357-84f0-41a6-bc53-55866726418b', '6009', 'cat litter Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e50c877b-a104-49c4-9986-853dcb4de65f', '4684', 'Duphalac syrup 200ml', 'Medicine', 'Aldo Pet', 7, 5, '198.48', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e50efc30-a686-4392-96a0-8904359ee474', '5332', 'Wormtek tab', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e520afde-20bd-4b92-9111-11175a9d8c18', '5362', 'Fancyfeast grilled oceanwhite fish 85g', 'Food & Snacks', 'Aldo Pet', 17, 5, '59.09', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e5281946-a6fe-47a8-a024-123e696c2ab4', '5799', 'FDA 27', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 8, 5, '0.00', '175.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e5da9704-6afa-4dc3-bcdd-bbf00f1cd508', '6355', 'Renalof', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e5fc64cf-1a28-486c-9520-34616a8bda1f', '6116', 'Fluid Therapy Adult Cat', 'Service', 'ALDOPET', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e63ce83b-938f-4b39-a21c-cf3a23980da2', '6458', 'E collar 7', 'Accessories & Toys', 'Aldo Pet', 14, 5, '0.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e64a6e31-8574-4b60-b7f5-78a35f16cf9d', '6031', 'Lidocaine inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e666b98b-7c52-4ed1-b22f-51c545d5fa4d', '25033', 'Cat craft', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e6798da2-ff25-437c-9418-c967b818de59', '5437', 'Loperamide Hy d susp', 'Medicine', 'Aldo Pet', 29, 5, '243.66', '350.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('e6e18114-fabe-4011-aa0e-94ea24b4974f', '6992', 'E Collar Medium', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e71da63e-70ed-47c5-9ab8-8f48061ece29', '6824', 'Maggot Wound', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e73b1dce-0c72-43d7-8650-30e0ff760f6c', '6471', 'injection Inactive', 'Medicine', 'dufamox', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e76b3d90-8769-4b54-b3b8-9e43a478dc27', '6705', 'Petmedin 10mg tabs x30 Not for selling', 'Medicine', 'IBL', 0, 5, '1020.00', '1650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e7c79059-a654-42e3-9b2d-13e76dbd4186', '6099', 'Fighting donut Inactive', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '299.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e7f8e728-5ffe-45b7-8249-f027ff843b8b', '5315', 'Syringe 10ml', 'Hygiene Items', 'Aldo Pet', 0, 5, '6.35', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e803b7c7-7a60-45bb-b6a4-cba7fe19c649', '5251', 'Bentas Soap Marseille 10L', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e832be01-7ede-43b1-86f2-8fea3ebab068', '5724', 'Renal Pouch Royal Canin Inactive', 'Food & Snacks', 'Aldo Pet', 4, 5, '0.00', '90.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e85d90b9-4554-4894-a1b8-1c3eca6957ae', '5815', 'Vime-ATP (Oral drops)', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e8600af8-4897-4cf2-9978-db6d0dd08925', '8994400024280', 'Pet N  Sun over 11-20 KG', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e87e8153-dd8a-4114-a256-d470a96898ad', '5660', 'Trabar Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e8bce05f-bdeb-4e91-a809-36f6696481d7', '6348', 'Catalysis Viusid Pets Oral Solution', 'Accessories & Toys', 'Aldo Pet', 2, 5, '163.48', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e8d41993-43d8-43c9-a6b4-b303255f5e2f', '5318', 'Cort ear cleanser Inactive', 'Medicine', 'Aldo Pet', 0, 5, '163.93', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e8dc2dac-a6ce-4a6b-801d-5cdecf33871f', '6397', 'Wound Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e8e7a53a-746d-42a5-a7bb-7e2db589b51f', '3182550799645', 'Neutered satiety balance 3.5kg', 'Food & Snacks', 'Aldo Pet', 2, 5, '0.00', '2075.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e914f069-60c1-4544-a2ae-5b0bcf289876', '6157', 'Home vaccination Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e970eacb-dc71-46ec-9fe5-c2e5ef73e012', 'NC222', 'Blue cat collar', 'Accessories & Toys', 'Aldo Pet', 140, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('e97ea3c5-1142-4058-8a16-9359633a38e3', '6957919911252', 'Lavender fragrance Inactive', 'Accessories & Toys', 'Aldo Pet', 51, 5, '0.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('e9afed92-8a01-4a08-9508-6e982a37a65c', '5292', 'Aciloc inj', 'Medicine', 'Aldo Pet', 0, 5, '27.83', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ea47ccbf-7cac-43b0-a48a-cd8789d16254', '4622', 'Frontline plus dog 20 to 40', 'Medicine', 'Aldo Pet', 0, 5, '360.00', '625.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ea493683-803c-4804-87dc-4c5491d3eeeb', '5951', 'carprofen Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ea5261e6-2ef8-4a58-b3ee-258f5c738823', '9003579003886', 'Adult Instinctive Loaf Pouch 85g Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '62.32', '76.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('eab11b51-7803-427b-ae20-655a75b609b0', '6357', 'Nutrabone fish oil', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('eaec237f-78fc-4352-b1b0-e50693bbec15', '6526', 'Home Vaccination', 'Service', 'ALDOPET', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('eaf4f3f1-791a-4b6d-8b09-4db9bc7acbec', '6441', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('eb1d9316-078b-403a-935c-b75d5f1a1621', '6402', 'Home Castration Cat Inactive', 'Service', 'ALDOPET', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('eb75e65e-b889-4e4f-9003-b37316c85c7c', '6235', 'xray Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ebad975d-fdc3-4de3-b641-5e542da53a29', '6036', 'Xray Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '2500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ebe3165d-245a-4114-80cb-6feb7bed1d03', '6508', 'Transport Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ec5f2a63-996e-487a-a63c-49377ed94b0e', '6309', 'Cleaning Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ec7604ef-2d9e-44e3-9166-22806150efe6', '6002', 'Bites Junior Puppy treats Inactive', 'Food & Snacks', 'Aldo Pet', 3, 5, '0.00', '180.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ec796d1b-7c78-4f73-8304-e11859456d67', '5316', 'Zotek - P ear drop', 'Medicine', 'Aldo Pet', 1, 5, '143.44', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ec7e3f9b-5de4-4dd7-be06-4140916db2be', '5853', 'Cat drip treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ec8094d2-a954-4840-a24b-2730539166cc', '6602', 'Apoquel 16mg Inactive', 'Medicine', 'Aldo Pet', 2, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('eca96d35-3b3f-4981-94aa-6de3436e7da5', '4352', 'Iron Dextran 10% plus inj x 100ml Inactive', 'Medicine', 'Aldo Pet', 40, 5, '2.60', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ecebfcb3-1ce3-4f32-a1dd-d401baca064d', '6523', 'Fluralaner Chew Tab 1x250 mg', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '530.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ed093eae-975c-4f9b-a1a5-8b659843305c', '6087', 'Transportation Inactive', 'Service', 'Aldo Pet', 1, 5, '0.00', '2700.00', 1, NULL, '2026-07-31 19:57:45', 'kilogram', NULL, NULL, 'Inactive'),
-('ed1470e7-5b70-4b8c-889e-5fdca65f4edd', '6829', 'Trimming Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ed2cc88f-0778-44d0-80d6-3115b839d6ed', '6312', 'vetronutri multivitamin syrup', 'Vitamins & Supplements', 'PNL', 3, 5, '0.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ed3101ab-6e8f-4bb9-bec9-d9f8869bef30', '6537', 'Doxycyline', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ed429906-27d5-4a89-8556-9dc1303cbfed', '6815', 'maggot case severe', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('eda47e55-88e3-4ab2-8ab5-8b49044676bb', '6123456709106', 'aldopet pure rawhide', 'Food & Snacks', 'ALDOPET', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('edc377a6-0bcd-4933-80a1-3521f6cb7bc4', '6324', 'T4 Test', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1700.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('edc39f65-aa7d-496a-87f6-e6cb3d8acd93', '5213', 'vetronutri multivitamin syrup Inactive', 'Medicine', 'Aldo Pet', 13, 5, '282.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ee30ce54-6195-41df-b1e7-64a17716aefe', '8698931093004', 'DermaCat 0.5(150Tabs)', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ee6aca86-9db1-4bd5-bba9-df9ea3354177', '5273', 'Triaxone 1g 1.M', 'Accessories & Toys', 'Aldo Pet', 0, 5, '290.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ee7a9a1c-8c55-46d5-9984-1ad9176ab393', '6202', 'Dental Finger Wipes', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 16, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ee7ef794-6e11-4b67-9a3f-760bbf0d0983', 'MC266', 'Metal Collar S', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef0b05c0-edae-4802-b6bb-ae82f3de26f2', 'FBL32', 'Fluo Body Leash', 'Accessories & Toys', 'Aldo Pet', 6, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef371373-12fe-41d7-9f14-88b8248dd04b', '6506', 'plush toy', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef4a8f37-6c82-42e2-afda-f39b2244a181', '6627', 'Uphalyte sachet', 'Accessories & Toys', 'Aldo Pet', 12, 5, '0.00', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef705981-be6b-4004-a007-b04afadb14a1', '5608', 'Consumables Minim', 'Hygiene Items', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef72b7e2-12ee-4d89-b1a4-4c977122668d', '6970117120424', 'Bioline flea and ticks collar for dogs', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 15, 5, '0.00', '260.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef779097-113f-4ecd-8ac7-14178af71dff', '8698931093233', 'Bio Puppy (puppy milk200g)', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ef87b1fb-ff1d-4e9e-89b0-aaa74ba97d24', '4539', 'Lignocaine', 'Medicine', 'Aldo Pet', 140, 5, '6.25', '35.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('efc50da3-5ce7-49a3-ad58-fcac85b632c6', '5891', 'Antezole Dog Tab', 'Medicine', 'VETOPHARMA', 1, 5, '0.00', '70.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f0252294-03b9-421c-bf1c-b2ac1e6fc9b3', '4419', 'Zudicort Cream x 15G', 'Medicine', 'Aldo Pet', 0, 5, '93.85', '145.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f0c3a4b6-cdfd-4eca-8963-5ec11d935ad2', '5759', 'Melonex oral susp 1.5mg', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'mililiters', NULL, NULL, 'Active'),
-('f1116ec7-4510-43cf-abd2-399f09d2a827', '6649', 'Kyrovite C injection (Bottle) Not for selling', 'Medicine', 'VETOPHARMA', 0, 5, '550.00', '12500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f12c3210-fabe-4e55-9d09-3254f89b6457', '5782', 'Food dispenser ball toy', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 9, 5, '0.00', '425.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f154571c-a113-460c-86db-5baf0f0f5631', '6174', 'Minor surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f1c03fb3-e886-4e7e-acfb-2e4f3d77dae0', '5228', 'SBC and CBC', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f1c2d4ac-d362-4f17-a48e-d8d126d5a5c3', '6039', 'Erina Coat Cleanser 450ml', 'Accessories & Toys', 'Aldo Pet', 24, 5, '304.98', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f1ff5f9b-fea6-4d5f-a140-09974666e48d', '6724', 'Gutwell Powder', 'Vitamins & Supplements', 'Aldo Pet', 0, 5, '0.00', '195.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f244b09d-e29e-44fd-94b4-5797d2250404', '5373', 'Maggot wound', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f24cf68e-1691-44ab-8479-7fd7ebd78dcf', '6038', 'C section Inactive', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '5000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f2654667-f8ef-4d85-b859-f6bc2d4a52c7', '6077', 'consultation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f2717330-fefa-4a82-9b70-e1274853397b', 'HP2024', 'Helepet Body Leash', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f29f876f-1fc2-446f-bf4b-97f881eb8fd1', '5450', 'Butalin 120ml syrup', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f2b8e1f1-59bc-4576-ab82-2734e7ec353c', '4675', 'Beclo rhino Aerosol Inactive', 'Medicine', 'Aldo Pet', 2, 5, '338.48', '423.10', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f2d66ed2-362a-46c2-9aa2-5b1f7430b3a2', '9003579309445', 'VD Gastro Intestinal can 400g', 'Food & Snacks', 'Aldo Pet', 0, 5, '209.10', '290.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f2f853ed-5f69-4539-bb6f-8d8ec36846ea', '8698931094124', 'Synbioflora For Cats', 'Vitamins & Supplements', 'Aldo Pet', 9, 5, '0.00', '435.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f377ba0c-bcb2-4ff3-9406-4a694c6a72b5', '6097', '3 layercat toy', 'Accessories & Toys', 'ALDOPET', 7, 5, '0.00', '373.75', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f38383df-6b49-45c4-a6eb-eccc938f382b', '6037', 'Xray Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '3000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f3987858-8d44-401d-afb8-700876f03d26', '4628', 'Nexgard 25.1 to 50', 'Medicine', 'Aldo Pet', 0, 5, '403.00', '650.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f3a40086-f923-4821-ada6-127b23af3e68', '5990', 'R.Canin Kitten 400g', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '455.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f4236dcb-bcd6-4c3b-b1d7-3cb24d8b5405', '6821', 'Radicate Cat', 'Medicine', 'Aldo Pet', 40, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f4309bf3-c92e-419d-8538-364a0db189e5', '5499', 'Brushless dog dental stick Inactive', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f438837d-b657-49d0-a140-01dc9623fffc', '6738', 'Wound Dressing', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '600.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f446e24c-6658-46ac-909e-8f1fd59604b3', '5731', 'Bath & Dry medium dog', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f496bff2-b28c-4b35-945e-7ea0e4d0051b', '6650', 'Home Consultation Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f4b6760a-32fa-427b-8300-1df4417da311', '6232', 'gastro puppy treatment Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f4f1dc91-ec48-4ff9-814f-5eb1223bd954', '5312', 'Minor suturingg Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '800.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f50b81a9-23b3-4182-8232-86d76c863357', '6290', 'Orthopedic Surgery', 'Service', 'Aldo Pet', 0, 5, '0.00', '13000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f51dfaee-5fa4-428b-aff3-9d847adb918f', '4546', 'Vedamox c 250', 'Medicine', 'PNL', 392, 5, '16.10', '30.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f51f5040-b6f6-4fb0-bc3e-36ab67ac3cd3', '6071', 'Drontal large dog', 'Accessories & Toys', 'Aldo Pet', 11, 5, '318.25', '475.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f6477e21-0e80-45a2-9fa6-6191e6612410', '5965', 'Urinary dog cathether', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f69a7014-96bb-4a10-8049-3e879e0604ae', '5881', 'Transport Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f6eb4e01-968f-403b-95bb-84f26990378c', '6443', 'Treatment goat', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f701f329-248e-4505-b023-5bb484102955', '5484', 'Vegebrand Assorted Flavor big bone', 'Food & Snacks', 'Aldo Pet', 0, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f736e901-9d68-4e40-a780-dc7241906359', '6532', 'Simparica (5kg-10kg)', 'Medicine', 'IBL', 22, 5, '133.33', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f73fdc31-5ddf-42e7-8f46-cfeb02b56101', '6405', 'Methimazole 5mg', 'Medicine', 'Aldo Pet', 140, 5, '0.00', '25.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f75998f9-15d3-4e6b-96bb-c25c3134e237', '4667', 'Allercet 10mg', 'Medicine', 'Aldo Pet', 107, 5, '8.27', '20.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f7626993-503d-4d58-b694-4137ff88c0da', '6095', 'Melamine double bowl L', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 4, 5, '0.00', '399.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f76dbd28-61fd-4691-8a7c-597dcc6b48d8', '4582', 'Azithropet 100mg', 'Medicine', 'Aldo Pet', 163, 5, '8.64', '15.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f77b0c05-4280-4469-8f37-dab9f7a5d1ff', '6807', 'Petcurin Suspension', 'Medicine', 'Aldo Pet', 3, 5, '0.00', '495.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f77f121b-6e46-47c1-9ac1-d05438b6367e', '6605', 'Tumour Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '8000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f7fed265-8256-4316-a581-88d8c7c6f7ec', '3182550751988', 'Digestive Care 400g Inactive', 'Food & Snacks', 'Aldo Pet', 1, 5, '315.70', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f8101b95-4fb0-4036-8cc3-83b6b2ee6908', '5899', 'Mandible Repair', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f87301f5-fcf2-49a4-b27f-b9640d48a4dc', '5269', 'Cat Toy Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f87bcba4-9377-4157-911d-c75d098f7071', 'KN78', 'Kitten novelty safety collar', 'Accessories & Toys', 'Aldo Pet', 3, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f88610ab-e9ef-46e5-9680-beb56022927d', '8699245858297', 'Bentas cat litter orange 10L Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '300.00', '450.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f8c44343-46da-4804-8d98-08846e58c759', '6569', 'Review Puppy Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f8de36c8-b3d1-428d-a923-23f35b160c92', '5483', 'Gel cooling mat S', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 0, 5, '0.00', '350.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f8ef2675-c640-4728-a7fb-1afca354948d', '6158', 'Dufafur inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f8f56757-a65e-4c2f-98af-0055d43c438a', '5512', 'Pet Grooming Brush Red', 'Accessories & Toys', 'Aldo Pet', 54, 5, '0.00', '199.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f8fe5d43-210a-42b3-ada7-c403454d0085', '6323', 'cat FPV Treatment Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '1000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f91f6272-e13f-464c-9458-8fd1c37c20bb', '6567', 'Waterless Grooming wipes Inactive', 'Accessories & Toys', 'Aldo Pet', 8, 5, '0.00', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f921387b-2739-4bfd-8a96-e5a3cf353002', '6577', 'Oridermyl Ointment', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f9428416-cf3f-45c1-8d81-60afe8b2e1dc', '9003579311004', 'Hypoallergenic dog can 400g', 'Food & Snacks', 'Aldo Pet', 2, 5, '221.40', '280.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f947b3b9-ca6f-4512-b325-3a6d4eb3ce4b', '4318', 'Mirra Cote Biozinc 500ML', 'Medicine', 'Aldo Pet', 22, 5, '615.00', '925.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('f958851e-0163-459a-b1a8-e810ea9bc9a8', '5510', 'Vegebrand pet perfume Inactive', 'Accessories & Toys', 'Aldo Pet', 19, 5, '0.00', '385.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f9780e81-21ac-4494-a640-274355fd7b54', '6452', 'Bird Dressing Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f980082a-2cd6-4489-9827-85a0582435be', '6243', 'vetacam 0.5mg/ml x 10ml Inactive', 'Accessories & Toys', 'Aldo Pet', 0, 5, '0.00', '230.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('f9997f12-0dd4-4038-9aad-a51088ccbb99', '6152', 'Wormout gel', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fa1990bf-9ca2-4727-bdba-5b7c0696d277', 'CCP225', 'Cat Collar pierre', 'Accessories & Toys', 'Aldo Pet', 11, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fa1b4461-fe90-432b-8936-c302e3c249f5', '5215', 'Vetacam inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fa569015-8aeb-4bc0-b7ad-211512eb4666', '4617', 'Tambac 200mg', 'Medicine', 'Aldo Pet', 0, 5, '26.14', '40.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fa962bd6-41cd-4cf4-8c52-cf647a08232b', '5509', 'Fig smoothing pet conditioner Inactive', 'Accessories & Toys', 'Aldo Pet', 22, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('faa33dd1-ca06-485c-860f-8dc4c3b14f0d', '4424', 'Betadine Gel 30g', 'Medicine', 'Aldo Pet', 5, 5, '125.28', '190.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('faa8a2b5-f964-4625-a98b-dcbedd2736be', '6419', 'Deworming For Cats Inactive', 'Accessories & Toys', 'Aldo Pet', 705, 5, '0.00', '75.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fae89e38-965c-4ced-a6c3-9f743a8024f1', '4627', 'Nexgard 10.1 to 25', 'Medicine', 'Aldo Pet', 0, 5, '305.00', '575.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fb0424bc-7e69-4324-b182-53a228369c24', '6424', 'Maggot Wound', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fb0a01a1-1c82-469f-a5c4-26ea3ed6efe9', '6970117121360', 'Bioline catnip tube 5g Inactive', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '185.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fb8b41e5-141d-4ff5-9233-635dc0afcee8', '5323', 'Petocef dry syrup', 'Medicine', 'Aldo Pet', 0, 5, '204.92', '325.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fba099d3-db22-43b8-a9f2-d7270525fcdd', '6447', 'Staple Removal', 'Service', 'Aldo Pet', 0, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fba38faa-f54f-4b0c-9092-edefe7a4c350', '5412', 'Elastic Adhesive Bandage 7.5 cm x 4.5 cm', 'Hygiene Items', 'Aldo Pet', 0, 5, '100.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fba830d1-dd06-486a-8a87-6ad1e163cdf0', '5223', 'Vime ATP inj', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fbbf3a24-f2b4-411b-9913-23336e3d6728', '4517', 'Frusemide 20mg', 'Medicine', 'Aldo Pet', 24, 5, '18.00', '45.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fbc14ae6-2fe3-470e-b74e-3bb806417e22', 'RK46', 'Reveur kitten collar', 'Accessories & Toys', 'Aldo Pet', 5, 5, '0.00', '225.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fc02c123-d8a4-4cfe-b415-17635da8bf53', '6372', 'Compress Bandaging', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fc093a66-cb6f-4786-bf5c-c2de96b55304', '6714', 'Euthanasia Cat Not for selling', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fc22860d-58a5-4330-88a2-d5f2394d4fd6', '4614', 'Amydio fortes pet liquid 200ml', 'Vitamins & Supplements', 'Aldo Pet', 3, 5, '141.53', '275.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fc573638-d269-429f-88c0-0421974f82e0', '4449', 'Simparica (2.5 kg- 5kg)', 'Medicine', 'Aldo Pet', 12, 5, '236.60', '375.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fc60f38d-91ef-46ef-85b7-0c7009529112', '4311', 'Gerivet 250G', 'Medicine', 'Aldo Pet', 0, 5, '475.00', '725.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fcb5cb88-fa92-4f94-ae86-457b2d2bc3dd', '6957919900683', 'Vegebones Immune care Inactive', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '150.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fcb971b6-5aab-4801-90c1-1bdf4df465da', '6465', 'Gastronomy Surgery', 'Accessories & Toys', 'Aldo Pet', 2, 5, '0.00', '4000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fce6532b-7678-477e-a268-a489514c0efc', '6046', 'o.d terone', 'Accessories & Toys', 'Aldo Pet', 0, 5, '350.00', '490.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fd71dade-fc78-432e-b08b-e91c218a4664', '4307', 'Bravecto 10-20kg', 'Medicine', 'Aldo Pet', 0, 5, '1155.00', '1750.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fdaea98a-1347-4f20-b34c-aa3d2bc99140', '8994400024358', 'Pet N  Sun over 21-50 KG', 'Accessories & Toys', 'Aldo Pet', 9, 5, '0.00', '590.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fdb30867-5604-4ab6-865b-d7e413e11ae6', '6122', 'Eye Enucleation', 'Service', 'Aldo Pet', 0, 5, '0.00', '2000.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fddf3225-663a-4d09-ac93-adfb1b70c939', '6011', 'vaccine Inactive', 'Medicine', 'Aldo Pet', 1, 5, '0.00', '1200.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fdea3b95-7f01-4681-a071-9b2c8d068382', '6023', 'ivomec Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '125.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fdf056f1-669c-46c3-9991-436f637208d1', '6947746476437', 'Cocoyo Pet Sheet L', 'Accessories & Toys', 'Aldo Pet', 7, 5, '0.00', '1400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fdf99adc-f169-4690-9370-bf7f2166e24f', '4328', 'Bravecto 20 – 40 kg', 'Medicine', 'Aldo Pet', 0, 5, '1500.00', '2250.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fe07b305-c3be-44f5-90ba-27a707a2f7bc', '6336', 'fenbendazole Inactive', 'Accessories & Toys', 'Aldo Pet', 1, 5, '0.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fe12ba98-88f7-425c-8658-a68b40668bc6', '6384', 'Wormout Gel Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '100.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fe2f42c3-cd1f-45f5-8951-6aeda976e41e', '6220', 'Jomiji whitening shampoo', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 6, 5, '190.00', '300.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fe34dd4e-8405-4972-939e-8ece72434416', '5297', 'Healthy treats 1kg adult Inactive', 'Food & Snacks', 'Aldo Pet', 2, 5, '358.36', '550.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fe98d2ba-704f-4c83-aea3-50e9ad82a6b8', '6416', 'E collar Inactive', 'Accessories & Toys', 'Aldo Pet', 4, 5, '0.00', '400.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('fed65d76-231e-4d05-9e80-2586959c9f85', '5402', 'Spectylo Inj', 'Medicine', 'Aldo Pet', 0, 5, '4.80', '50.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fefa83e5-808c-4185-a0f2-95b21057ee43', '5775', 'Revolution plus < 2.5kg pc', 'Medicine', 'IBL', 0, 5, '368.33', '675.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('fefc50dc-2bbb-4f68-a8ef-12653183abd1', '6457', 'Babyltrl ECollar L', 'Accessories & Toys', 'Aldo Pet, PET SUPERMARKET (ISFAHAAN LTD)', 14, 5, '0.00', '499.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ff00ff50-ee16-41e9-8487-58cdec6b3468', '6028', 'Dressing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ff37ca20-ba25-48d4-b93d-67f7dc1fc3b7', '3182550707046', 'Giant Puppy 15kg', 'Food & Snacks', 'Aldo Pet', 0, 5, '3673.60', '4690.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ff5d1ca7-e951-4d0b-a212-422327825b17', '6266', 'major maggot wound Inactive', 'Medicine', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ff724dd2-c4bd-4b73-bbe4-102ca500d29b', '5581', 'Gastrointestinal Can 400g', 'Food & Snacks', 'Aldo Pet', 1, 5, '0.00', '290.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Active'),
-('ff85374d-5005-408d-b6b9-73fedb7c3f26', '6169', 'Minor suture Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive'),
-('ffb7ab91-a212-4502-bf9e-c66576b9087c', '6267', 'major suturing Inactive', 'Service', 'Aldo Pet', 0, 5, '0.00', '1500.00', 1, NULL, '2026-07-31 19:57:45', 'Pieces', NULL, NULL, 'Inactive');
+--
+-- Dumping data for table `inventory`
+--
 
+LOCK TABLES `inventory` WRITE;
+/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
+INSERT INTO `inventory` VALUES ('1fd68aec-0577-4180-8f83-f2c642f8176e','AMX-2026-0815','Amoxicillin 500mg Capsules','Medicine','VetPharm Laboratories',100,20,NULL,850.00,1,'2028-10-25','2026-08-14 05:40:19','clinic-1'),('c753a1aa-c1a4-4a1b-ae1a-84b6f4ec28b1','CEP-2026-0452','Cefpodoxime 100mg Tablets','Medicine','AnimalCare Pharma',75,15,NULL,1250.00,1,'2028-05-17','2026-08-14 05:42:11','clinic-1');
+/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `invoice_line_items`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `invoice_line_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoice_line_items` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `invoice_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `inventory_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `quantity` int NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `invoice_id` varchar(36) DEFAULT NULL,
+  `inventory_id` varchar(36) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
   `unit_price` decimal(10,2) NOT NULL,
   `total` decimal(10,2) NOT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `invoice_id` (`invoice_id`),
-  KEY `inventory_id` (`inventory_id`)
+  KEY `inventory_id` (`inventory_id`),
+  KEY `fk_invoice_items_clinic` (`clinic_id`),
+  CONSTRAINT `fk_invoice_items_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `invoice_line_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `invoice_line_items_ibfk_2` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `invoice_line_items` (9 rows)
-INSERT INTO `invoice_line_items` (`id`, `invoice_id`, `inventory_id`, `quantity`, `unit_price`, `total`) VALUES
-('02f3ac10-7ae1-41fb-9cf8-b6c84182573e', 'INV-2026-0001', NULL, 1, '45.00', '45.00'),
-('0635f97a-c398-4fa0-9aec-24ce522efca9', 'INV-2026-0001', NULL, 1, '2500.00', '2500.00'),
-('2f6fcd64-8851-4604-9226-ffe0cdef3fda', 'INV-2026-0001', '01f793ab-b4f5-4eee-b079-3cbef54e88d6', 1, '175.00', '175.00'),
-('3c9cc6d8-2a06-485e-a0b7-f8ff3ec8cba2', 'INV-2026-0002', NULL, 1, '2497.00', '2497.00'),
-('644788ea-5475-4768-a155-e39bb61e782d', 'INV-2026-0002', NULL, 1, '45.00', '45.00'),
-('71c4e015-c3e4-4352-b19d-7b4800d3adaa', 'INV-2026-0001', NULL, 1, '0.00', '0.00'),
-('75a773f4-824a-4f81-ba45-70eb8911c40e', 'INV-2026-0002', NULL, 1, '50.00', '50.00'),
-('7cb97401-89f6-46ac-801b-61f7995ecd4f', 'INV-2026-0002', '008cee19-415f-45e8-878b-2c5168c2b676', 1, '7000.00', '7000.00'),
-('b19c0be8-bb68-4827-b15c-2ad3d8018fa0', 'INV-2026-0002', NULL, 1, '0.00', '0.00');
+--
+-- Dumping data for table `invoice_line_items`
+--
 
+LOCK TABLES `invoice_line_items` WRITE;
+/*!40000 ALTER TABLE `invoice_line_items` DISABLE KEYS */;
+INSERT INTO `invoice_line_items` VALUES ('7283ea4c-c4fb-413f-aafd-cbef9f3e857f','INV-2026-0002',NULL,1,0.00,0.00,'clinic-1'),('7d9de5fe-8929-46cb-9f53-4333759e336f','INV-2026-0002',NULL,1,45.00,45.00,'clinic-1'),('eb4066f1-8410-435c-97cf-49ced0e74b3e','INV-2026-0002',NULL,3,50.00,150.00,'clinic-1');
+/*!40000 ALTER TABLE `invoice_line_items` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `invoices`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `invoices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoices` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `owner_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `pet_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `doctor_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `owner_id` varchar(36) DEFAULT NULL,
+  `pet_id` varchar(36) DEFAULT NULL,
+  `doctor_id` varchar(36) DEFAULT NULL,
+  `encounter_id` varchar(36) DEFAULT NULL,
+  `home_visit_id` varchar(36) DEFAULT NULL,
   `invoice_date` date NOT NULL,
   `subtotal` decimal(10,2) NOT NULL,
-  `tax_amount` decimal(10,2) DEFAULT '0.00',
-  `discount_amount` decimal(10,2) DEFAULT '0.00',
+  `tax_amount` decimal(10,2) DEFAULT 0.00,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
   `grand_total` decimal(10,2) NOT NULL,
-  `status` enum('Paid','Pending','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Pending',
-  `encounter_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `home_visit_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('Paid','Pending','Cancelled') DEFAULT 'Pending',
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `owner_id` (`owner_id`),
   KEY `pet_id` (`pet_id`),
   KEY `doctor_id` (`doctor_id`),
-  KEY `fk_invoice_encounter` (`encounter_id`),
-  KEY `fk_invoice_home_visit` (`home_visit_id`),
-  CONSTRAINT `fk_invoice_encounter` FOREIGN KEY (`encounter_id`) REFERENCES `clinical_encounters` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_invoice_home_visit` FOREIGN KEY (`home_visit_id`) REFERENCES `home_visits` (`id`) ON DELETE SET NULL,
+  KEY `encounter_id` (`encounter_id`),
+  KEY `home_visit_id` (`home_visit_id`),
+  KEY `fk_invoices_clinic` (`clinic_id`),
+  CONSTRAINT `fk_invoices_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `pet_owners` (`id`) ON DELETE SET NULL,
   CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `invoices_ibfk_3` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `invoices_ibfk_3` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `invoices_ibfk_4` FOREIGN KEY (`encounter_id`) REFERENCES `clinical_encounters` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `invoices_ibfk_5` FOREIGN KEY (`home_visit_id`) REFERENCES `home_visits` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `invoices` (2 rows)
-INSERT INTO `invoices` (`id`, `owner_id`, `pet_id`, `doctor_id`, `invoice_date`, `subtotal`, `tax_amount`, `discount_amount`, `grand_total`, `status`, `encounter_id`, `home_visit_id`) VALUES
-('INV-2026-0001', 'CO3066', 'PET-2026-522801F4', 'usr-d837bb2d', '2026-08-01 18:30:00', '2675.00', '214.00', '0.00', '2889.00', 'Pending', NULL, NULL),
-('INV-2026-0002', 'CO3066', 'PET-2026-522801F4', 'usr-d837bb2d', '2026-08-01 18:30:00', '9497.00', '759.76', '0.00', '10256.76', 'Pending', NULL, NULL);
+--
+-- Dumping data for table `invoices`
+--
 
+LOCK TABLES `invoices` WRITE;
+/*!40000 ALTER TABLE `invoices` DISABLE KEYS */;
+INSERT INTO `invoices` VALUES ('INV-2026-0001','own-7ac05428','PET-2026-AF7721C3',NULL,NULL,NULL,'2026-08-12',100.00,8.00,0.00,108.00,'Pending','clinic-1'),('INV-2026-0002','own-6b4db7c3','PET-2026-837EB3C8','usr-65987e84','e41d43ad-8f5a-4936-96d3-211a6fae2466',NULL,'2026-08-14',195.00,0.00,0.00,195.00,'Pending','clinic-1');
+/*!40000 ALTER TABLE `invoices` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `notifications`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `notifications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notifications` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `type` enum('Inventory','Appointment','Attendance','System') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `is_read` tinyint(1) DEFAULT '0',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `type` enum('Inventory','Appointment','Attendance','System') NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
+  KEY `user_id` (`user_id`),
+  KEY `fk_notifications_clinic` (`clinic_id`),
+  CONSTRAINT `fk_notifications_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `notifications` (4 rows)
-INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `is_read`, `created_at`) VALUES
-('notif-0adf26da-0', NULL, '📅 New Appointment Booked', 'petu with Dr. Demo doctor on 2026-07-31 at 21:00:00.', 'Appointment', 0, '2026-07-29 20:57:04'),
-('notif-1', 'u1-admin', 'Low Stock Alert', 'Royal Canin Gastrointestinal 2kg is running low (Current: 12, Threshold: 5).', 'Inventory', 0, '2026-06-05 20:44:50'),
-('notif-280ded32-0', NULL, '🐾 New Pet Registered', 'mac (Dog) has been registered under owner ID: CO3066. Patient profile is now active.', 'System', 0, '2026-08-03 01:36:35'),
-('notif-93e75464-b', 'usr-d837bb2d', '📅 New Appointment Scheduled', 'Patient: petu (Owner: bhakti) — on 2026-07-31 at 21:00:00. Please review your schedule.', 'Appointment', 0, '2026-07-29 20:57:04');
+--
+-- Dumping data for table `notifications`
+--
 
+LOCK TABLES `notifications` WRITE;
+/*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
+INSERT INTO `notifications` VALUES ('notif-09f1ad8c-f',NULL,'🐾 New Pet Registered','aaa (Dog) has been registered by undefined.','',0,'2026-08-12 10:21:39','clinic-1'),('notif-1','u1-admin','Low Stock Alert','Royal Canin Gastrointestinal 2kg is running low (Current: 12, Threshold: 5).','Inventory',0,'2026-08-06 17:29:24','clinic-1'),('notif-2acfb8ea-9',NULL,'🐾 New Pet Registered','Jacky  (Dog) has been registered by undefined.','',0,'2026-08-13 13:51:34','clinic-1'),('notif-34f32910-0',NULL,'🐾 New Pet Registered','Bella (Dog) has been registered by undefined.','',0,'2026-08-14 05:28:03','clinic-1'),('notif-3ebdfe9b-1',NULL,'🐾 New Pet Registered','Milo (Dog) has been registered by undefined.','',0,'2026-08-14 05:18:43','clinic-1'),('notif-4bf90985-6',NULL,'📅 New Appointment Booked','Jacky  with Dr. ak on 2026-08-13 at 10:00:00.','Appointment',0,'2026-08-13 13:52:17','clinic-1'),('notif-4e6b8e37-0',NULL,'🧪 Lab Test Ordered: Bella','Dr. Sarah Jenkins ordered Ultrasound for patient Bella. Task pending in Assistant queue.','System',0,'2026-08-14 05:35:57','clinic-1'),('notif-4fadee4a-b','u3-doctor1','📅 New Appointment Scheduled','Patient: aaa (Owner: dasdad) — on 2026-08-12 at 20:30:00. Please review your schedule.','Appointment',0,'2026-08-12 10:26:13','clinic-1'),('notif-7193a377-3',NULL,'📅 New Appointment Booked','aaa with Dr. Dr. Alan Grant on 2026-08-12 at 20:30:00.','Appointment',0,'2026-08-12 10:26:13','clinic-1'),('notif-7ca56dea-3',NULL,'🧪 Lab Test Ordered: Bella','Dr. Sarah Jenkins ordered Blood Test for patient Bella. Task pending in Assistant queue.','System',0,'2026-08-14 05:35:57','clinic-1'),('notif-85fe3750-c','usr-65987e84','📅 New Appointment Scheduled','Patient: aaa (Owner: dasdad) — on 2026-08-13 at 21:00:00. Please review your schedule.','Appointment',0,'2026-08-13 13:31:34','clinic-1'),('notif-897f664f-1','usr-65987e84','📅 New Appointment Scheduled','Patient: Jacky  (Owner: Varun) — on 2026-08-13 at 10:00:00. Please review your schedule.','Appointment',0,'2026-08-13 13:52:17','clinic-1'),('notif-9dcc1cba-9',NULL,'🐾 New Pet Registered','Max (Dog) has been registered by undefined.','',0,'2026-08-12 10:20:52','clinic-1'),('notif-bf0bc836-1',NULL,'📅 New Appointment Booked','aaa with Dr. ak on 2026-08-13 at 21:00:00.','Appointment',0,'2026-08-13 13:31:34','clinic-1'),('notif-d2658492-e','usr-65987e84','📅 New Appointment Scheduled','Patient: Bella (Owner: Perera) — on 2026-08-21 at 10:00:00. Please review your schedule.','Appointment',0,'2026-08-14 05:30:17','clinic-1'),('notif-e1f26f50-b',NULL,'🧪 Lab Test Ordered: Bella','Dr. Sarah Jenkins ordered X-Ray for patient Bella. Task pending in Assistant queue.','System',0,'2026-08-14 05:35:57','clinic-1'),('notif-eeabc383-d',NULL,'📅 New Appointment Booked','Bella with Dr. ak on 2026-08-21 at 10:00:00.','Appointment',0,'2026-08-14 05:30:17','clinic-1');
+/*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `pet_owners`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `pet_owners`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pet_owners` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `nic` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `telephone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `customer_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `nic` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `telephone` varchar(20) DEFAULT NULL,
+  `mobile` varchar(20) NOT NULL,
+  `address` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `nic` (`nic`)
+  UNIQUE KEY `nic` (`nic`),
+  KEY `fk_owners_clinic` (`clinic_id`),
+  CONSTRAINT `fk_owners_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `pet_owners` (24 rows)
-INSERT INTO `pet_owners` (`id`, `name`, `nic`, `email`, `telephone`, `mobile`, `address`, `created_at`, `customer_number`) VALUES
-('CO3044', 'Mrs Fiona Rose', NULL, NULL, NULL, '57948076', NULL, '2026-07-31 19:57:45', 'CO3044'),
-('CO3045', 'Mr Ali Bissessur', NULL, NULL, NULL, '58463881', NULL, '2026-07-31 19:57:45', 'CO3045'),
-('CO3046', 'Mr Tarun Ramsohye', NULL, NULL, NULL, '57221841', NULL, '2026-07-31 19:57:45', 'CO3046'),
-('CO3047', 'Miss Tanisha Mohun', NULL, NULL, NULL, '55036822', NULL, '2026-07-31 19:57:45', 'CO3047'),
-('CO3048', 'Mr Hasley Musafeer', NULL, NULL, NULL, '59217876', NULL, '2026-07-31 19:57:45', 'CO3048'),
-('CO3049', 'Mr Natasha Dabeedin', NULL, NULL, NULL, '57973643', NULL, '2026-07-31 19:57:45', 'CO3049'),
-('CO3050', 'Mr Sunil Dowarkasingh', NULL, NULL, NULL, '52596886', NULL, '2026-07-31 19:57:45', 'CO3050'),
-('CO3051', 'Mr Ashish kumar Hoolass', NULL, NULL, NULL, '52563823', NULL, '2026-07-31 19:57:45', 'CO3051'),
-('CO3052', 'Mr Youdish Makhan', NULL, NULL, NULL, '54720559', NULL, '2026-07-31 19:57:45', 'CO3052'),
-('CO3053', 'Mr Jereme Jolicoeur', NULL, NULL, NULL, '58310762', NULL, '2026-07-31 19:57:45', 'CO3053'),
-('CO3054', 'Mr Vikshay Reedha', NULL, NULL, NULL, '57691050', NULL, '2026-07-31 19:57:45', 'CO3054'),
-('CO3055', 'Mr Oozeer Assad', NULL, NULL, NULL, '59160408', NULL, '2026-07-31 19:57:45', 'CO3055'),
-('CO3056', 'Mrs Kamla', NULL, NULL, NULL, '58192928', NULL, '2026-07-31 19:57:45', 'CO3056'),
-('CO3057', 'Mrs Kajal Mootoosamy', NULL, NULL, NULL, '52506141', NULL, '2026-07-31 19:57:45', 'CO3057'),
-('CO3058', 'Mrs maya seenundun', NULL, NULL, NULL, '59223605', NULL, '2026-07-31 19:57:45', 'CO3058'),
-('CO3059', 'Mr Kiran Padaruth', NULL, NULL, NULL, '52552610', NULL, '2026-07-31 19:57:45', 'CO3059'),
-('CO3060', 'Mr Mounesh Sohatef', NULL, NULL, NULL, '59141652', NULL, '2026-07-31 19:57:45', 'CO3060'),
-('CO3061', 'Miss Pia Aune', NULL, NULL, NULL, '53230003', NULL, '2026-07-31 19:57:45', 'CO3061'),
-('CO3062', 'Salman', NULL, NULL, NULL, '57758118', NULL, '2026-07-31 19:57:45', 'CO3062'),
-('CO3063', 'Mr Rutchia Gopee', NULL, NULL, NULL, '57135862', NULL, '2026-07-31 19:57:45', 'CO3063'),
-('CO3064', 'Mrs Benny Soubita', NULL, NULL, NULL, '59206534', NULL, '2026-07-31 19:57:45', 'CO3064'),
-('CO3065', 'Mr Sunil Sookun', NULL, NULL, NULL, '57899741', NULL, '2026-07-31 19:57:45', 'CO3065'),
-('CO3066', 'Mrs Nasleen Sokeechand', NULL, NULL, NULL, '57262093', NULL, '2026-07-31 19:57:45', 'CO3066'),
-('CO3067', 'Mrs Sonalall Poonoovadee', NULL, NULL, NULL, '57057801', NULL, '2026-07-31 19:57:45', 'CO3067');
+--
+-- Dumping data for table `pet_owners`
+--
 
+LOCK TABLES `pet_owners` WRITE;
+/*!40000 ALTER TABLE `pet_owners` DISABLE KEYS */;
+INSERT INTO `pet_owners` VALUES ('own-6b4db7c3','Perera','199403810291','perera@example.com','+94 11 234 5678','+94 77 456 7890','No. 25, Lake Road, Colombo 05, Sri Lanka','2026-08-14 05:15:05','clinic-1'),('own-7ac05428','dasdad','dfsdfs','dfsfs@gmail.com','645645664','6546464646',NULL,'2026-08-12 10:17:41','clinic-1'),('own-dac65856','Varun','Indian ','V@gmail.com',NULL,'4545454565','Delhi','2026-08-13 13:49:11','clinic-1');
+/*!40000 ALTER TABLE `pet_owners` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `pets`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `pets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pets` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `owner_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `microchip_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `species` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `breed` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `gender` enum('Male','Female') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `neutered_status` tinyint(1) DEFAULT '0',
-  `age` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `owner_id` varchar(36) DEFAULT NULL,
+  `microchip_number` varchar(100) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `species` varchar(100) DEFAULT NULL,
+  `breed` varchar(100) DEFAULT NULL,
+  `gender` enum('Male','Female') DEFAULT NULL,
+  `age` varchar(50) DEFAULT NULL,
   `weight` decimal(5,2) DEFAULT NULL,
-  `previous_medical_history` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `previous_medical_history` text DEFAULT NULL,
   `last_vaccination` date DEFAULT NULL,
   `last_deworming` date DEFAULT NULL,
-  `photo_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `photo_url` longtext DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  `neutered_status` varchar(10) DEFAULT 'No',
   PRIMARY KEY (`id`),
-  KEY `owner_id` (`owner_id`)
+  KEY `owner_id` (`owner_id`),
+  KEY `fk_pets_clinic` (`clinic_id`),
+  CONSTRAINT `fk_pets_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `pets_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `pet_owners` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `pets` (1 rows)
-INSERT INTO `pets` (`id`, `owner_id`, `microchip_number`, `name`, `species`, `breed`, `gender`, `neutered_status`, `age`, `weight`, `previous_medical_history`, `last_vaccination`, `last_deworming`, `photo_url`, `created_at`) VALUES
-('PET-2026-522801F4', 'CO3066', '451212', 'mac', 'Dog', 'a', 'Male', 0, '2', '15.00', NULL, NULL, NULL, NULL, '2026-08-03 01:36:34');
+--
+-- Dumping data for table `pets`
+--
 
+LOCK TABLES `pets` WRITE;
+/*!40000 ALTER TABLE `pets` DISABLE KEYS */;
+INSERT INTO `pets` VALUES ('PET-2026-223EAF35','own-dac65856',NULL,'Jacky ','Dog','Hjs','Male','2',15.00,NULL,NULL,NULL,NULL,'2026-08-13 13:51:34','clinic-1','0'),('PET-2026-262BBEBF','own-6b4db7c3','985141234567891','Milo','Dog','Persian','Male','2 years',4.80,'Previous mild respiratory infection, fully recovered. Routine vaccinations up to date.','2026-06-20','2026-07-10','http://localhost:5000/uploads/c7d8b1da-bffa-46f3-9c89-11b6ab1a94f1.jpg','2026-08-14 05:18:43','clinic-1','1'),('PET-2026-837EB3C8','own-6b4db7c3','985141234567892','Bella','Dog','Golden Retriever','Male','5 years',25.20,'History of mild ear infection treated successfully. No current health concerns.',NULL,NULL,'http://localhost:5000/uploads/98e967b6-f5e0-4cef-8df2-ce70e7703e45.jpg','2026-08-14 05:28:03','clinic-1','1'),('PET-2026-AF7721C3','own-7ac05428','343255353555','aaa','Dog','eewrwer','Male',NULL,NULL,NULL,NULL,NULL,NULL,'2026-08-12 10:21:39','clinic-1','No'),('PET-2026-ED7F06DB','own-7ac05428',NULL,'Max','Dog','Labrador','Male','3',22.00,NULL,NULL,NULL,NULL,'2026-08-12 10:20:52','clinic-1','No');
+/*!40000 ALTER TABLE `pets` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
 -- Table structure for table `prescriptions`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `prescriptions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prescriptions` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `encounter_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `medicine_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `dosage` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `frequency` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `duration` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `instructions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `inventory_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `encounter_id` varchar(36) DEFAULT NULL,
+  `medicine_name` varchar(255) NOT NULL,
+  `dosage` varchar(100) DEFAULT NULL,
+  `frequency` varchar(100) DEFAULT NULL,
+  `duration` varchar(100) DEFAULT NULL,
+  `instructions` text DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  `inventory_id` varchar(36) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `encounter_id` (`encounter_id`),
-  KEY `fk_prescription_inventory` (`inventory_id`)
+  KEY `fk_prescriptions_clinic` (`clinic_id`),
+  KEY `fk_prescriptions_inventory` (`inventory_id`),
+  CONSTRAINT `fk_prescriptions_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_prescriptions_inventory` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `prescriptions_ibfk_1` FOREIGN KEY (`encounter_id`) REFERENCES `clinical_encounters` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `prescriptions`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `prescriptions` WRITE;
+/*!40000 ALTER TABLE `prescriptions` DISABLE KEYS */;
+INSERT INTO `prescriptions` VALUES ('06eb4dd1-190b-4265-a87f-53b52024148b','2583b2dc-2c32-4d7e-b4e0-7dc72a45cde8','Omeprazole 10 mg – once daily for 5 days; Metoclopramide 5 mg – as directed for 3 days',NULL,NULL,NULL,NULL,'clinic-1',NULL),('57104e59-f59e-4615-a3df-6afd7377eab9','e41d43ad-8f5a-4936-96d3-211a6fae2466','Otic ear drops – 4 drops in affected ear twice daily for 7 days',NULL,NULL,NULL,NULL,'clinic-1',NULL);
+/*!40000 ALTER TABLE `prescriptions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `saas_payments`
+--
+
+DROP TABLE IF EXISTS `saas_payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `saas_payments` (
+  `id` varchar(36) NOT NULL,
+  `clinic_admin_id` varchar(36) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('Successful','Pending','Failed','Refunded') DEFAULT 'Pending',
+  `payment_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `razorpay_order_id` varchar(255) DEFAULT NULL,
+  `razorpay_payment_id` varchar(255) DEFAULT NULL,
+  `razorpay_signature` varchar(255) DEFAULT NULL,
+  `currency` varchar(10) DEFAULT 'INR',
+  `invoice_number` varchar(100) DEFAULT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `plan_id` varchar(36) DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  PRIMARY KEY (`id`),
+  KEY `clinic_admin_id` (`clinic_admin_id`),
+  KEY `fk_pay_clinic` (`clinic_id`),
+  CONSTRAINT `fk_pay_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `saas_payments_ibfk_1` FOREIGN KEY (`clinic_admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `saas_payments`
+--
+
+LOCK TABLES `saas_payments` WRITE;
+/*!40000 ALTER TABLE `saas_payments` DISABLE KEYS */;
+INSERT INTO `saas_payments` VALUES ('7b71263d-d755-4c26-83e2-60a9df03ede3','dea9a0c3-31af-4359-a012-cb744a94e2ef',1.00,'Successful','2026-08-08 17:07:38','order_TNLtsaOb3eIiLl','pay_TNLupAp1vOQpxf','bb132005d1457fac90aaa3386cf6165c96468c16bef5c437cbe0782529c8175a','INR','INV-1786208931003','Razorpay','testing','clinic-1'),('b453e953-1fdc-4c0e-a882-bf48ff06e965','80a1dd34-8246-4a62-b861-8b04a127ce43',1299.00,'Pending','2026-08-12 09:46:25','order_TOoflE68NrHrl9',NULL,NULL,'INR',NULL,NULL,'pro','65783694-c111-4bfd-b48c-d76d6cda9ccd');
+/*!40000 ALTER TABLE `saas_payments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `saas_plans`
+--
+
+DROP TABLE IF EXISTS `saas_plans`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `saas_plans` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `duration_days` int(11) NOT NULL,
+  `features` text DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `saas_plans`
+--
+
+LOCK TABLES `saas_plans` WRITE;
+/*!40000 ALTER TABLE `saas_plans` DISABLE KEYS */;
+INSERT INTO `saas_plans` VALUES ('plan-free-trial','Free Trial',0.00,7,'Full access for 7 days,No credit card required',1,'2026-08-08 16:21:27'),('plan-pro','Pro',1.00,30,'Advanced features,Unlimited pets,Multi-clinic support',1,'2026-08-08 16:21:27'),('plan-standard','Standard',1.00,30,'Complete features,Up to 500 pets,WhatsApp+Email reminders',1,'2026-08-08 16:21:27'),('plan-starter','Starter',1.00,30,'Basic clinic management,Up to 100 pets,Email reminders',1,'2026-08-08 16:21:27'),('plan-testing','Testing Plan',1.00,30,'For razorpay testing,1 Rs payment',1,'2026-08-08 16:32:53');
+/*!40000 ALTER TABLE `saas_plans` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `saas_subscriptions`
+--
+
+DROP TABLE IF EXISTS `saas_subscriptions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `saas_subscriptions` (
+  `id` varchar(36) NOT NULL,
+  `clinic_admin_id` varchar(36) DEFAULT NULL,
+  `plan_id` varchar(36) DEFAULT NULL,
+  `status` enum('Active','Expired','Cancelled','Trial') DEFAULT 'Trial',
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `razorpay_payment_id` varchar(255) DEFAULT NULL,
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `clinic_admin_id` (`clinic_admin_id`),
+  KEY `plan_id` (`plan_id`),
+  KEY `fk_sub_clinic` (`clinic_id`),
+  CONSTRAINT `fk_sub_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `saas_subscriptions_ibfk_1` FOREIGN KEY (`clinic_admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `saas_subscriptions_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `saas_plans` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `saas_subscriptions`
+--
+
+LOCK TABLES `saas_subscriptions` WRITE;
+/*!40000 ALTER TABLE `saas_subscriptions` DISABLE KEYS */;
+INSERT INTO `saas_subscriptions` VALUES ('8fc75931-f3a4-4473-9469-4585233fe27a','ccc7a061-74e7-4158-8c5a-ab9eb7ec8013','plan-free-trial','Active','2026-08-08','2026-12-31','2026-08-08 17:25:22',NULL,'clinic-1','2026-08-18 11:29:46'),('af5a249a-4ee5-43ed-bc6b-d3eb4970c6f5','ba06097f-b161-42c9-8632-3e784aed75f9','plan-free-trial','Trial','0000-00-00','2026-08-12','2026-08-12 16:06:02',NULL,'67214fa4-4ef6-43a0-b798-3188be8c2318','2026-08-18 11:27:21'),('SUB-1786527864226-743','6cb68fe1-cb71-42bd-aada-3df707094b56','plan-free-trial','Active','2026-08-12','2026-08-19','2026-08-12 09:44:24',NULL,'611dabff-1c91-4b0c-a477-3bf04ccbb5eb','2026-08-18 11:27:21'),('SUB-1786527984408-923','80a1dd34-8246-4a62-b861-8b04a127ce43','plan-free-trial','Active','2026-08-12','2026-08-19','2026-08-12 09:46:24',NULL,'65783694-c111-4bfd-b48c-d76d6cda9ccd','2026-08-18 11:27:21');
+/*!40000 ALTER TABLE `saas_subscriptions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `saas_support_tickets`
+--
+
+DROP TABLE IF EXISTS `saas_support_tickets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `saas_support_tickets` (
+  `id` varchar(50) NOT NULL,
+  `clinic_admin_id` varchar(36) DEFAULT NULL,
+  `clinic` varchar(255) NOT NULL,
+  `adminName` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `priority` varchar(50) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Open',
+  `updated` varchar(100) NOT NULL,
+  `messages` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`messages`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `saas_support_tickets`
+--
+
+LOCK TABLES `saas_support_tickets` WRITE;
+/*!40000 ALTER TABLE `saas_support_tickets` DISABLE KEYS */;
+INSERT INTO `saas_support_tickets` VALUES ('TKT-1634891290342-108',NULL,'Happy Pets Clinic','Dr. Sarah Connor','sarah.connor@happypets.com','Invoice Download','Low','Billing','Closed','5 Aug 2026','[{\"sender\":\"Admin\",\"text\":\"How do I download duplicate copies of receipts from the billing section?\",\"time\":\"05/08/26, 11:30 am\",\"isUser\":true},{\"sender\":\"Superadmin\",\"text\":\"You can go to Billing & POS and click the download icon next to any invoice.\",\"time\":\"05/08/26, 11:45 am\",\"isUser\":false}]','2026-08-12 06:33:07'),('TKT-1786006334931-390',NULL,'Anytime Fitness Vet','Rahul Sharma','anytimefitness@gmail.com','Payment Issue','Medium','Billing','Replied','8 Aug 2026','[{\"sender\":\"Admin\",\"text\":\"There is an issue with the payment gateway. It shows error on checkout.\",\"time\":\"06/08/26, 2:22 pm\",\"isUser\":true},{\"sender\":\"Superadmin\",\"text\":\"We have identified the issue. It will be resolved within 24 hours.\",\"time\":\"06/08/26, 2:27 pm\",\"isUser\":false}]','2026-08-12 06:33:07'),('TKT-1786516748835-911','u1-admin','My Veterinary Clinic','admin@vetcarepro.com','admin@vetcarepro.com','tabs not working ','Medium','Technical','Replied','12/08/26','[{\"sender\":\"Admin\",\"text\":\"when we book appointment there is not found any  appointmnet on the dashboard.\",\"time\":\"12/08/26, 12:09 pm\",\"isUser\":true},{\"sender\":\"Superadmin\",\"text\":\"ok we will check\",\"time\":\"12/08/26, 12:11 pm\",\"isUser\":false}]','2026-08-12 06:39:08'),('TKT-1786519345674-932','7ebf6a10-5a99-49a6-8e73-71d7b4859a43','My Veterinary Clinic','kushakriti524@gmail.com','kushakriti524@gmail.com','Payment Issue','High','Billing','Open','12/08/26','[{\"sender\":\"Admin\",\"text\":\"ndiu jhdiud jdnuhdid ndio\",\"time\":\"12/08/26, 12:52 pm\",\"isUser\":true}]','2026-08-12 07:22:25'),('TKT-1786520083061-289','7ebf6a10-5a99-49a6-8e73-71d7b4859a43','My Veterinary Clinic','kushakriti524@gmail.com','kushakriti524@gmail.com','Add new Feature','Medium','Feature Request','Open','12/08/26','[{\"sender\":\"Admin\",\"text\":\"nknisd nduhd ijshduiwd sdud \",\"time\":\"12/08/26, 01:04 pm\",\"isUser\":true}]','2026-08-12 07:34:43'),('TKT-1786520518193-233','u1-admin','Default Clinic','Dr. Sarah Jenkins','admin@vetcarepro.com','Not Working ','Medium','Account','Open','12/08/26','[{\"sender\":\"Admin\",\"text\":\"asdffhjk hedjkuy yhueiks\",\"time\":\"12/08/26, 01:11 pm\",\"isUser\":true}]','2026-08-12 07:41:58'),('TKT-1892017382103-512',NULL,'Paws & Claws Care','Dr. John Doe','john.doe@pawsclaws.com','Login Issue','High','Technical','Open','7 Aug 2026','[{\"sender\":\"Admin\",\"text\":\"Dashboard is loading slow today and showing connection timeout errors repeatedly.\",\"time\":\"07/08/26, 10:15 am\",\"isUser\":true}]','2026-08-12 06:33:07');
+/*!40000 ALTER TABLE `saas_support_tickets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `saas_system_settings`
+--
+
+DROP TABLE IF EXISTS `saas_system_settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `saas_system_settings` (
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text NOT NULL,
+  PRIMARY KEY (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `saas_system_settings`
+--
+
+LOCK TABLES `saas_system_settings` WRITE;
+/*!40000 ALTER TABLE `saas_system_settings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `saas_system_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `super_admins`
+--
+
+DROP TABLE IF EXISTS `super_admins`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `super_admins` (
+  `id` varchar(36) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) DEFAULT 'SUPER_ADMIN',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `super_admins`
+--
+
+LOCK TABLES `super_admins` WRITE;
+/*!40000 ALTER TABLE `super_admins` DISABLE KEYS */;
+INSERT INTO `super_admins` VALUES ('sa-1','superadmin@vetcarepro.com','$2b$10$scgJZvuJ5OFi.pl1nHPSBuCEs1kNax.fmoMXXoVT9fxEu5ozwzLAC','SUPER_ADMIN','2026-08-06 18:15:52','2026-08-18 11:55:20');
+/*!40000 ALTER TABLE `super_admins` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `treatment_notes`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `treatment_notes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `treatment_notes` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `encounter_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `note_type` enum('observation','medication','vitals') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `note_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` varchar(36) NOT NULL,
+  `encounter_id` varchar(36) DEFAULT NULL,
+  `user_id` varchar(36) DEFAULT NULL,
+  `note_type` enum('observation','medication','vitals') NOT NULL,
+  `note_text` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   KEY `encounter_id` (`encounter_id`),
-  KEY `user_id` (`user_id`)
+  KEY `user_id` (`user_id`),
+  KEY `fk_treatment_clinic` (`clinic_id`),
+  CONSTRAINT `fk_treatment_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `treatment_notes_ibfk_1` FOREIGN KEY (`encounter_id`) REFERENCES `clinical_encounters` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `treatment_notes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `treatment_notes`
+--
 
--- --------------------------------------------------------
+LOCK TABLES `treatment_notes` WRITE;
+/*!40000 ALTER TABLE `treatment_notes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `treatment_notes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
--- --------------------------------------------------------
+--
+
 DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('Admin','Manager','Doctor','Receptionist','Vet Assistant') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `profile_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('Active','Inactive','On Leave','Terminated') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'Active',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `department` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` enum('Admin','Manager','Doctor','Receptionist','Vet Assistant') NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `profile_image` longtext DEFAULT NULL,
+  `status` enum('Active','Inactive','On Leave','Terminated') DEFAULT 'Active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `selected_plan` varchar(20) DEFAULT 'free-trial',
+  `trial_expiry_date` date DEFAULT NULL,
+  `subscription_status` enum('trial','active','expired') DEFAULT 'trial',
+  `clinic_id` varchar(36) DEFAULT 'clinic-1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
+  KEY `fk_users_clinic` (`clinic_id`),
+  CONSTRAINT `fk_users_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- Data for table `users` (7 rows)
-INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `phone`, `profile_image`, `status`, `created_at`, `updated_at`, `username`, `department`) VALUES
-('u1-admin', 'Dr. Sarah Jenkins', 'admin@veterinary.com', '$2b$10$hashedpassworddummy', 'Admin', '555-0100', NULL, 'Active', '2026-06-05 20:44:50', '2026-06-05 20:44:50', NULL, NULL),
-('usr-70a2733f', 'Dr. Riya R', 'riya@gmail.com', '$2b$10$JNIdbkdD/GhAb8K9cqgQJeU49abLbcyQBjcm7jUOq6j37S0g8.wcm', 'Doctor', '7894561230', NULL, 'Active', '2026-06-06 01:17:36', '2026-07-29 20:51:21', 'riya', 'General Practice'),
-('usr-9eabad8d', 'demo Receptionist', 'demoR@gmail.com', '$2b$10$8jg.fhdr1Mv2GpqSqirVT.lG3n1hfLxHs4aUgfpfENaY2WHpCLISK', 'Receptionist', '456789215644', 'Active', 'Active', '2026-06-05 23:18:51', '2026-06-06 00:26:50', 'Receptionist', 'Front Desk'),
-('usr-admin', 'Admin User', 'admin@vetcarepro.com', '$2b$10$SANWxQ4SBys0iJXPAn/QaeEJf8hgFjlCeAQ4kLZuFBlvZObUA3x66', 'Admin', '555-01', NULL, 'Active', '2026-06-03 23:56:05', '2026-06-03 23:56:05', NULL, NULL),
-('usr-asst', 'Assistant User', 'assistant@vetcarepro.com', '$2b$10$SANWxQ4SBys0iJXPAn/QaeEJf8hgFjlCeAQ4kLZuFBlvZObUA3x66', 'Vet Assistant', '555-05', NULL, 'Active', '2026-06-03 23:56:05', '2026-06-03 23:56:05', NULL, NULL),
-('usr-d837bb2d', 'Demo doctor', 'demodoctor@gmail.com', '$2b$10$8v.yU9F1BUY3QcnyfqtCtOsFaXKrZRjF.F7i6t2U/GEd88M1T80SW', 'Doctor', '7894561231', NULL, 'Active', '2026-06-05 23:17:39', '2026-06-07 20:00:57', 'doctor2', 'Surgery'),
-('usr-mgr', 'Manager User', 'manager@vetcarepro.com', '$2b$10$SANWxQ4SBys0iJXPAn/QaeEJf8hgFjlCeAQ4kLZuFBlvZObUA3x66', 'Manager', '555-02', NULL, 'Active', '2026-06-03 23:56:05', '2026-06-03 23:56:05', NULL, NULL);
+--
+-- Dumping data for table `users`
+--
 
-COMMIT;
-SET FOREIGN_KEY_CHECKS = 1;
-SET UNIQUE_CHECKS = 1;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES ('6cb68fe1-cb71-42bd-aada-3df707094b56','Dr. Test','landingtest1@example.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','9876543211','landingtest146',NULL,NULL,'Active','2026-08-12 09:44:24','2026-08-18 10:47:31','free-trial',NULL,'trial','611dabff-1c91-4b0c-a477-3bf04ccbb5eb'),('7ebf6a10-5a99-49a6-8e73-71d7b4859a43','Owner Kumar','kushakriti524@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','5201364789','kushakriti52482',NULL,NULL,'Active','2026-08-11 12:51:00','2026-08-18 10:47:31','free-trial',NULL,'trial','6eee1bbc-ca0b-40fb-971a-d30b36f753dc'),('80a1dd34-8246-4a62-b861-8b04a127ce43','Dr. Pro Admin','proadmin1@example.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','9876543299','proadmin17',NULL,NULL,'Active','2026-08-12 09:46:24','2026-08-18 10:47:31','free-trial',NULL,'trial','65783694-c111-4bfd-b48c-d76d6cda9ccd'),('ba06097f-b161-42c9-8632-3e784aed75f9','Test Admin','test1786550762719@test.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','9550762719','test178655076271920',NULL,NULL,'Active','2026-08-12 16:06:02','2026-08-18 10:47:31','free-trial',NULL,'trial','67214fa4-4ef6-43a0-b798-3188be8c2318'),('c9f0635d-925b-4c3e-a522-f616be525598','ABCD Kumar','efga42687@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','6302145897','efga4268788',NULL,NULL,'Active','2026-08-12 07:44:41','2026-08-18 10:47:31','free-trial',NULL,'trial','347e7a3f-0910-425a-937d-877df4a89303'),('ccc7a061-74e7-4158-8c5a-ab9eb7ec8013','admin','mask12527@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Doctor','917458889966','mask1252778','Dermatology','data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAngMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAAAQIDBAUGBwj/xAA7EAABAwIEBAMGBAILAAAAAAABAAIDBBEFEiExBhNBUSJhcQcygZGhwRRCUrEzYiMkJUNTgpLR4fDx/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAEEAwIF/8QAIBEBAQACAgIDAQEAAAAAAAAAAAECEQMhEiIEMUEyE//aAAwDAQACEQMRAD8A9TslSoUAkSoQIdkiU7JOiiGga3Kp1s81nMporu1vI8HIz5alNxbE6fC6N9RUmwA0C8i4i9qFbOHw0ADIjduuxH7n10RWXifFeJzy/joMQpWyXzclkRjAsdADc372TeJeNpsepqWODPA6Nh5rmvOv8v0/7ZcfNVymHkBxEQNwy+gKrte/NcehAQWpq5zZItGO5QygPbcH177lQOnkfIHusQDmEZ90eg2T3QsABe5wFrmyWORmbK1py9S5Eb2HzUNfC6nq4YaaV7HGKribluRrlc0HYi48tPh23s6thsnD1XHJY4i6WkqIg6+YglzXEeVguJwKtp6amdSwUj31VX/RGU+LlR3BcWttqdLn0Xq/BGBSy1NPWzQup6ChLxSQOPje9wsXuttYbDe51RXfBOTQB00CeAqBCWyLIGoTkfBAgCVCVAiEqEDVC6QB+Xd1r5R2Ux2VHEqYVFObZhIzWNwNsp/2Qcpx1h9ZjNHy4WBzerWEXcB2v27dV4ZLHJRVVRT11E90hGUB92OjN9HDRd77SOIa+Rz8MlgZAWPDnyRSauNtBpsvNXZ3O1JeOhvchQI5ul79dim6DxDRPa0X21sphTnli29r2REL5XECx0C1KLDoqzC5aine509OA6RpcNQTsBa9+vXQXNlmCIljhbpuAmAkOs1x6g2PTqivXeD+B6OGGnxearfUGV0XIYGlhbf9QvqRtZepMqqCnmioWTwtlGjYQ4X77fVfPXDdfW4hVxwVWKyshYRoZSLa2uP+Ol17pw5gFHhUIma91RUPBvM62x1IaOgv8T1QbgHr8U4JB8U4BUCE5CBqE5FkDUJbJUDUJyEDCqdfM2nppJnkBsbC8k9LK6QsXiuVkHD2IyyAFrad5IJtpZB87cS4q/E8WqqoizZZ3vGt9zp8hZZ7Gt6Jts7jfe60KHD31JFmkAqW6JLarmxsWtAt9VKyESSDK7I7qCt6DhqbJzH3aLddFPBRQwEc2Mu7X6rx5z8dJxX9c7NQyQxkgeFou4+apR0b+UX5CDfVekPpoqhoaMPeM9iATr6lJjWCsbQN5EDmgHRrupU/1j3eCvOIoi0guae+gXsfs3oWYpgDavD8UrqKtify5WsmL2AjbwOJbYjyG5XllYRC/luBbY7WXT+yTGX0PFJoTIG01bGWHuHjVp/cfFdI42aezcO11TW007K1kYqaad9PI+IEMkLfzNBva/a5sVrBVqKBlPCI44wwElxA7k3PrqVbAVQlkWT7IyoGWRZPIRZAxCEtkCIS2RZA07Liva1Wii4MrI72fVFkDR3zHX6ArtiuA9sVI6q4W5rdqedshF+liPug8No6WapnDI2uuOq9X4Q4fZFHzZhmkGgaeiwuAsMZUh0xDbN0Oi9LoYRGQGjS2iyc2femrh4+vKrH4CCqhEc0bXW7jZRwcNYdHLzRTtc/9Trkj5rQjGXyVhpcNlzjtaqnDomuBbE2/eyqYhRRywujcwa3Ws4usqU/VTJcba8l404efFEZWNu5lxdcpwe2RnFOHZQeYKlo+uq9nxulbWUk0DtcwK844AwyWo45hOQmOmc57ndraD43/ZaOHPymmbnw8bt7/HbopWhRRHQWHRTNWhnKAlQhAIshCBlkBCEAQksnIQNcNFzXHVPzuHKodIrSuH6gOi6UnRcvxu+V+GOihF8zw21/eJ0A+ZUqy6u3n3s6ceTW2GVol0HZdXUVOItcRSmnpo2/31Qb39APus7BMFdgFRVUT3B55gdn7gj/ANU+P8NjGcpNRMxgNzG11mu+SxZX37b8J6dAcR4xSvLHwUGJAG16aYNf/pO66XCMVGJU3MMMlO9rsro5W2IK4fDOAoKeTO8Ne9pJjkY0tezbqLX2O9911lEx1LUwwzvLzk8R7+amVk+jGX9WsYxmPCYGPfBPO97srGQtuSfsuffxBi2IO/qlBS0gOxqpwXH/AChXMVhnrTJFTvys2eQbEjsOy4yXgdz6uQwEwsuSx4mcXi40B11tvsrjqztLLL07ClmrZHmKvhYyRtvHE67H+i5v2b4hT0nFmLR1MbWvqJnMikP5LONx6Hv5LosLoJ8Ow9kVVUvqJGj33AC6oy8Hlr5uS/JUSB9SyUfleXNO/azrfArpwfdc/kfUelxC4uLKUBZfD1Y6uwuCaZuSaxZK39MjTZw+YK1FqZAhCWyBEIQgSyWyEIBCEII5dGFZdfTc8wsI8XOa8+g2Wu8ZgQq1ry6+83ZBicSUkTJI61gIe4hjvMWNkmHEPZ47LQ4ji5mHtP8AhyAn02WTSOyNJdpZYef1zb+D249NUiNrSdNB1WFC9k+J6ODtd1ZqJjNG9nugiwH3VSjaIayMugA0sSNlz3uuuOGk0JZHWEZw25tqtZsbLhxsbdVkTta+pe9rA1l9L9U+GqMR5chOR3uHt5FTykLjudExFxdJy2jc2Gi6IU7Xz5iBlDMp+gssCOMz1kQHV4XVEWbotXxu5azfKsmoycD/AKOqxKDoJWvse5aLn4kLYWbQR/2vXuAs3LFr52N/stUBaWQjQlslQgSyMqcEIIktkoCcAqGWRZSWRZQMyqGZmV7XjY6FWk2QBzSCNCgrTRtnhkhkF2uFvj3XPZOTM6KYW6FdG5riBlIDtlzWOOkZiz23FzG24Cz/ACZNbafjW+WmVitJPTVgrqWVzmlwEtO5xyuGmo7FaFBU08tOHukmp3aXZJFm+o0KWOVsrCHbjXVPhjiI8LLA72WbGtnWu1XEqgfwYBLI86B7/C0eYHVJhmHMpI873Oe8gXzOvchXHtYCbNsR1UUsjhG5zQdNlMrvo3qdNfB6doeZnjX8v3WpI8NadOixOFhy8L/CukD5KaZ7S697gnOD8nBbLhlOYm4AzH0W/jwmOOo+bnlcst1Fh8dpal51u4XPc2F/3V1R00eSFub3j4j6nUqRe3gIsnAJVQyxTrJUII0qRCqHBCaN04kAXJsFFCa5zW++4BvmoZKtmzPG7osbiKOSehDS9wzSAOsbXFjp6LzldTa4zd0kr+JcOpMzY3/iJr2DI+/mVzzZ5qyukqJxZ7iLgbDyTDRRwdFNQxnO5ywcnLc2/j4scO1v8M8EPjHqFdgLgNI2hLRjNGVYDLLxjNLlmgfCZXXcAGjoFVr2BsDgBpZaZ0VKr1Nl6sTHLdchRjFKLHopcPqA2GZwZNDJezugPqF38E0jIWtrHtdI8gF7RYellz1HTczEIWgD+Lm07AX+1viuknbdw/lN1q4Lbj2zc8kyaLXNfq079AnALKaTGczHEFOFdNGAD4z2K7uDUQqUWIsP8RpZ57q4xzXtBYQQeyoVLZKEIIkj3BjczjYJrpGtbmOyoyOdM7Mb26BA6Wskk0jGUd1Wc2Rxu97neqstj8lI2O+6CvG0ixGyjxtrzhj5I2lzo7PsPJXGs8I+SmjZdpYdQRsvOU3NLjdXbgHYnDKczyWm+oIVrD6uNz35SMp2Kt4lSU8FQ6nfEC7dht7w7qtDQNBJY2w8l8642XT6WNlx3GvSPaPd1BVvTus+kjMdhrZTyEtO+69RzynafMCqVW5upB2VguyxW7rPma58jWMaS55ytHml7MZ+rHD0Rlq56kjwsGRvzuf2C2Hi5v3T6anbR0jIW6nqe56n5o2PotvHj446Y+TLyy2gIuPVyjDNSSrVO29z2uU0Dw3Xt4VzGCLWToXPp3gx6X3HdTOAbbzQ5lnW7IL1PK2dl27jcdlIsuJrw8yRmwGmvVaUTxIwO7qjPqXEyZTsE5jRfZCEEoHiAT2gXQhQNPuu9UM0OiEIKfEEMb6QSuaM8Z8J9VnRa3SoWbmnbXw3pKNG6KN+uqVC4uphuQ0E7myuYLCx08kjhdzXFov0FkIXThnvHPl/mtKbVyishC1scLBpE+3mmH+HbzQhA54GdmiQ6B563QhASgBoaNgAVLRE5nt6aFCFR//Z','Active','2026-08-08 17:25:22','2026-08-18 10:47:31','free-trial','2026-08-15','trial','clinic-1'),('dea9a0c3-31af-4359-a012-cb744a94e2ef','Clinic Admin','astp750@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','2013654789','astp75093',NULL,NULL,'Active','2026-08-08 17:07:38','2026-08-18 10:47:31','testing','2026-08-15','trial','clinic-1'),('e9e44c99-48fd-46c3-8d6c-80a9cb135e6d','Test Admin','test1786452432082@test.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','1234567890','test178645243208262',NULL,NULL,'Active','2026-08-11 12:47:12','2026-08-18 10:47:31','free-trial',NULL,'trial','cba43d1a-e9ee-49a1-901a-ca73bf4a8a54'),('ee9b739f-9be4-4370-9250-db5b51009f31','fnfjknfjeoijw','nfdfnd@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','7458012369','nfdfnd57',NULL,NULL,'Active','2026-08-07 05:39:51','2026-08-18 10:47:31','free-trial',NULL,'trial','clinic-1'),('u1-admin','Dr. Sarah Jenkins','admin@vetcarepro.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Admin','555-0100',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-18 10:58:35','free-trial',NULL,'trial','clinic-1'),('u2-manager','Michael Ross','manager@vetcarepro.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Manager','555-0101',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-18 10:58:35','free-trial',NULL,'trial','clinic-1'),('u3-doctor1','Dr. Alan Grant','demodoctor@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Doctor','555-0102',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-06 17:43:14','free-trial',NULL,'trial','clinic-1'),('u4-doctor2','Dr. Ellie Sattler','esattler@veterinary.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Doctor','555-0103',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-06 17:42:33','free-trial',NULL,'trial','clinic-1'),('u5-recept','Jessica Day','demoR@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Receptionist','555-0104',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-06 17:43:14','free-trial',NULL,'trial','clinic-1'),('u6-vetasst','Todd Chavez','assistant@vetcarepro.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Vet Assistant','555-0105',NULL,NULL,NULL,'Active','2026-08-06 17:29:24','2026-08-18 10:58:35','free-trial',NULL,'trial','clinic-1'),('usr-65987e84','ak','ak@gmail.com','$2b$10$l4lSVlr8arXCtyQgVTNMKehWkjIrJNQfzN3NFAx4bMVdVzt/cWi2y','Doctor','4242424454','akku','Surgery','data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAvwMBIgACEQEDEQH/xAAcAAACAgMBAQAAAAAAAAAAAAAAAQUGAgQHAwj/xAA7EAABAwIEBAMGBAQGAwAAAAABAAIDBBEFEiExBhNBYSJRkRQycYGhwQex0eEjQvDxQ1JigrLCJHKi/8QAGQEBAAMBAQAAAAAAAAAAAAAAAAEDBAIF/8QAIxEBAQACAgICAgMBAAAAAAAAAAECEQMxEiEEQTJRIkJhE//aAAwDAQACEQMRAD8A64EJIXTk0JEoBQNCEIBCEIBCEuqBnZJa9XXQUg/iu18goHEeKYog5sckbXdDfMVxcpHcxtWZCouH8U1b5pWPcZmWuH2Aa30WxQcbwGs9nrmhsbjYTt2B79k84Xjq4pIaQ5oLSCCLggoXcrgkISQCChIoApJpIEsSsliUGyhCEAhCAgY2QhCAOyAhCAWlitd7HAQL537W6BbpNr9lVKyb23EHZjaMHW+wCr5MtR3hN1H4i90kTpqiYQwD3nuO/bv8FUarHII5BBh2HZ3X9+QakfLT6r0pGy8dcSSkuczCaNxZFDsHa+8e5+6vsfDmG0rA2KmY2w3ss7V125/BWVbpG/8Ajta15sQBqoqriqqesdIHeEnY7FdLq8Kpgw5fCbdFz/iXCTEZJoJH6dyorrUq9cA8QNqIBh07iHt1ivrp1Cuq+a6HEnxzNc2R0UrTo5psQQuzcCcUnGqf2Wrc01cY0fa3MHW46FX4Z/VZs8PuLakmUlcpBSKZSKBIQhAliVksSg2UIQgEwkmEAhCEAhCEGvXycmkkf2sqBjdb7DgdZUF1nyMcLnpcE/krnxG8soQ0HV7w1cu40q6f2qjw+obI+KXQsYbXJ117aD1Wblv8tNPDPW07+FVH7LgUcklmum8Zud7q7zOZ/mB+a53VCkocPigiwyone2O7nc1zWgeW6xwDEaqOCSqjp5mNiaHOp3y5g5pNrAnUO7LmdLLN3a7Vz4I4y6Z7WNA3JsqNiuK4RO+SmhqhLKRsxjnD1AssuLZq+SuZRy0oDQ0PsJbhwJ67KEbTYzz3QxUtLyWvAbkhAzNtqb+d0sdSqZjMTqesdbc6i2zh+qm/w7xGeDiehax980gbtbTyWtxjhD6Mie2XMPdGwI8vj9lhwa4xcS4fOBYB3MH+1TOldnt9J762STHuj4JLUyApFNIoEhCEGKEJFBsoQhAIBQhA0JXRdA0JXTCCC4ldeSmjH+py47UVTMS41jcXXjgqbE32FwPsus8Tzcutab6siJXz06oq6Svqaqlfllu/cX0JKyZ+862cXrF9IGlg5IEjCQ0W0F9FqwMopnGFkYEbHB0hc22oOg+N1r4VijsQ4fo62CzjUU7H2B6kaj10WNNUUcNE6CtD3vzEyB0Ljmdun+Op79tHi59J7fBNnjdO29g4+8Brb6L3paqKWjE0MFgR5iygsenw6SYSijqnvb/MYiA35nReFBXSy01Q5kb4YwbND7eL0XNq3xsntXPxIqRJTR38LjJYC/xUNw3GWz00jQbtLvlsvTjqXO+jpybvLnSEeQ2H5r3wBpjMItq7P/xU31Iqt3a+hIHZoI3ebQsl4YeSaGAncsBXutk6YqEihIogIQsSUAUkJINpCEIBCEIBCEIBCEHQXPRKlR+MJ8tVO69rNA/Ncdlp8lRM9w0EgGo6G/6FdT48kcKp8YGvJb8ySSqFXPhpo5Yn2dI5zPoSfusOUvm3YWeCyfhXiUoZW4LKM0VLllheTqGuJu31H1XSWBssWUajzXLfwnpZTjGMy1LC3KGRZe4ufuF0qWKSEZoX5ex2Vl7cS/pHYrg7JWudLIT111uqnjFVDQwuZm8DBt5qXxrFKuEOY5jddLhUbFxLLBI6Qm56Ku6Wy5a9qdJWSYvjDqiXTM4Brf8AK0dFcKBnKfQWHidIWD4kWH5qk4WOXiDC7QczKugYaA+uwNpAsa9l/UKzPuKcfxrt0ADYGNHRoH0WaALAC1rIWqdMhFIplJAikmVigEkJINtCSEDQhCAQhGgBJIsN9VINkpB4dRooivxpkRLacXt/MdvkoOtxKonYQ+V2XyB0Xc4rkrvLMUPxvVSPxKSSKB02RuVjRsT3PzVV4bwGd80lbizg+UnPG22jbn9lag7nl0bzo5puFl4opma3Drt12HUK3j+LjhfJXyfKyymoMGezC+JJWOsIa9ge0/622B+lldHkFl1z3HZoIIYJ55ooZGSNsZHZdT0+at2GVnOo2AnxZRpcFZPkcfjnWv4/J5YPDEqNk5JIv8lUsXomlr2hq6DHDzQSSLW0UJidE1pkLgCACSVkuNvTVjl+3GJ8M5Jq5SQ0l7cl/Pf9FIYdiDmuonkkOp6hsjvkR9lIY5A6SdrGtsy5J7dvyWpTUUYqXM0Ng02Pw/Zb78fywn7YZ8iY539PoKlnbU0sU8Zu17Qbr0+S5bg2K11AwQwVMjIwPdJLh6FW3CuI2SvDK2XlnYOtYX7+Sm8Wc+nM5MLe1kSTGou03B1BWJXDsisbrIrFAkIQg2kJJoBAQhA1C8R1OSNkLHltyC7XfyUy54Yxz3e60ElU/FKh0xkk/mO3ZXcOO8tqubLU01JJCcwzDUaWWoJL5muveyYeHRtLCNNLha0xGa+u+y2aYxJEQ8yRGxAt8ViJ3VEZZcRy2u24Gh366dl6RuBF9b2WMkMcgGYX6KUKVjsNTxZVMbQvzUlJm8btGyPPl56Df0UzgcEmHshNPNLEWgEsaL3A95ttr/YmynKaBtO3lNYGgaDKlWQDWSJjcwIJ/VceGN3tZ/0ymtfS0YdXsqYg5hNiL6+Sq/HnE8OHtbTRNdJI8+6N3ne3ZvmVr4liVbh9A91I20zyGZ5NmX626/Dv8VVafCGOPOnldPU1LjmlebnI0+I9tQsfH8ezKtfJ8iXGaRUWLVj6mWbE2OkhkNwWNuIjtoL6jQX+F1K0V5sQkyg5AQQbeFwsLEfVSTsPh5AblAufLosbU9Gwx08fitbfZbJx6Y8uSX6bbpWseA062Wy2XwZjuoqBrieY83Lhde884hjcXHQMurKri1cL8RPhroqCd+enlfkYDuxx2t2V7N+q4MzEHwOp5mXMjZg8C22Ug/p9V3WnnZU00NRGbslYHtPYi4WHmx1dxt4ctzTJJMrFUrgkmkg2kIQgaEgmg0cam5NC8A6v8KqEr7A3Nw4HRTnE0w5rI7+625+JVblkILu1lt4cdYsfNlvJpUc7XzSxNeCWnp0Xs8ZtSoxszabGxDYBtRrfzKk3vtcWvrurlLyd4La9CvRrhpY9VicrmXOlgdF5l/KIcTdrnADsiW6NQCeqxJuLaX7pttksTsP7LylIyutqRsFzUteRkDsIxGKWFxlkaeVJm0Y3r130+qjcLZG6ghmN7vibqfJbj7+xTOBbmLDtb9lH4KC7B6FgFyYYz/8AIKjH8k38W1NlFwSL9PRaXKvI64sFvzRA1bAdi3otDE6lsDzE3V7tT2VivTKOxZcAkDQKJxiW0LhfewKk85hp42PLQQzO4nzKrmIzXpJJHO0zWF1zldR1jPbNsoeQwPvlbc/Fdm4CqvauE6Ek3MQdEf8AaSB9LLiEDtJCXXNgAbLqv4SVGfBKunP+FUXHwIH7rPzTeLRw+sl5KSCksrSEk1jdBtoQhABPokmEFO4llJxGVo/lAH0Cg6pxa46mx6LcxSczYnUHoZCB62+yicSmdDFzW9Ddw7dV6WE1JHnZ3dtV/iioNNiWFVhIyDM1x/rtdTZqW3iYyTMXR5rMbnPoFXeLC2owKSUOBdDIJG2G40v+anYpKekwfDoua1uWNvKLjYuGVt99N1G9ZaT47x8nrNUSMa3LTz2PXL/XdJjqh4dH7FUOjHkW36/svWlMVaXwVVa2gcGFzZSzmB50NgNP62QayFoY1z8ua1mDc2HTqfRTv6NMX101Mx7pKSXKANQ9pOUDc6/Jb+a4LhYNcLnMb6KDxGY1TpY2xytlfG1jSRlaATfUG/dScUTI4wLOcGtyi/VRPZkbzK+jkYYRrGRcWPzWjg4MeHUjWD3YgPQKTw+r9mo6wspGvEoIL3jVov07LUwmFvsFPmBLspB100Nvson5Jv4teol5dXG8G+Rt3a9Aeg6qEmmY6okdYuJGpzNJDd72upfFo3RtbLC9rJWg2uA7U9LH1Vb59T7TIalrGSOa5gLPCHggi+vUHp1U22UkljYxGsjeTM3mODhq4xuDWAfKyruMTZ+VTsc1wLiXFp0381ba99NBGx9LNLUutmDpW2LHm1xsBpYqqY1m9uiEmVz2R6u66/2Pqqs7dLMJNvaN38A26ldF/CGfLX4hT30kgbIB/wCrrf8AYLm0RBjaFevwxmEfE8YP+LTSRi/no7/qmXvGox9ZR1wpFCxKxtkCRSJSug3UIQgaTyWtJHQEpIUztF6cwjJdVyEm/iP3XlO0Phla7UEW+iEL050869qW5xloqunfrGLtHYK9VFPFIyPOwEQtysHS39BCFH2n6eEdBTltw1zLjXI4t/JZ0sENPH/Bjay7bkgak9/NCERtr1Iy1MbwSTodfgVhzpHbuPvW+qaEhWdnPopA97nARg62KzoiW0bLdAfzQhRO03poYo8mlubHUnUKNrgCcjgHNN73QhKRB1cdn25klgNBnIUJVEipdqTrbU3QhZ8u2nDpIQe4PgrXwK4t4lw0g2vLb1BTQu/6q/7R2srAoQsTYxSKaEH/2Q==','Active','2026-08-12 16:32:14','2026-08-18 10:47:31','free-trial',NULL,'trial','clinic-1');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-08-19 13:04:14
