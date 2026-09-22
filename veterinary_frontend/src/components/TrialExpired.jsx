@@ -184,9 +184,6 @@ export default function TrialExpired({ onLogout }) {
               <h1 className="trial-hero-title">
                 Your <span className="trial-hero-highlight">7-Day Free Trial</span> Has Ended
               </h1>
-              <h2 style={{ fontSize: '1.25rem', color: '#cbd5e1', fontWeight: 600, margin: '0.5rem 0' }}>
-                आपका 7-Day Free Trial समाप्त हो गया है
-              </h2>
               <p className="trial-hero-subtitle">
                 Choose a plan to regain full access to your veterinary clinic.
                 All your patient records and clinic data are safely preserved — simply subscribe to continue right where you left off.
@@ -213,7 +210,7 @@ export default function TrialExpired({ onLogout }) {
                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c2410c'}
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
                 >
-                  🚀 Upgrade Plan / Buy Now (प्लान चुनें) <ArrowRight size={18} />
+                  🚀 Upgrade Plan / Buy Now <ArrowRight size={18} />
                 </button>
               </div>
 
