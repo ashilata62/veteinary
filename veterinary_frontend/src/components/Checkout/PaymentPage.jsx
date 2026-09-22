@@ -22,17 +22,21 @@ export default function PaymentPage() {
     document.body.appendChild(script);
 
     const PLANS = {
-      'starter': { name: 'Starter Plan', amount: 999 },
-      'standard': { name: 'Standard Plan', amount: 1299 },
-      'pro': { name: 'Pro Plan', amount: 1499 },
+      'starter': { name: 'Starter Plan', amount: 599 },
+      'standard': { name: 'Standard Plan', amount: 799 },
+      'pro': { name: 'Pro Plan', amount: 1299 },
+      'plan-starter': { name: 'Starter Plan', amount: 599 },
+      'plan-standard': { name: 'Standard Plan', amount: 799 },
+      'plan-pro': { name: 'Pro Plan', amount: 1299 },
       'custom': { name: 'Custom Plan', amount: 0 },
       'free-trial': { name: '7-Day Free Trial', amount: 0 }
     };
     
-    if (PLANS[planId]) {
-      setPlanDetails(PLANS[planId]);
+    const key = (planId || '').toLowerCase();
+    if (PLANS[key]) {
+      setPlanDetails(PLANS[key]);
     } else {
-      setPlanDetails({ name: 'Pro Plan', amount: 1499 });
+      setPlanDetails({ name: 'Pro Plan', amount: 1299 });
     }
 
     return () => {

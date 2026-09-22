@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RegisterModal from './RegisterModal';
 import LegalModal from './LegalModal';
@@ -22,13 +22,14 @@ import {
   Phone,
   Mail,
   ChevronRight,
+  ChevronDown,
   Linkedin,
   Instagram,
-  Twitter,
   Facebook,
   ShieldCheck,
   Globe
 } from 'lucide-react';
+import { LANGUAGES, PLAN_PRICING, TRANSLATIONS } from '../data/landingTranslations';
 import './LandingPage.css';
 
 export default function LandingPage() {
@@ -38,6 +39,54 @@ export default function LandingPage() {
   const [selectedPlan, setSelectedPlan] = useState('free-trial');
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
+
+  // Language & Currency State
+  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('petcare_lang') || 'en');
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langDropdownRef = useRef(null);
+
+  // Derive active language and currency
+  const activeLang = LANGUAGES.find((l) => l.id === currentLang) || LANGUAGES[0];
+  const currency = activeLang.currency || 'USD';
+  const pricing = PLAN_PRICING[currency] || PLAN_PRICING.USD;
+  const tData = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+
+  // Translation helper
+  const t = (path) => {
+    const keys = path.split('.');
+    let current = tData;
+    for (const key of keys) {
+      if (current && current[key] !== undefined) {
+        current = current[key];
+      } else {
+        // Fallback to English
+        let fallback = TRANSLATIONS.en;
+        for (const fKey of keys) {
+          if (fallback && fallback[fKey] !== undefined) fallback = fallback[fKey];
+          else return path;
+        }
+        return fallback;
+      }
+    }
+    return current;
+  };
+
+  const handleLanguageChange = (langId) => {
+    setCurrentLang(langId);
+    localStorage.setItem('petcare_lang', langId);
+    setLangMenuOpen(false);
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+        setLangMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleAdminLogin = () => {
     navigate('/login');
@@ -56,35 +105,69 @@ export default function LandingPage() {
     }
   };
 
+  const isRTL = currentLang === 'ar';
+
   return (
-    <div className="vet-landing">
+    <div className={`vet-landing ${isRTL ? 'rtl' : ''}`}>
       {/* 1. NAVIGATION BAR (Sticky Top) */}
       <header className="vet-landing-header">
         <div className="vet-header-container">
           {/* Logo */}
           <div className="vet-brand-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '36px', objectFit: 'contain', cursor: 'pointer' }} />
+            <img src="/kt-logo.png" alt="PetCare Pro Logo" style={{ height: '36px', objectFit: 'contain', cursor: 'pointer' }} />
             <span>PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
 
           {/* Center Links (Desktop) */}
           <ul className="vet-nav-links">
-            <li><a href="#home" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Home</a></li>
-            <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Features</a></li>
-            <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>Benefits</a></li>
-            <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>Testimonials</a></li>
-            <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>Pricing</a></li>
-            <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>Contact</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>Brochure</a></li>
+            <li><a href="#home" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{t('nav.home')}</a></li>
+            <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+            <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+            <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
+            <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
+            <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>{t('nav.contact')}</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
           </ul>
 
           {/* Right Actions */}
           <div className="vet-header-actions">
+            {/* Language & Currency Selector Dropdown */}
+            <div className="vet-lang-dropdown-wrapper" ref={langDropdownRef}>
+              <button 
+                className="vet-lang-btn" 
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                title="Select Language & Currency"
+              >
+                <Globe size={15} />
+                <span>{activeLang.flag} {activeLang.nativeName}</span>
+                <span className="vet-lang-currency-tag">{pricing.code} ({pricing.symbol})</span>
+                <ChevronDown size={14} style={{ opacity: 0.7 }} />
+              </button>
+
+              {langMenuOpen && (
+                <div className="vet-lang-menu">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.id}
+                      className={`vet-lang-option ${currentLang === lang.id ? 'active' : ''}`}
+                      onClick={() => handleLanguageChange(lang.id)}
+                    >
+                      <div className="vet-lang-option-left">
+                        <span style={{ fontSize: '1.1rem' }}>{lang.flag}</span>
+                        <span>{lang.nativeName} ({lang.label})</span>
+                      </div>
+                      <span className="vet-lang-option-currency">{lang.currency} ({lang.symbol})</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button className="vet-btn-outline" onClick={handleAdminLogin}>
-              Admin Login
+              {t('nav.adminLogin')}
             </button>
             <button className="vet-btn-primary" onClick={() => handleRegister('free-trial')}>
-              Start Free Trial
+              {t('nav.startTrial')}
             </button>
           </div>
 
@@ -102,7 +185,7 @@ export default function LandingPage() {
       <div className={`vet-mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="vet-brand-logo">
-            <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '32px', objectFit: 'contain' }} />
+            <img src="/kt-logo.png" alt="PetCare Pro Logo" style={{ height: '32px', objectFit: 'contain' }} />
             <span>PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
           <button className="vet-mobile-toggle" onClick={() => setMobileMenuOpen(false)}>
@@ -110,22 +193,54 @@ export default function LandingPage() {
           </button>
         </div>
 
-        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Home</a></li>
-          <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Features</a></li>
-          <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Benefits</a></li>
-          <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Testimonials</a></li>
-          <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Pricing</a></li>
-          <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>Contact</a></li>
-          <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontSize: '1.1rem', textDecoration: 'none', fontWeight: 'bold' }}>Brochure</a></li>
+        {/* Mobile Language Selector */}
+        <div style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
+          <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.4rem', display: 'block' }}>
+            Language / Currency
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => { handleLanguageChange(lang.id); setMobileMenuOpen(false); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.5rem 0.65rem',
+                  borderRadius: '8px',
+                  background: currentLang === lang.id ? 'rgba(20, 184, 166, 0.2)' : 'rgba(30, 41, 59, 0.6)',
+                  border: currentLang === lang.id ? '1px solid #14b8a6' : '1px solid rgba(255, 255, 255, 0.08)',
+                  color: currentLang === lang.id ? '#2dd4bf' : '#e2e8f0',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.nativeName}</span>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginLeft: 'auto' }}>{lang.currency}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem' }}>
+          <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.home')}</a></li>
+          <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.features')}</a></li>
+          <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.benefits')}</a></li>
+          <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.testimonials')}</a></li>
+          <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.pricing')}</a></li>
+          <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} style={{ color: '#e5e7eb', fontSize: '1.1rem', textDecoration: 'none' }}>{t('nav.contact')}</a></li>
+          <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontSize: '1.1rem', textDecoration: 'none', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
         </ul>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
           <button className="vet-btn-outline" style={{ width: '100%', justifyContent: 'center' }} onClick={handleAdminLogin}>
-            Admin Login
+            {t('nav.adminLogin')}
           </button>
           <button className="vet-btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => handleRegister('free-trial')}>
-            Start Free Trial
+            {t('nav.startTrial')}
           </button>
         </div>
       </div>
@@ -135,44 +250,44 @@ export default function LandingPage() {
         <div className="vet-hero-grid">
           <div className="vet-hero-content">
             <div className="vet-badge">
-              <Award size={15} /> #1 Veterinary Clinic Management Software
+              <Award size={15} /> {t('hero.badge')}
             </div>
 
             <h1 className="vet-hero-title">
-              Transform Your <br />
-              <span className="vet-text-gradient">Veterinary Practice</span>
+              {t('hero.title1')} <br />
+              <span className="vet-text-gradient">{t('hero.titleGradient')}</span>
             </h1>
 
             <p className="vet-hero-subtitle">
-              The all-in-one solution for modern veterinary clinics and pet hospitals. Streamline appointments, manage pet records, automate billing, and grow your clinic with our powerful practice management system.
+              {t('hero.subtitle')}
             </p>
 
             <div className="vet-hero-actions">
               <button className="vet-btn-primary" style={{ padding: '0.8rem 1.8rem', fontSize: '0.95rem' }} onClick={() => handleRegister('free-trial')}>
-                Start 7-Day Free Trial <ArrowRight size={18} />
+                {t('hero.getStarted')} <ArrowRight size={18} />
               </button>
               <button className="vet-btn-outline" style={{ padding: '0.8rem 1.6rem', fontSize: '0.95rem' }} onClick={() => scrollToSection('pricing')}>
-                View Pricing Plans
+                {t('hero.explorePricing')}
               </button>
             </div>
 
             {/* Stats Row */}
             <div className="vet-hero-stats">
               <div className="vet-stat-item">
-                <div className="vet-stat-value">500+</div>
-                <div className="vet-stat-label">Happy Clinics</div>
+                <div className="vet-stat-value">50K+</div>
+                <div className="vet-stat-label">{t('hero.stats.pets')}</div>
               </div>
               <div className="vet-stat-item">
-                <div className="vet-stat-value">50K+</div>
-                <div className="vet-stat-label">Pets Treated</div>
+                <div className="vet-stat-value">500+</div>
+                <div className="vet-stat-label">{t('hero.stats.clinics')}</div>
               </div>
               <div className="vet-stat-item">
                 <div className="vet-stat-value">99.9%</div>
-                <div className="vet-stat-label">Uptime</div>
+                <div className="vet-stat-label">{t('hero.stats.satisfaction')}</div>
               </div>
               <div className="vet-stat-item">
                 <div className="vet-stat-value">24/7</div>
-                <div className="vet-stat-label">Support</div>
+                <div className="vet-stat-label">{t('hero.stats.support')}</div>
               </div>
             </div>
           </div>
@@ -194,97 +309,85 @@ export default function LandingPage() {
       {/* 3. FEATURES SECTION */}
       <section id="features" className="vet-section-container">
         <div className="vet-section-header">
-          <div className="vet-badge"><Zap size={14} /> Features</div>
+          <div className="vet-badge"><Zap size={14} /> {t('features.badge')}</div>
           <h2 className="vet-section-title">
-            Everything You Need to <span className="vet-text-gradient">Manage Your Clinic</span>
+            {t('features.title')} <span className="vet-text-gradient">{t('features.titleGradient')}</span>
           </h2>
           <p className="vet-section-subtitle">
-            Comprehensive tools designed specifically for veterinary practices.
+            {t('features.subtitle')}
           </p>
         </div>
 
         <div className="vet-features-grid">
-          {/* Card 1 */}
+          {/* Feature 1 */}
           <div className="vet-feature-card">
             <div className="vet-feature-icon-wrapper">
               <Calendar size={26} />
             </div>
-            <h3 className="vet-feature-title">Smart Appointments</h3>
-            <p className="vet-feature-desc">
-              Manage clinic appointments, home visits, vaccination schedules with automated reminders for pet owners.
-            </p>
+            <h3 className="vet-feature-title">{t('features.f1_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f1_desc')}</p>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
+              {t('nav.pricing')} <ChevronRight size={16} />
             </a>
           </div>
 
-          {/* Card 2 */}
+          {/* Feature 2 */}
           <div className="vet-feature-card">
             <div className="vet-feature-icon-wrapper">
               <FileHeart size={26} />
             </div>
-            <h3 className="vet-feature-title">Pet Medical Records</h3>
-            <p className="vet-feature-desc">
-              Detailed health records, treatment history, vaccination logs with easy search and instant PDF exports.
-            </p>
+            <h3 className="vet-feature-title">{t('features.f2_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f2_desc')}</p>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
+              {t('nav.pricing')} <ChevronRight size={16} />
             </a>
           </div>
 
-          {/* Card 3 */}
+          {/* Feature 3 */}
           <div className="vet-feature-card">
             <div className="vet-feature-icon-wrapper">
               <CreditCard size={26} />
             </div>
-            <h3 className="vet-feature-title">Billing & POS</h3>
-            <p className="vet-feature-desc">
-              Automated billing, multiple payment methods (UPI, Card, Cash), and GST-compliant receipts.
-            </p>
+            <h3 className="vet-feature-title">{t('features.f3_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f3_desc')}</p>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
+              {t('nav.pricing')} <ChevronRight size={16} />
             </a>
           </div>
 
-          {/* Card 4 */}
-          <div className="vet-feature-card">
-            <div className="vet-feature-icon-wrapper">
-              <BarChart3 size={26} />
-            </div>
-            <h3 className="vet-feature-title">Reports & Analytics</h3>
-            <p className="vet-feature-desc">
-              Revenue tracking, pet visit trends, staff performance metrics, and inventory consumption analytics.
-            </p>
-            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
-            </a>
-          </div>
-
-          {/* Card 5 */}
+          {/* Feature 4 */}
           <div className="vet-feature-card">
             <div className="vet-feature-icon-wrapper">
               <Package size={26} />
             </div>
-            <h3 className="vet-feature-title">Inventory Management</h3>
-            <p className="vet-feature-desc">
-              Stock control for medicines, vaccines, pet food with automated low-stock alerts and batch tracking.
-            </p>
+            <h3 className="vet-feature-title">{t('features.f4_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f4_desc')}</p>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
+              {t('nav.pricing')} <ChevronRight size={16} />
             </a>
           </div>
 
-          {/* Card 6 */}
+          {/* Feature 5 */}
           <div className="vet-feature-card">
             <div className="vet-feature-icon-wrapper">
               <BellRing size={26} />
             </div>
-            <h3 className="vet-feature-title">Email & SMS Reminders</h3>
-            <p className="vet-feature-desc">
-              Automated appointment reminders, vaccination due alerts, and follow-up notifications.
-            </p>
+            <h3 className="vet-feature-title">{t('features.f5_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f5_desc')}</p>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
-              Learn more <ChevronRight size={16} />
+              {t('nav.pricing')} <ChevronRight size={16} />
+            </a>
+          </div>
+
+          {/* Feature 6 */}
+          <div className="vet-feature-card">
+            <div className="vet-feature-icon-wrapper">
+              <BarChart3 size={26} />
+            </div>
+            <h3 className="vet-feature-title">{t('features.f6_title')}</h3>
+            <p className="vet-feature-desc">{t('features.f6_desc')}</p>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
+              {t('nav.pricing')} <ChevronRight size={16} />
             </a>
           </div>
         </div>
@@ -294,43 +397,25 @@ export default function LandingPage() {
       <section id="benefits" className="vet-section-container">
         <div className="vet-why-grid">
           <div className="vet-why-left">
-            <div className="vet-badge"><ShieldCheck size={14} /> Why Choose Us</div>
+            <div className="vet-badge"><ShieldCheck size={14} /> {t('benefits.badge')}</div>
             <h2 className="vet-section-title">
-              Why <span className="vet-text-gradient">PetCare Pro</span> Stands Out
+              {t('benefits.title')} <span className="vet-text-gradient">{t('benefits.titleGradient')}</span>
             </h2>
             <p className="vet-section-subtitle">
-              Designed to help you save time, increase revenue, and provide exceptional care.
+              {t('benefits.subtitle')}
             </p>
 
             <ul className="vet-why-checklist">
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Increase clinic efficiency by up to 40%
-              </li>
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Save 15+ hours per week on administrative tasks
-              </li>
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Reduce no-shows with automated reminders
-              </li>
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Boost revenue with streamlined billing and POS
-              </li>
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Enhance pet owner experience with digital records
-              </li>
-              <li className="vet-why-item">
-                <span className="vet-check-icon">✓</span>
-                Make data-driven decisions with real-time analytics
-              </li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b1')}</li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b2')}</li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b3')}</li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b4')}</li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b5')}</li>
+              <li className="vet-why-item"><span className="vet-check-icon">✓</span> {t('benefits.b6')}</li>
             </ul>
 
-            <button className="vet-btn-primary" onClick={() => handleRegister('free-trial')}>
-              See All Benefits <ArrowRight size={18} />
+            <button className="vet-btn-primary" onClick={() => scrollToSection('pricing')}>
+              {t('benefits.btn')} <ArrowRight size={18} />
             </button>
           </div>
 
@@ -338,27 +423,25 @@ export default function LandingPage() {
             <div className="vet-metrics-row">
               <div className="vet-metric-card">
                 <div className="vet-metric-val vet-text-teal">40%</div>
-                <div className="vet-metric-lbl">Faster Check-ins</div>
+                <div className="vet-metric-lbl">{t('benefits.metrics.faster')}</div>
               </div>
               <div className="vet-metric-card">
                 <div className="vet-metric-val vet-text-teal">15+</div>
-                <div className="vet-metric-lbl">Hours Saved Weekly</div>
+                <div className="vet-metric-lbl">{t('benefits.metrics.saved')}</div>
               </div>
               <div className="vet-metric-card">
                 <div className="vet-metric-val vet-text-teal">99.9%</div>
-                <div className="vet-metric-lbl">System Uptime</div>
+                <div className="vet-metric-lbl">{t('benefits.metrics.uptime')}</div>
               </div>
             </div>
 
             <div className="vet-quote-card">
-              <p className="vet-quote-text">
-                "PetCare Pro transformed how we run our clinic! Automated vaccination reminders and instant digital billing increased our repeat client visits by 40%."
-              </p>
+              <p className="vet-quote-text">{t('benefits.quote')}</p>
               <div className="vet-quote-author">
                 <div className="vet-author-avatar">RS</div>
                 <div>
-                  <div className="vet-author-name">Dr. Rahul Sharma</div>
-                  <div className="vet-author-role">Owner, City Vet Clinic</div>
+                  <div className="vet-author-name">{t('benefits.author')}</div>
+                  <div className="vet-author-role">{t('benefits.authorRole')}</div>
                 </div>
               </div>
             </div>
@@ -367,265 +450,90 @@ export default function LandingPage() {
       </section>
 
       {/* 5. TESTIMONIALS SECTION */}
-      <section id="testimonials" className="vet-section-container" style={{ paddingBottom: "0.5rem" }}>
+      <section id="testimonials" className="vet-section-container" style={{ paddingBottom: '0.5rem' }}>
         <div className="vet-section-header">
-          <div className="vet-badge"><Star size={14} fill="#f59e0b" color="#f59e0b" /> Testimonials</div>
+          <div className="vet-badge"><Star size={14} fill="#f59e0b" color="#f59e0b" /> {t('testimonials.badge')}</div>
           <h2 className="vet-section-title">
-            What Our <span className="vet-text-gradient">Clients Say</span>
+            {t('testimonials.title')} <span className="vet-text-gradient">{t('testimonials.titleGradient')}</span>
           </h2>
           <p className="vet-section-subtitle">
-            Join hundreds of satisfied veterinarians and clinic managers.
+            {t('testimonials.subtitle')}
           </p>
         </div>
 
         <div className="vet-testimonials-slider-container">
           <div className="vet-testimonials-track">
-          <div className="vet-testimonials-group">
-          {/* Card 1 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
+            <div className="vet-testimonials-group">
+              {/* Card 1 */}
+              <div className="vet-testimonial-card">
                 <div>
-                  <div className="vet-user-name">truman42lewis</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 4 months ago</div>
+                  <div className="vet-testimonial-user">
+                    <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
+                    <div>
+                      <div className="vet-user-name">truman42lewis</div>
+                      <div className="vet-user-clinic">🇺🇸 United States • 4 months ago</div>
+                    </div>
+                  </div>
+                  <p className="vet-testimonial-text">
+                    "Kiaan And His Team are truly professional and I'm honored to work with them. They delivered our agency state-of-the-art software! Thank you 🙏🏼"
+                  </p>
+                </div>
+                <div className="vet-stars">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />)}
                 </div>
               </div>
-              <p className="vet-testimonial-text">
-                "Kiaan And His Team are truly professional and In honored to work with them. As the have delivered our agency a state of the ark software! Thank you 🙏🏼"
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
 
-          {/* Card 2 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
+              {/* Card 2 */}
+              <div className="vet-testimonial-card">
                 <div>
-                  <div className="vet-user-name">truman42lewis</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 5 months ago</div>
+                  <div className="vet-testimonial-user">
+                    <div className="vet-author-avatar" style={{ background: '#10b981' }}>H</div>
+                    <div>
+                      <div className="vet-user-name">hansdjabs</div>
+                      <div className="vet-user-clinic">🇷🇼 Rwanda • 7 months ago</div>
+                    </div>
+                  </div>
+                  <p className="vet-testimonial-text" style={{ fontSize: '0.9rem' }}>
+                    "My experience working with this company is great. I highly recommend everyone to work with this amazing team. Everything is smooth and they are experts in software development."
+                  </p>
+                </div>
+                <div className="vet-stars">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />)}
                 </div>
               </div>
-              <p className="vet-testimonial-text">
-                "Kiaan and his team showed up and handled business. Excellent work, professional, and on point. I highly recommend them."
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
 
-          {/* Card 3 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#10b981' }}>H</div>
+              {/* Card 3 */}
+              <div className="vet-testimonial-card">
                 <div>
-                  <div className="vet-user-name">hansdjabs</div>
-                  <div className="vet-user-clinic">🇷🇼 Rwanda • 7 months ago</div>
+                  <div className="vet-testimonial-user">
+                    <div className="vet-author-avatar" style={{ background: '#ef4444' }}>FH</div>
+                    <div>
+                      <div className="vet-user-name">fahimhyder310</div>
+                      <div className="vet-user-clinic">🇮🇳 India • 5 months ago</div>
+                    </div>
+                  </div>
+                  <p className="vet-testimonial-text" style={{ fontSize: '0.85rem' }}>
+                    "Strong command over frontend and backend development, ensuring performance and security. Milestones delivered on time with clear communication."
+                  </p>
+                </div>
+                <div className="vet-stars">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#f59e0b" color="#f59e0b" />)}
                 </div>
               </div>
-              <p className="vet-testimonial-text" style={{ fontSize: '0.9rem' }}>
-                "my experience working with this company is very great , i highly recommend everyone to work with this amazing team. because everything is smooth by working with them .. and they have expert in software development i can tell you .. whatever you have in mind they can build it with professionalism."
-              </p>
             </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 4 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#ef4444' }}>FH</div>
-                <div>
-                  <div className="vet-user-name">fahimhyder310</div>
-                  <div className="vet-user-clinic">🇮🇳 India • 5 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text" style={{ fontSize: '0.85rem' }}>
-                "They demonstrated strong command over both frontend and backend development, ensuring performance, security, and smooth functionality throughout the build. What stood out most was their deep understanding of the product vision. Their professionalism was consistent throughout the project. Milestones were delivered on time, communication was clear and structured, and they handled feedback with maturity and precision."
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 5 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#65a30d' }}>P</div>
-                <div>
-                  <div className="vet-user-name">pop1010</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 3 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text">
-                "Best developer ever, always listening and make adjustments to every bugs snd response to messages every seconds"
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-          </div>
-          
-          <div className="vet-testimonials-group" aria-hidden="true">
-          {/* Card 1 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
-                <div>
-                  <div className="vet-user-name">truman42lewis</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 4 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text">
-                "Kiaan And His Team are truly professional and In honored to work with them. As the have delivered our agency a state of the ark software! Thank you 🙏🏼"
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#3b82f6' }}>TL</div>
-                <div>
-                  <div className="vet-user-name">truman42lewis</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 5 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text">
-                "Kiaan and his team showed up and handled business. Excellent work, professional, and on point. I highly recommend them."
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#10b981' }}>H</div>
-                <div>
-                  <div className="vet-user-name">hansdjabs</div>
-                  <div className="vet-user-clinic">🇷🇼 Rwanda • 7 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text" style={{ fontSize: '0.9rem' }}>
-                "my experience working with this company is very great , i highly recommend everyone to work with this amazing team. because everything is smooth by working with them .. and they have expert in software development i can tell you .. whatever you have in mind they can build it with professionalism."
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 4 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#ef4444' }}>FH</div>
-                <div>
-                  <div className="vet-user-name">fahimhyder310</div>
-                  <div className="vet-user-clinic">🇮🇳 India • 5 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text" style={{ fontSize: '0.85rem' }}>
-                "They demonstrated strong command over both frontend and backend development, ensuring performance, security, and smooth functionality throughout the build. What stood out most was their deep understanding of the product vision. Their professionalism was consistent throughout the project. Milestones were delivered on time, communication was clear and structured, and they handled feedback with maturity and precision."
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-
-          {/* Card 5 */}
-          <div className="vet-testimonial-card">
-            <div>
-              <div className="vet-testimonial-user">
-                <div className="vet-author-avatar" style={{ background: '#65a30d' }}>P</div>
-                <div>
-                  <div className="vet-user-name">pop1010</div>
-                  <div className="vet-user-clinic">🇺🇸 United States • 3 months ago</div>
-                </div>
-              </div>
-              <p className="vet-testimonial-text">
-                "Best developer ever, always listening and make adjustments to every bugs snd response to messages every seconds"
-              </p>
-            </div>
-            <div className="vet-stars">
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-              <Star size={16} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-          </div>
           </div>
         </div>
       </section>
 
-      {/* 6. PRICING SECTION (CRITICAL FOR SAAS) */}
-      <section id="pricing" className="vet-section-container" style={{ paddingTop: "0.5rem" }}>
+      {/* 6. DYNAMIC PRICING SECTION */}
+      <section id="pricing" className="vet-section-container" style={{ paddingTop: '0.5rem' }}>
         <div className="vet-section-header">
-          <div className="vet-badge"><CreditCard size={14} /> Pricing Plans</div>
+          <div className="vet-badge"><CreditCard size={14} /> {t('pricing.badge')}</div>
           <h2 className="vet-section-title">
-            Choose Your <span className="vet-text-gradient">Perfect Plan</span>
+            {t('pricing.title')} <span className="vet-text-gradient">{t('pricing.titleGradient')}</span>
           </h2>
           <p className="vet-section-subtitle">
-            Flexible pricing options for clinics of all sizes.
+            {t('pricing.subtitle')}
           </p>
         </div>
 
@@ -633,94 +541,94 @@ export default function LandingPage() {
           {/* Plan 1: 7-Day Free Trial */}
           <div className="vet-price-card">
             <div>
-              <div className="vet-plan-name">7-Day Free Trial</div>
+              <div className="vet-plan-name">{t('pricing.trialName')}</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹0</span>
-                <span className="vet-plan-unit">per week</span>
+                <span className="vet-plan-price">{pricing.symbol}{pricing['free-trial'].price}</span>
+                {pricing['free-trial'].unit && <span className="vet-plan-unit">{pricing['free-trial'].unit}</span>}
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 7 Days full feature trial access</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: 7 Days</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.trialFeature1')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.trialFeature2')}</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('free-trial')}>
-              Get Started
+              {t('pricing.btnGetStarted')}
             </button>
           </div>
 
           {/* Plan 2: Starter */}
           <div className="vet-price-card">
             <div>
-              <div className="vet-plan-name">Starter</div>
+              <div className="vet-plan-name">{t('pricing.starterName')}</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹999</span>
-                <span className="vet-plan-unit">per month</span>
+                <span className="vet-plan-price">{pricing.symbol}{pricing.starter.price}</span>
+                {pricing.starter.unit && <span className="vet-plan-unit">{pricing.starter.unit}</span>}
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Essential clinic management features</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.starterFeature1')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.starterFeature2')}</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('starter')}>
-              Get Started
+              {t('pricing.btnGetStarted')}
             </button>
           </div>
 
           {/* Plan 3: Standard (Most Popular) */}
           <div className="vet-price-card featured" style={{ borderColor: '#14b8a6' }}>
-            <div className="vet-popular-badge" style={{ backgroundColor: '#14b8a6' }}>Most Popular</div>
+            <div className="vet-popular-badge" style={{ backgroundColor: '#14b8a6' }}>{t('pricing.standardBadge')}</div>
             <div>
-              <div className="vet-plan-name" style={{ color: '#14b8a6' }}>Standard</div>
+              <div className="vet-plan-name" style={{ color: '#14b8a6' }}>{t('pricing.standardName')}</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>₹1,299</span>
-                <span className="vet-plan-unit">per month</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>{pricing.symbol}{pricing.standard.price}</span>
+                {pricing.standard.unit && <span className="vet-plan-unit">{pricing.standard.unit}</span>}
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Complete features for growing clinics</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.standardFeature1')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.standardFeature2')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.standardFeature3')}</li>
               </ul>
             </div>
             <button className="vet-btn-plan" style={{ backgroundColor: '#14b8a6', borderColor: '#14b8a6' }} onClick={() => handleRegister('standard')}>
-              Get Started
+              {t('pricing.btnGetStarted')}
             </button>
           </div>
 
           {/* Plan 4: Pro */}
           <div className="vet-price-card">
             <div>
-              <div className="vet-plan-name">Pro</div>
+              <div className="vet-plan-name">{t('pricing.proName')}</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>₹1,499</span>
-                <span className="vet-plan-unit">per month</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>{pricing.symbol}{pricing.pro.price}</span>
+                {pricing.pro.unit && <span className="vet-plan-unit">{pricing.pro.unit}</span>}
               </div>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 🤖 Kiaan AI Assistant & AI Features</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Advanced features and priority support</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Duration: Monthly</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.proFeature1')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.proFeature2')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.proFeature3')}</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('pro')}>
-              Get Started
+              {t('pricing.btnGetStarted')}
             </button>
           </div>
 
           {/* Plan 5: Custom */}
           <div className="vet-price-card">
             <div>
-              <div className="vet-plan-name">Custom Plan</div>
+              <div className="vet-plan-name">{t('pricing.customName')}</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>Custom</span>
+                <span className="vet-plan-price" style={{ color: '#14b8a6' }}>{pricing.custom.price}</span>
               </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>Tailored to your clinic</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>{t('pricing.customSub')}</p>
               <ul className="vet-plan-features">
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> SaaS with customization</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Personal domain</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> Personal branding</li>
-                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> 🤖 AI and automation</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.customFeature1')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.customFeature2')}</li>
+                <li className="vet-plan-feature-item"><Check size={16} style={{ color: '#14b8a6' }} /> {t('pricing.customFeature3')}</li>
               </ul>
             </div>
             <button className="vet-btn-plan" onClick={() => handleRegister('custom')}>
-              Get Started
+              {t('pricing.btnContactSales')}
             </button>
           </div>
         </div>
@@ -730,13 +638,13 @@ export default function LandingPage() {
       <section className="vet-cta-banner">
         <div className="vet-cta-banner-overlay">
           <h2 className="vet-cta-title">
-            Ready to Transform Your Clinic?
+            {t('hero.title1')} {t('hero.titleGradient')}
           </h2>
           <p className="vet-cta-subtitle">
-            Join thousands of veterinarians who have already streamlined their practice.
+            {t('hero.subtitle')}
           </p>
           <button className="vet-btn-cta-lg" onClick={() => handleRegister('free-trial')}>
-            Start Free Trial <ArrowRight size={20} />
+            {t('nav.startTrial')} <ArrowRight size={20} />
           </button>
         </div>
       </section>
@@ -752,34 +660,26 @@ export default function LandingPage() {
                 <span>KIAAN <span className="vet-text-teal">TECHNOLOGY</span></span>
               </div>
               <p className="vet-footer-desc">
-                The ultimate management solution for modern veterinary clinics, pet hospitals, and animal care centers.
+                {t('footer.tagline')}
               </p>
               <div style={{ display: 'flex', gap: '12px', marginTop: '1.5rem', alignItems: 'center' }}>
                 <a href="https://www.instagram.com/kiaan_technology4/" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
-                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(225, 48, 108, 0.4)'; }} 
-                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', textDecoration: 'none' }} 
                    title="Instagram">
                   <Instagram size={18} strokeWidth={2.5} />
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61560965313920&mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#1877F2', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
-                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(24, 119, 242, 0.4)'; }} 
-                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#1877F2', color: '#fff', textDecoration: 'none' }} 
                    title="Facebook">
                   <Facebook size={18} strokeWidth={2.5} />
                 </a>
                 <a href="https://www.linkedin.com/company/kiaan-technology-pvt-ltd/posts/?feedView=all" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#0A66C2', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
-                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(10, 102, 194, 0.4)'; }} 
-                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#0A66C2', color: '#fff', textDecoration: 'none' }} 
                    title="LinkedIn">
                   <Linkedin size={18} strokeWidth={2.5} />
                 </a>
                 <a href="https://kiaantechnology.com/" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#14b8a6', color: '#fff', transition: 'transform 0.2s ease, box-shadow 0.2s ease', textDecoration: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} 
-                   onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(20, 184, 166, 0.4)'; }} 
-                   onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)'; }} 
+                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#14b8a6', color: '#fff', textDecoration: 'none' }} 
                    title="Website">
                   <Globe size={18} strokeWidth={2.5} />
                 </a>
@@ -788,21 +688,19 @@ export default function LandingPage() {
 
             {/* Column 2: Quick Links */}
             <div>
-              <h4 className="vet-footer-col-title">Quick Links</h4>
+              <h4 className="vet-footer-col-title">{t('footer.quickLinks')}</h4>
               <ul className="vet-footer-links">
-                <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>Home</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>About Us</a></li>
-                <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>Pricing</a></li>
-                <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>Blog</a></li>
-                <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>Contact</a></li>
+                <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+                <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
+                <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+                <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>{t('nav.contact')}</a></li>
               </ul>
             </div>
 
-
-
-            {/* Column 4: Contact */}
+            {/* Column 3: Contact */}
             <div>
-              <h4 className="vet-footer-col-title">Contact Us</h4>
+              <h4 className="vet-footer-col-title">{t('footer.contact')}</h4>
               <ul className="vet-contact-list">
                 <li className="vet-contact-item">
                   <MapPin size={16} /> 2341, Sector E, Sudama Nagar, Indore, Madhya Pradesh 452009
@@ -820,7 +718,7 @@ export default function LandingPage() {
           {/* Bottom Bar */}
           <div className="vet-footer-bottom">
             <div>
-              © 2026 <strong>Kiaan Tech Craft</strong>. All rights reserved. Powered by <strong>Kiaan Technology</strong>.
+              © 2026 <strong>Kiaan Tech Craft</strong>. {t('footer.rights')}
             </div>
             <div className="vet-bottom-links">
               <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalType('privacy'); setShowLegalModal(true); }}>Privacy Policy</a>
@@ -839,7 +737,8 @@ export default function LandingPage() {
         title="Chat with us on WhatsApp"
         style={{
           position: 'fixed',
-          right: '20px',
+          right: isRTL ? 'auto' : '20px',
+          left: isRTL ? '20px' : 'auto',
           bottom: '30px',
           width: '54px',
           height: '54px',

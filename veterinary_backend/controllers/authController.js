@@ -49,10 +49,12 @@ const loginUser = async (req, res) => {
             const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
             if (subs.length > 0) {
                 const sub = subs[0];
-                if (sub.plan_id === 'plan-free-trial') {
+                if (sub.status === 'Trial' || sub.plan_id === 'plan-free-trial') {
                     subscription_status = 'trial';
+                } else if (sub.status === 'Active') {
+                    subscription_status = 'active';
                 } else {
-                    subscription_status = sub.status === 'Active' ? 'active' : 'expired';
+                    subscription_status = 'expired';
                 }
                 trial_end_date = sub.end_date;
             }
@@ -184,7 +186,7 @@ const registerUser = async (req, res) => {
             // Insert SaaS Subscription
             await connection.query(
                 `INSERT INTO saas_subscriptions (id, clinic_id, clinic_admin_id, plan_id, status, start_date, end_date) 
-                 VALUES (?, ?, ?, ?, 'Trial', ?, ?)`,
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
                 [subscriptionId, tenantId, userId, planId, 'Trial', trialStartDate, trialExpiryDate]
             );
 

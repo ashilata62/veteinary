@@ -34,6 +34,7 @@ export const TAB_IDS = new Set([
   'hospitalization',
   'plans',
   'settings',
+  'audit-logs',
 ]);
 
 const PREFIXES = new Set(Object.values(ROLE_PREFIX));

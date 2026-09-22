@@ -58,6 +58,9 @@ const { protect } = require('./middlewares/authMiddleware');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { subscriptionMiddleware } = require('./middlewares/subscriptionMiddleware');
 
+const { auditPerformanceMiddleware } = require('./middlewares/auditMiddleware');
+app.use(auditPerformanceMiddleware);
+
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -82,6 +85,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const supportTicketRoutes = require('./routes/supportTicketRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const hospitalizationRoutes = require('./routes/hospitalizationRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -103,6 +107,7 @@ app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceT
 app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicketRoutes);
 app.use('/api/v1/dashboard', protect, subscriptionMiddleware, dashboardRoutes);
 app.use('/api/v1/hospitalization', protect, subscriptionMiddleware, hospitalizationRoutes);
+app.use('/api/v1/audit-logs', auditRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
 

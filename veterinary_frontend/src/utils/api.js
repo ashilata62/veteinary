@@ -44,10 +44,12 @@ api.interceptors.response.use(
     } else if (error.response && error.response.status === 403) {
       const code = error.response.data && error.response.data.code;
       if (code === 'TRIAL_EXPIRED' || code === 'SUBSCRIPTION_EXPIRED' || code === 'ACCOUNT_SUSPENDED' || code === 'SUBSCRIPTION_REQUIRED') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.dispatchEvent(new CustomEvent('auth:subscription_status', {
+          detail: {
+            code,
+            data: error.response.data.data
+          }
+        }));
       }
     }
     return Promise.reject(error);

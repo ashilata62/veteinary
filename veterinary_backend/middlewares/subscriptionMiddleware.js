@@ -112,7 +112,10 @@ const checkClinicStatus = async (req, res, next) => {
             }
 
             const now = new Date();
-            const endDate = trialSub.end_date ? new Date(trialSub.end_date) : null;
+            let endDate = trialSub.end_date ? new Date(trialSub.end_date) : null;
+            if (endDate) {
+                endDate.setHours(23, 59, 59, 999);
+            }
             if (endDate && now > endDate) {
                 await db.query(
                     "UPDATE clinics SET status = 'EXPIRED', updated_at = NOW() WHERE id = ?",
