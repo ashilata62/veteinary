@@ -92,7 +92,7 @@ export default function PaymentPage() {
   const [simulatingPayment, setSimulatingPayment] = useState(false);
   const [selectedSimMethod, setSelectedSimMethod] = useState('upi');
 
-  const executeVerification = async ({ order_id, payment_id, user, method = 'Razorpay' }) => {
+  const executeVerification = async ({ order_id, payment_id, signature, user, method = 'Razorpay' }) => {
     setSimulatingPayment(true);
     try {
       const verifyRes = await apiFetch('/api/payment/verify', {
@@ -101,7 +101,7 @@ export default function PaymentPage() {
         body: JSON.stringify({
           razorpay_order_id: order_id,
           razorpay_payment_id: payment_id || `pay_${Date.now()}`,
-          razorpay_signature: 'sig_verified_sandbox',
+          razorpay_signature: signature || 'sig_verified',
           clinicAdminId: user.id || user.userId,
           planId: planDetails.id,
           amount: planDetails.amount,
@@ -152,7 +152,7 @@ export default function PaymentPage() {
     }
 
     const key = orderData.data.key_id;
-    const isMockKey = !key || key.includes('dummy') || key === 'rzp_test_dummyKeyId' || !key.startsWith('rzp_test_') && !key.startsWith('rzp_live_');
+    const isMockKey = !key || key.includes('dummy') || key === 'rzp_test_dummyKeyId';
 
     // If key is dummy or unconfigured, use Sandbox Simulator
     if (isMockKey || typeof window.Razorpay === 'undefined') {
@@ -166,7 +166,7 @@ export default function PaymentPage() {
       return;
     }
 
-    // 2. Launch Razorpay Checkout Modal
+    // 2. Launch Official Razorpay Checkout Modal
     const options = {
       key: key,
       amount: orderData.data.amount,
@@ -179,6 +179,7 @@ export default function PaymentPage() {
         await executeVerification({
           order_id: response.razorpay_order_id,
           payment_id: response.razorpay_payment_id,
+          signature: response.razorpay_signature,
           user
         });
       },
