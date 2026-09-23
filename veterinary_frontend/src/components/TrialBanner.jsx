@@ -72,26 +72,26 @@ export default function TrialBanner() {
     <div 
       className="trial-banner"
       style={{
-        background: 'linear-gradient(90deg, #78350f 0%, #92400e 35%, #b45309 100%)',
-        color: '#fef3c7',
-        padding: '10px 20px',
-        margin: '0 0 16px 0',
+        background: 'linear-gradient(90deg, #042f2e 0%, #064e3b 40%, #0f766e 100%)',
+        color: '#ecfdf5',
+        padding: '12px 22px',
+        margin: '0 0 18px 0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '14px',
-        borderRadius: '12px',
-        border: '1px solid rgba(251, 191, 36, 0.3)',
-        boxShadow: '0 4px 14px rgba(180, 83, 9, 0.25)',
+        borderRadius: '14px',
+        border: '1px solid rgba(45, 212, 191, 0.3)',
+        boxShadow: '0 4px 16px rgba(15, 118, 110, 0.2)',
         flexWrap: 'wrap'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <span 
           style={{
             backgroundColor: '#fbbf24',
             color: '#78350f',
-            padding: '3px 12px',
+            padding: '4px 14px',
             borderRadius: '9999px',
             fontSize: '0.75rem',
             fontWeight: '800',
@@ -106,10 +106,10 @@ export default function TrialBanner() {
           <Sparkles size={13} /> 7-Day Free Trial
         </span>
 
-        <span style={{ fontSize: '0.88rem', fontWeight: 500, color: '#fffbeb' }}>
+        <span style={{ fontSize: '0.88rem', fontWeight: 500, color: '#f0fdfa' }}>
           Registered on <strong>{formattedRegDate}</strong> • Day <strong>{currentDay} of 7</strong>
-          <span style={{ margin: '0 8px', opacity: 0.6 }}>|</span>
-          <span style={{ color: '#fef08a', fontWeight: '700' }}>
+          <span style={{ margin: '0 10px', opacity: 0.5 }}>|</span>
+          <span style={{ color: '#5eead4', fontWeight: '800' }}>
             ⏳ {diffDays} {diffDays === 1 ? 'Day' : 'Days'} Remaining
           </span>
           {formattedEndDate && (
@@ -124,27 +124,27 @@ export default function TrialBanner() {
         <button 
           onClick={() => navigate('/plans')}
           style={{
-            backgroundColor: '#ea580c',
-            color: '#ffffff',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backgroundColor: '#fbbf24',
+            color: '#78350f',
+            border: 'none',
             borderRadius: '20px',
-            padding: '6px 18px',
-            fontSize: '0.82rem',
-            fontWeight: '700',
+            padding: '7px 20px',
+            fontSize: '0.84rem',
+            fontWeight: '800',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            boxShadow: '0 3px 8px rgba(234, 88, 12, 0.4)',
+            boxShadow: '0 3px 10px rgba(251, 191, 36, 0.35)',
             transition: 'all 0.2s ease',
             whiteSpace: 'nowrap'
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#c2410c';
+            e.currentTarget.style.backgroundColor = '#f59e0b';
             e.currentTarget.style.transform = 'translateY(-1px)';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#ea580c';
+            e.currentTarget.style.backgroundColor = '#fbbf24';
             e.currentTarget.style.transform = 'translateY(0)';
           }}
         >

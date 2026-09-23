@@ -140,14 +140,14 @@ function RevenueChart({ data = [] }) {
           transform: 'scale(1.05)'
         }}>
           <span>{points[hov].month} Revenue</span>
-          <span style={{ color: 'var(--primary-teal)' }}>LKR {(points[hov].val / 1000).toFixed(0)}k</span>
+          <span style={{ color: 'var(--primary-teal)' }}>₹ {(points[hov].val).toLocaleString('en-IN')}</span>
           <div style={{ position: 'absolute', top: '-5px', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '6px solid #0f172a' }}></div>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.72rem', marginTop: '0.25rem' }}>
         {points.map((p, i) => (
           <span key={i} style={{ fontWeight: i === points.length - 1 ? 700 : 400, color: i === points.length - 1 ? 'var(--primary-teal)' : 'inherit' }}>
-            {p.month} ({(p.val / 1000).toFixed(0)}k)
+            {p.month} (₹{(p.val / 1000).toFixed(0)}k)
           </span>
         ))}
       </div>
@@ -392,7 +392,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
   }, []);
 
   const latestMonthData = revenueData.length > 0 ? revenueData[revenueData.length - 1] : null;
-  const monthlyRevenueVal = latestMonthData ? `LKR ${(latestMonthData.revenue / 1000).toFixed(0)}k` : 'LKR 0';
+  const monthlyRevenueVal = latestMonthData ? `₹ ${(latestMonthData.revenue).toLocaleString('en-IN')}` : '₹ 0';
 
   let trendText = 'Gross billing logged';
   let isTrendUp = true;
@@ -421,10 +421,11 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       <TrialPopup />
       <OnboardingChecklist setCurrentTab={setCurrentTab} />
-      {/* Hero Banner — Admin gradient */}
+
+      {/* Hero Banner — Admin Refined Teal Theme */}
       <div
         className="animate-fade-in-up"
         style={{
@@ -434,27 +435,39 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '1.5rem',
-          padding: '2.5rem 3rem',
-          borderRadius: 'var(--radius-xl)',
+          padding: '2.25rem 2.5rem',
+          borderRadius: '16px',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, var(--primary-teal) 0%, #0891b2 100%)',
+          background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #0891b2 100%)',
           color: '#ffffff',
-          boxShadow: '0 10px 25px -5px rgba(20, 184, 166, 0.4)',
+          boxShadow: '0 8px 24px -4px rgba(13, 148, 136, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.15)'
         }}
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px 0' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(8px)',
+            padding: '4px 12px',
+            borderRadius: '999px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '10px'
+          }}>
             Admin Control Panel
-          </p>
-          <h1 style={{ color: '#ffffff', fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.75rem 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+          </div>
+          <h1 style={{ color: '#ffffff', fontSize: '2.25rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
             Clinic Operations Command
           </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.05rem', margin: 0, fontWeight: 500, maxWidth: '550px', lineHeight: '1.5' }}>
-            Real-time overview of patients, revenue, appointments, and stock.
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.98rem', margin: 0, fontWeight: 500, maxWidth: '580px', lineHeight: '1.5' }}>
+            Real-time overview of patients, revenue, appointments, staff attendance, and inventory.
           </p>
         </div>
-
-        {/* Action buttons removed from banner per user request */}
       </div>
 
       {/* KPI Cards with stagger animations */}
@@ -513,7 +526,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
       {/* 3 Interactive Charts */}
       <div className="dashboard-charts-grid">
         <div className="chart-card-revenue">
-          <ChartCard title="Revenue Analytics Trend (LKR)" badge="Live Growth" badgeClass="badge-success">
+          <ChartCard title="Revenue Analytics Trend (₹)" badge="Live Growth" badgeClass="badge-success">
             <RevenueChart data={revenueData} />
           </ChartCard>
         </div>

@@ -74,47 +74,46 @@ export default function OnboardingChecklist({ setCurrentTab }) {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      border: '1px solid rgba(20, 184, 166, 0.3)',
+      background: '#ffffff',
+      border: '1px solid #e2e8f0',
       borderRadius: '16px',
       padding: '1.5rem',
       marginBottom: '1.75rem',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+      boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Background Glow */}
+      {/* Top Emerald Accent Bar */}
       <div style={{
         position: 'absolute',
-        top: '-40px',
-        right: '-40px',
-        width: '180px',
-        height: '180px',
-        background: 'radial-gradient(circle, rgba(20, 184, 166, 0.15) 0%, transparent 70%)',
-        pointerEvents: 'none'
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: 'linear-gradient(90deg, #0f766e 0%, #14b8a6 50%, #06b6d4 100%)'
       }} />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem', marginTop: '0.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+            background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
             color: '#ffffff',
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(20, 184, 166, 0.4)'
+            boxShadow: '0 4px 12px rgba(20, 184, 166, 0.25)'
           }}>
             {progressPercent === 100 ? <Trophy size={22} /> : <Sparkles size={22} />}
           </div>
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: '0 0 2px 0' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 3px 0', letterSpacing: '-0.01em' }}>
               Clinic Setup & Onboarding Guide
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0 }}>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
               Complete these 5 quick steps to get your clinic running at 100% capacity.
             </p>
           </div>
@@ -124,13 +123,16 @@ export default function OnboardingChecklist({ setCurrentTab }) {
           onClick={handleDismiss}
           title="Dismiss guide"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: '#f1f5f9',
             border: 'none',
-            color: '#94a3b8',
+            color: '#64748b',
             cursor: 'pointer',
-            padding: '0.35rem',
-            borderRadius: '6px'
+            padding: '0.4rem',
+            borderRadius: '8px',
+            transition: 'background 0.15s'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
         >
           <X size={16} />
         </button>
@@ -138,15 +140,15 @@ export default function OnboardingChecklist({ setCurrentTab }) {
 
       {/* Progress Bar */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600, marginBottom: '0.4rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', fontWeight: 600, marginBottom: '0.45rem' }}>
           <span>Setup Progress</span>
-          <span style={{ color: '#2dd4bf' }}>{completedSteps.length} of {steps.length} Completed ({progressPercent}%)</span>
+          <span style={{ color: '#0f766e', fontWeight: 700 }}>{completedSteps.length} of {steps.length} Completed ({progressPercent}%)</span>
         </div>
-        <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(255, 255, 255, 0.08)', borderRadius: '999px', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '8px', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
           <div style={{
             width: `${progressPercent}%`,
             height: '100%',
-            background: 'linear-gradient(90deg, #14b8a6 0%, #2dd4bf 100%)',
+            background: 'linear-gradient(90deg, #0f766e 0%, #14b8a6 100%)',
             borderRadius: '999px',
             transition: 'width 0.4s ease'
           }} />
@@ -157,7 +159,7 @@ export default function OnboardingChecklist({ setCurrentTab }) {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '0.75rem'
+        gap: '0.85rem'
       }}>
         {steps.map((step) => {
           const isDone = completedSteps.includes(step.id);
@@ -166,51 +168,59 @@ export default function OnboardingChecklist({ setCurrentTab }) {
               key={step.id}
               onClick={() => setCurrentTab && setCurrentTab(step.tab)}
               style={{
-                background: isDone ? 'rgba(20, 184, 166, 0.08)' : 'rgba(30, 41, 59, 0.6)',
-                border: isDone ? '1px solid rgba(20, 184, 166, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
+                background: isDone ? '#f0fdfa' : '#f8fafc',
+                border: isDone ? '1px solid #99f6e4' : '1px solid #e2e8f0',
                 borderRadius: '12px',
-                padding: '0.85rem',
+                padding: '0.95rem',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                boxShadow: isDone ? '0 2px 8px rgba(13, 148, 136, 0.08)' : 'none'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.borderColor = '#0d9488';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = isDone ? '#99f6e4' : '#e2e8f0';
+                e.currentTarget.style.boxShadow = isDone ? '0 2px 8px rgba(13, 148, 136, 0.08)' : 'none';
+              }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{
-                    fontSize: '0.68rem',
+                    fontSize: '0.7rem',
                     fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    backgroundColor: isDone ? 'rgba(20, 184, 166, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                    color: isDone ? '#2dd4bf' : '#94a3b8'
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    backgroundColor: isDone ? '#ccfbf1' : '#e2e8f0',
+                    color: isDone ? '#0f766e' : '#475569'
                   }}>
                     {step.badge}
                   </span>
                   <button
                     onClick={(e) => toggleStep(step.id, e)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: isDone ? '#2dd4bf' : '#64748b', padding: 0 }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: isDone ? '#0d9488' : '#94a3b8', padding: 0 }}
                     title={isDone ? 'Mark uncompleted' : 'Mark completed'}
                   >
-                    {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                    {isDone ? <CheckCircle2 size={20} /> : <Circle size={20} />}
                   </button>
                 </div>
 
                 <div style={{
-                  fontSize: '0.88rem',
-                  fontWeight: 600,
-                  color: isDone ? '#e2e8f0' : '#ffffff',
-                  marginBottom: '0.2rem',
-                  textDecoration: isDone ? 'line-through' : 'none',
-                  opacity: isDone ? 0.8 : 1
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  color: isDone ? '#0f766e' : '#0f172a',
+                  marginBottom: '0.25rem',
+                  textDecoration: isDone ? 'line-through' : 'none'
                 }}>
                   {step.title}
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0, lineHeight: 1.35 }}>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
                   {step.desc}
                 </p>
               </div>
@@ -219,12 +229,12 @@ export default function OnboardingChecklist({ setCurrentTab }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                fontSize: '0.75rem',
-                color: '#2dd4bf',
-                fontWeight: 600,
-                marginTop: '0.75rem'
+                fontSize: '0.78rem',
+                color: '#0d9488',
+                fontWeight: 700,
+                marginTop: '0.85rem'
               }}>
-                Open {step.title.split(' ')[0]} <ArrowUpRight size={13} />
+                Open {step.title.split(' ')[0]} <ArrowUpRight size={14} />
               </div>
             </div>
           );
