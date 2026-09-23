@@ -8,6 +8,7 @@ import {
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
 import ForgotPasswordModal from './ForgotPasswordModal';
+import RegisterModal from './RegisterModal';
 
 export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAdmin, onLoginSuccess }) {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [capsLockActive, setCapsLockActive] = useState(false);
   const [transitionOut, setTransitionOut] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -296,39 +298,18 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-0.5rem', marginBottom: '0.75rem' }}>
+              <div className="login-forgot-row">
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#2dd4bf',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    padding: 0,
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                  className="login-forgot-btn"
                 >
                   Forgot Password?
                 </button>
               </div>
 
               {/* Google reCAPTCHA Security Widget */}
-              <div style={{
-                background: '#f9f9f9',
-                border: '1px solid #d3d3d3',
-                borderRadius: '4px',
-                padding: '10px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '1rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-              }}>
+              <div className="login-recaptcha-box">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div
                     onClick={handleRecaptchaClick}
@@ -336,7 +317,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                       width: '28px',
                       height: '28px',
                       border: recaptchaChecked ? 'none' : '2px solid #c1c1c1',
-                      borderRadius: '3px',
+                      borderRadius: '4px',
                       background: recaptchaChecked ? '#059669' : '#ffffff',
                       cursor: 'pointer',
                       display: 'flex',
@@ -383,22 +364,14 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 )}
               </button>
 
-              <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.88rem', color: '#64748b' }}>
-                Don't have a clinic account?{' '}
+              <div className="login-register-prompt">
+                <span>Don't have a clinic account?</span>
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#0d9488',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    padding: 0,
-                    textDecoration: 'underline'
-                  }}
+                  className="login-register-btn"
                 >
-                  Start 7-Day Free Trial
+                  Start 7-Day Free Trial <ArrowRight size={14} />
                 </button>
               </div>
             </form>
@@ -407,6 +380,12 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
               isOpen={showForgotPassword}
               onClose={() => setShowForgotPassword(false)}
             />
+
+            {showRegisterModal && (
+              <RegisterModal
+                onClose={() => setShowRegisterModal(false)}
+              />
+            )}
 
             <div className="trust-indicators">
               <div className="trust-item"><ShieldCheck size={14} /> SSL Secured</div>
