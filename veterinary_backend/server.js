@@ -87,9 +87,12 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const hospitalizationRoutes = require('./routes/hospitalizationRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const systemRoutes = require('./routes/systemRoutes');
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/v1/subscriptions', subscriptionRoutes);
 // Apply subscription middleware to all protected API routes
 app.use('/api/v1/inventory', protect, subscriptionMiddleware, inventoryRoutes);
 app.use('/api/v1/owners', protect, subscriptionMiddleware, petOwnerRoutes);
@@ -112,6 +115,7 @@ app.use('/api/v1/audit-logs', auditRoutes);
 app.use('/api/v1/system', systemRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
+app.use('/api/v1/payment', paymentLimiter, paymentRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

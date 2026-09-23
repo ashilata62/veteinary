@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight } from 'lucide-react';
 import { CLINIC_SETTINGS } from '../data/mockData';
 export default function SettingsPage({ currentRole }) {
   const [activeTab, setActiveTab] = useState('profile');
@@ -27,6 +27,12 @@ export default function SettingsPage({ currentRole }) {
   const [s3SecretKey, setS3SecretKey] = useState('');
   const [s3Endpoint, setS3Endpoint] = useState('');
   const [storageLoading, setStorageLoading] = useState(false);
+
+  // Subscription & Billing State
+  const [subscriptionInfo, setSubscriptionInfo] = useState(null);
+  const [invoicesHistory, setInvoicesHistory] = useState([]);
+  const [plansList, setPlansList] = useState([]);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   // Personal Profile State
   const [profileName, setProfileName] = useState('');
@@ -110,10 +116,41 @@ export default function SettingsPage({ currentRole }) {
       }
     };
 
+    const fetchBillingData = async () => {
+      try {
+        setBillingLoading(true);
+        const [subRes, plansRes, invRes] = await Promise.all([
+          apiFetch('/api/subscriptions/current').catch(() => null),
+          apiFetch('/api/subscriptions/plans').catch(() => null),
+          apiFetch('/api/payment/my-history').catch(() => null)
+        ]);
+
+        if (subRes && subRes.ok) {
+          const subData = await subRes.json();
+          if (subData.status === 'success') setSubscriptionInfo(subData.data);
+        }
+
+        if (plansRes && plansRes.ok) {
+          const plansData = await plansRes.json();
+          if (plansData.status === 'success') setPlansList(plansData.data);
+        }
+
+        if (invRes && invRes.ok) {
+          const invData = await invRes.json();
+          if (invData.status === 'success') setInvoicesHistory(invData.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch billing data', err);
+      } finally {
+        setBillingLoading(false);
+      }
+    };
+
     fetchProfile();
     fetchClinicSettings();
     fetchBackupHistory();
     fetchStorageSettings();
+    fetchBillingData();
   }, []);
 
   const handleDownloadBackup = async () => {
@@ -375,6 +412,7 @@ export default function SettingsPage({ currentRole }) {
   const tabs = [
     { id: 'profile', label: 'Personal Profile', icon: User },
     { id: 'clinic', label: 'Hospital Information', icon: Settings },
+    { id: 'billing', label: 'Subscription & Invoices', icon: CreditCard },
     { id: 'branding', label: 'Visual Branding & Themes', icon: Palette },
     { id: 'notifications', label: 'Notification Preferences', icon: Bell },
     { id: 'backup', label: 'Database Backup', icon: Database },
@@ -1051,6 +1089,168 @@ export default function SettingsPage({ currentRole }) {
                     <Save size={16} /> {storageLoading ? 'Saving...' : 'Save Storage Configuration'}
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* SUBSCRIPTION & INVOICES TAB */}
+            {activeTab === 'billing' && (
+              <div className="card animate-fade-in" style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                  <h3 className="font-bold text-lg" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                    <CreditCard size={20} style={{ color: 'var(--primary-teal)' }} />
+                    Clinic Subscription & Tax Invoices
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setBillingLoading(true);
+                      Promise.all([
+                        apiFetch('/api/subscriptions/current').then(r => r.json()).then(d => d.status === 'success' && setSubscriptionInfo(d.data)),
+                        apiFetch('/api/payment/my-history').then(r => r.json()).then(d => d.status === 'success' && setInvoicesHistory(d.data || []))
+                      ]).finally(() => setBillingLoading(false));
+                    }}
+                    style={{ background: 'none', border: 'none', color: 'var(--primary-teal)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}
+                  >
+                    <RefreshCw size={14} className={billingLoading ? 'spin' : ''} /> Refresh Status
+                  </button>
+                </div>
+
+                {/* Current Subscription Card */}
+                <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '12px', padding: '1.5rem', color: '#ffffff', marginBottom: '2rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: subscriptionInfo?.isExpired ? '#ef4444' : '#10b981', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: '9999px', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                        <Sparkles size={12} /> {subscriptionInfo?.subStatus || 'Active Plan'}
+                      </div>
+                      <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.25rem 0' }}>{subscriptionInfo?.planName || 'Enterprise Cloud SaaS'}</h2>
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0 }}>
+                        {subscriptionInfo?.endDate ? `Valid until ${new Date(subscriptionInfo.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}` : 'Unlimited 24/7 Access'}
+                      </p>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#2dd4bf' }}>
+                        {subscriptionInfo?.daysLeft !== undefined ? `${subscriptionInfo.daysLeft} Days` : 'Active'}
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Remaining in billing cycle</span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <div style={{ height: '6px', width: '100%', background: 'rgba(255,255,255,0.15)', borderRadius: '9999px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${Math.min(100, Math.max(5, ((subscriptionInfo?.daysLeft || 30) / 30) * 100))}%`,
+                          background: 'linear-gradient(90deg, #2dd4bf, #14b8a6)',
+                          borderRadius: '9999px',
+                          transition: 'width 0.4s ease'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
+                    <a
+                      href="/checkout/plan-pro"
+                      style={{
+                        background: 'linear-gradient(135deg, #0d9488, #0f766e)',
+                        color: '#ffffff',
+                        padding: '0.5rem 1.25rem',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      Upgrade / Renew Plan <ArrowRight size={14} />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Invoices & Transaction History Table */}
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Receipt size={16} style={{ color: 'var(--primary-teal)' }} />
+                  Billing & Tax Invoice Receipts
+                </h4>
+
+                {invoicesHistory.length === 0 ? (
+                  <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>
+                    <Receipt size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                    <p style={{ margin: 0, fontSize: '0.9rem' }}>No payment invoices found for this clinic yet.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+                      <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                          <th style={{ padding: '10px 14px' }}>Invoice No</th>
+                          <th style={{ padding: '10px 14px' }}>Date</th>
+                          <th style={{ padding: '10px 14px' }}>Plan</th>
+                          <th style={{ padding: '10px 14px' }}>Amount</th>
+                          <th style={{ padding: '10px 14px' }}>Gateway</th>
+                          <th style={{ padding: '10px 14px' }}>Status</th>
+                          <th style={{ padding: '10px 14px', textAlign: 'right' }}>Tax Receipt</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoicesHistory.map((inv) => (
+                          <tr key={inv.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontWeight: 600, color: '#0f766e' }}>
+                              {inv.invoice_number || inv.id?.substring(0, 12)}
+                            </td>
+                            <td style={{ padding: '10px 14px', color: '#475569' }}>
+                              {inv.payment_date ? new Date(inv.payment_date).toLocaleDateString('en-IN') : 'N/A'}
+                            </td>
+                            <td style={{ padding: '10px 14px', fontWeight: 600 }}>{inv.plan_name || 'Standard Plan'}</td>
+                            <td style={{ padding: '10px 14px', fontWeight: 700, color: '#0f172a' }}>
+                              {inv.currency === 'USD' ? '$' : '₹'}{parseFloat(inv.amount).toFixed(2)}
+                            </td>
+                            <td style={{ padding: '10px 14px', color: '#64748b' }}>{inv.payment_method || 'Razorpay'}</td>
+                            <td style={{ padding: '10px 14px' }}>
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                background: inv.status === 'Successful' ? '#dcfce7' : '#fee2e2',
+                                color: inv.status === 'Successful' ? '#15803d' : '#b91c1c'
+                              }}>
+                                {inv.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                              <a
+                                href={`http://localhost:5002/api/payment/invoice/${inv.invoice_number || inv.id}/html`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  background: '#f1f5f9',
+                                  border: '1px solid #cbd5e1',
+                                  color: '#0f766e',
+                                  padding: '4px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                <FileText size={13} /> View Invoice
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
