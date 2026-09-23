@@ -46,16 +46,12 @@ const PRO_ADDITIONS = [
 
 // Tabs configuration per plan
 export const PLAN_ALLOWED_TABS = {
-  // 7-Day Free Trial gets full access to test all modules
+  // 7-Day Free Trial: Essential core features unlocked, advanced modules locked
   'plan-free-trial': [
     ...CORE_TABS,
-    ...STANDARD_ADDITIONS,
-    ...PRO_ADDITIONS,
   ],
   'free-trial': [
     ...CORE_TABS,
-    ...STANDARD_ADDITIONS,
-    ...PRO_ADDITIONS,
   ],
 
   // Starter Plan (₹999/mo): Essential clinic management features
