@@ -52,6 +52,17 @@ const createAuditLog = async ({
             }
         }
 
+        if (resolvedUserId) {
+            try {
+                const [userRows] = await db.query('SELECT id FROM users WHERE id = ?', [resolvedUserId]);
+                if (!userRows || userRows.length === 0) {
+                    resolvedUserId = null;
+                }
+            } catch (err) {
+                resolvedUserId = null;
+            }
+        }
+
         const safeOldValues = oldValues ? (typeof oldValues === 'object' ? JSON.stringify(oldValues) : String(oldValues)) : null;
         const safeNewValues = newValues ? (typeof newValues === 'object' ? JSON.stringify(newValues) : String(newValues)) : null;
 

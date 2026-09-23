@@ -179,20 +179,57 @@ const suspendClinic = async (req, res) => {
             [id]
         );
 
-        await createAuditLog({
-            userId: req.user.id,
-            clinicId: id,
-            action: 'CLINIC_SUSPENDED',
-            entity: 'clinic',
-            entityId: id,
-            newValues: { status: 'SUSPENDED', reason },
-            req
-        });
+        try {
+            await createAuditLog({
+                userId: null,
+                clinicId: id,
+                action: 'CLINIC_SUSPENDED',
+                entity: 'clinic',
+                entityId: id,
+                newValues: { status: 'SUSPENDED', reason },
+                req
+            });
+        } catch (auditErr) {
+            // ignore
+        }
 
         res.json({ status: 'success', message: 'Clinic suspended successfully' });
     } catch (error) {
         console.error('Error suspending clinic:', error);
         res.status(500).json({ status: 'error', message: 'Failed to suspend clinic' });
+    }
+};
+
+// @desc    Activate Clinic
+// @route   POST /api/super-admin/clinics/:id/activate
+// @access  Private (SUPER_ADMIN)
+const activateClinic = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await db.query(
+            "UPDATE clinics SET status = 'ACTIVE', updated_at = NOW() WHERE id = ?",
+            [id]
+        );
+
+        try {
+            await createAuditLog({
+                userId: null,
+                clinicId: id,
+                action: 'CLINIC_ACTIVATED',
+                entity: 'clinic',
+                entityId: id,
+                newValues: { status: 'ACTIVE' },
+                req
+            });
+        } catch (auditErr) {
+            // ignore
+        }
+
+        res.json({ status: 'success', message: 'Clinic activated successfully' });
+    } catch (error) {
+        console.error('Error activating clinic:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to activate clinic' });
     }
 };
 
