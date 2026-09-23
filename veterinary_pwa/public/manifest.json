@@ -1,42 +1,24 @@
 {
-  "short_name": "PetCare PWA",
-  "name": "PetCare Pro - Veterinary Mobile PWA",
-  "description": "Progressive Web App for Veterinary Clinic Doctors, Staff & Admins",
+  "short_name": "PetCare Pro",
+  "name": "PetCare Pro - Veterinary Clinic Management System",
+  "description": "Complete Veterinary Clinic Management SaaS & Mobile PWA",
   "icons": [
     {
-      "src": "/pwa-192.png",
+      "src": "/kt-logo.png",
       "type": "image/png",
-      "sizes": "192x192",
+      "sizes": "192x192 512x512",
       "purpose": "any maskable"
     },
     {
-      "src": "/pwa-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     }
   ],
   "start_url": "/",
-  "background_color": "#0f172a",
+  "background_color": "#ffffff",
   "theme_color": "#0d9488",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "categories": ["medical", "business", "productivity"],
-  "shortcuts": [
-    {
-      "name": "Appointments",
-      "url": "/appointments",
-      "description": "View today's clinic appointments"
-    },
-    {
-      "name": "Patients",
-      "url": "/patients",
-      "description": "Search and view pet medical records"
-    },
-    {
-      "name": "Billing & POS",
-      "url": "/billing",
-      "description": "Quick invoices and payments"
-    }
-  ]
+  "orientation": "any",
+  "categories": ["medical", "business", "productivity"]
 }
