@@ -1,0 +1,239 @@
+.sidebar-premium {
+  background: #0B1120;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+}
+
+.sidebar-brand-container {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-collapse-btn {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.sidebar-nav-menu {
+  flex: 1;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for nav */
+.sidebar-nav-menu::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav-menu::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.sidebar-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  overflow: visible; /* so before element shows properly */
+}
+
+.sidebar-menu-btn:hover {
+  background: rgba(255,255,255,0.03);
+  color: #f8fafc;
+}
+
+.sidebar-menu-btn.active {
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  color: #2dd4bf;
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.05), inset 0 0 10px rgba(20, 184, 166, 0.05);
+}
+
+.sidebar-menu-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 15%;
+  height: 70%;
+  width: 4px;
+  background: #2dd4bf;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px #2dd4bf;
+}
+
+.sidebar-menu-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-menu-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sidebar-menu-btn .chevron {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #64748b;
+}
+
+.sidebar-menu-btn:hover .chevron {
+  opacity: 0.5;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #ef4444;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0B1120;
+}
+
+/* User Profile Footer */
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.sidebar-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.sidebar-user-avatar .online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border: 2px solid #0B1120;
+  border-radius: 50%;
+}
+
+.sidebar-user-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-user-name {
+  color: #f8fafc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+  color: #2dd4bf;
+  font-size: 0.75rem;
+}
+
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* Toggle icon responsive swap */
+@media (max-width: 1024px) {
+  .sidebar-collapse-btn .desktop-icon {
+    display: none !important;
+  }
+  .sidebar-collapse-btn .mobile-icon {
+    display: inline-flex !important;
+  }
+}

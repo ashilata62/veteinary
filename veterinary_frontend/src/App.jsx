@@ -18,6 +18,7 @@ import Reports from './components/Reports';
 import Hospitalization from './components/Hospitalization';
 import SettingsPage from './components/Settings';
 import Login from './components/Login';
+import ResetPassword from './components/ResetPassword';
 import LandingPage from './components/LandingPage';
 import Register from './components/Register';
 import BrochurePage from './components/BrochurePage';
@@ -38,6 +39,7 @@ import PlansPage from './components/PlansPage';
 import TrialBanner from './components/TrialBanner';
 import { isTabAllowedForPlan, getRequiredPlanForTab } from './utils/planPermissions';
 import AuditLogs from './components/AuditLogs/AuditLogs';
+import SessionTerminatedModal from './components/SessionTerminatedModal';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
 import { Toaster } from 'react-hot-toast';
 import { Lock } from 'lucide-react';
@@ -265,6 +267,10 @@ export default function App() {
     return <BrochurePage />;
   }
 
+  if (location.pathname === '/reset-password') {
+    return <ResetPassword />;
+  }
+
   if (!isAuthenticated) {
     if (location.pathname === LOGIN_PATH) {
       return (
@@ -317,6 +323,7 @@ export default function App() {
         success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
         error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
       }} />
+      <SessionTerminatedModal />
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}

@@ -86,9 +86,14 @@ const supportTicketRoutes = require('./routes/supportTicketRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const hospitalizationRoutes = require('./routes/hospitalizationRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const systemRoutes = require('./routes/systemRoutes');
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const messagingRoutes = require('./routes/messagingRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/v1/subscriptions', subscriptionRoutes);
 // Apply subscription middleware to all protected API routes
 app.use('/api/v1/inventory', protect, subscriptionMiddleware, inventoryRoutes);
 app.use('/api/v1/owners', protect, subscriptionMiddleware, petOwnerRoutes);
@@ -102,14 +107,17 @@ app.use('/api/v1/invoices', protect, subscriptionMiddleware, invoiceRoutes);
 app.use('/api/v1/attendance', protect, subscriptionMiddleware, attendanceRoutes);
 app.use('/api/v1/reports', protect, subscriptionMiddleware, reportRoutes);
 app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRoutes);
+app.use('/api/v1/messaging', protect, subscriptionMiddleware, messagingRoutes);
 app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
 app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
 app.use('/api/v1/support-tickets', protect, supportTicketRoutes);
 app.use('/api/v1/dashboard', protect, subscriptionMiddleware, dashboardRoutes);
 app.use('/api/v1/hospitalization', protect, subscriptionMiddleware, hospitalizationRoutes);
 app.use('/api/v1/audit-logs', auditRoutes);
+app.use('/api/v1/system', systemRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
+app.use('/api/v1/payment', paymentLimiter, paymentRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {
