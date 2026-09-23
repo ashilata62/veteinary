@@ -4,17 +4,15 @@ import { pathForTab } from '../utils/routes';
 import { apiFetch } from '../utils/api';
 import './Login.css';
 import {
-  Mail, Lock, ArrowRight, ShieldCheck, Stethoscope, Users,
-  HeartHandshake, Briefcase, Eye, EyeOff, CalendarCheck,
+  Mail, Lock, ArrowRight, ShieldCheck, Eye, EyeOff, CalendarCheck,
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
 export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAdmin, onLoginSuccess }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@vetcarepro.com');
-  const [password, setPassword] = useState('password123');
-  const [activeRole, setActiveRole] = useState('Admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -93,80 +91,71 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!email.trim() || !password) {
+      setError('Please enter your email and password');
+      return;
+    }
+
     setLoading(true);
 
-    if (email && password) {
-      try {
-        // Super Admin uses a different API endpoint
-        const isSuperAdmin = activeRole === 'Super Admin';
-        const endpoint = isSuperAdmin ? '/api/super-admin/login' : '/api/auth/login';
+    try {
+      // First attempt clinic user login
+      const response = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password })
+      });
+      const data = await response.json();
 
-        const response = await apiFetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          if (isSuperAdmin) {
-            const { token, user } = data.data;
-            localStorage.setItem('sa_token', token);
-            localStorage.setItem('sa_user', JSON.stringify(user));
-            setSuccess(true);
-            setLoading(false);
-            setTransitionOut(true);
-            setTimeout(() => {
-              if (setIsSuperAdmin) setIsSuperAdmin(true);
-              navigate('/super-admin/dashboard', { replace: true });
-            }, 800);
-          } else {
-            const { token, user } = data.data;
-            localStorage.setItem('token', token);
-            localStorage.setItem('role', user.role);
-            localStorage.setItem('user', JSON.stringify(user));
-            sessionStorage.removeItem('trialPopupShown');
-            setSuccess(true);
-            setLoading(false);
-            setTransitionOut(true);
-            setTimeout(() => {
-              setIsAuthenticated(true);
-              if (setCurrentRole) setCurrentRole(user.role);
-              if (onLoginSuccess) onLoginSuccess(user);
-              navigate(pathForTab('dashboard', user.role), { replace: true });
-            }, 1000);
-          }
-        } else {
-          setError(data.message || 'Login failed. Please check your credentials.');
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Login Error:', err);
-        setError('Unable to connect to server. Ensure backend is running.');
+      if (data.status === 'success') {
+        const { token, user } = data.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', user.role);
+        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.removeItem('trialPopupShown');
+        setSuccess(true);
         setLoading(false);
+        setTransitionOut(true);
+        setTimeout(() => {
+          setIsAuthenticated(true);
+          if (setCurrentRole) setCurrentRole(user.role);
+          if (onLoginSuccess) onLoginSuccess(user);
+          navigate(pathForTab('dashboard', user.role), { replace: true });
+        }, 800);
+        return;
       }
+
+      // If not standard clinic user, check if Super Admin
+      const saResponse = await apiFetch('/api/super-admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password })
+      });
+      const saData = await saResponse.json();
+
+      if (saData.status === 'success') {
+        const { token, user } = saData.data;
+        localStorage.setItem('sa_token', token);
+        localStorage.setItem('sa_user', JSON.stringify(user));
+        setSuccess(true);
+        setLoading(false);
+        setTransitionOut(true);
+        setTimeout(() => {
+          if (setIsSuperAdmin) setIsSuperAdmin(true);
+          navigate('/super-admin/dashboard', { replace: true });
+        }, 800);
+        return;
+      }
+
+      setError(data.message || 'Invalid email or password. Please try again.');
+      setLoading(false);
+    } catch (err) {
+      console.error('Login Error:', err);
+      setError('Unable to connect to server. Please check your network connection.');
+      setLoading(false);
     }
   };
-
-  const demoUsers = [
-    { role: 'Admin', email: 'admin@vetcarepro.com', icon: Shield },
-    { role: 'Manager', email: 'manager@vetcarepro.com', icon: Briefcase },
-    { role: 'Doctor', email: 'demodoctor@gmail.com', icon: Stethoscope },
-    { role: 'Receptionist', email: 'demoR@gmail.com', icon: Users },
-    { role: 'Vet Assistant', email: 'assistant@vetcarepro.com', icon: HeartHandshake },
-    { role: 'Super Admin', email: 'superadmin@vetcarepro.com', icon: ShieldCheck },
-  ];
-
-  const selectDemoUser = (role, demoEmail) => {
-    setActiveRole(role);
-    setEmail(demoEmail);
-    setPassword('password123');
-    setError('');
-  };
-
-  const activeIndex = Math.max(0, demoUsers.findIndex(u => u.role === activeRole));
-  const colIndex = activeIndex % 3;
-  const rowIndex = Math.floor(activeIndex / 3);
 
   return (
     <div className={`login-premium-page ${transitionOut ? 'page-transition-out' : ''}`}>
@@ -273,32 +262,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
               )}
             </div>
 
-            <div className="role-chips">
-              <div
-                className="active-tab-indicator"
-                style={{
-                  '--active-left': `calc(0.35rem + ${colIndex} * (100% - 0.7rem) / 3)`,
-                  '--active-top': `calc(0.35rem + ${rowIndex} * (100% - 0.7rem) / 2)`
-                }}
-              />
-              {demoUsers.map(({ role, email: dEmail, icon: Icon }) => {
-                const isActive = activeRole === role;
-                const label = role === 'Receptionist' ? 'Reception' : role === 'Vet Assistant' ? 'Assistant' : role;
-                return (
-                  <button
-                    key={role}
-                    type="button"
-                    className={`role-chip ${isActive ? 'active' : ''}`}
-                    onClick={() => selectDemoUser(role, dEmail)}
-                  >
-                    <Icon size={14} />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} style={{ marginTop: '1.5rem' }}>
               <div className="premium-input-group">
                 <input
                   type="text"
@@ -418,6 +382,25 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                   </>
                 )}
               </button>
+
+              <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.88rem', color: '#64748b' }}>
+                Don't have a clinic account?{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('/register')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#0d9488',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Start 7-Day Free Trial
+                </button>
+              </div>
             </form>
 
             <ForgotPasswordModal
