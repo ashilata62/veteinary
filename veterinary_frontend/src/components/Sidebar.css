@@ -47,11 +47,14 @@
 
 .sidebar-nav-menu {
   flex: 1;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 0.875rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 /* Custom scrollbar for nav */
@@ -62,8 +65,11 @@
   background: transparent;
 }
 .sidebar-nav-menu::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
+}
+.sidebar-nav-menu::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .sidebar-menu-btn {
@@ -150,12 +156,17 @@
 
 /* User Profile Footer */
 .sidebar-footer {
-  padding: 1rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 0.875rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-top: auto;
+  background: #0B1120;
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  min-height: 64px;
 }
 
 .sidebar-user-avatar {

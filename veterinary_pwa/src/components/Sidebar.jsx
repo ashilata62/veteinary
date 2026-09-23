@@ -147,7 +147,7 @@ export default function Sidebar({
               <button 
                 key={item.id}
                 className={`sidebar-menu-btn ${active ? 'active' : ''}`}
-                onClick={() => { setCurrentTab(item.id); if (window.innerWidth < 1024) setSidebarOpen(false); }}
+                onClick={() => { setCurrentTab(item.id); if (window.innerWidth <= 1024) setSidebarOpen(false); }}
                 title={!isAllowed ? `${item.label} (Locked in your plan)` : item.label}
                 style={!isAllowed ? { opacity: 0.78 } : {}}
               >
@@ -185,7 +185,7 @@ export default function Sidebar({
 
           <button 
             className={`sidebar-menu-btn ${isActive('notifications') ? 'active' : ''}`}
-            onClick={() => { setCurrentTab('notifications'); if (window.innerWidth < 1024) setSidebarOpen(false); }}
+            onClick={() => { setCurrentTab('notifications'); if (window.innerWidth <= 1024) setSidebarOpen(false); }}
             title="Notifications"
           >
             <div className="sidebar-menu-icon" style={{ position: 'relative', color: getIconColor('notifications', isActive('notifications')) }}>

@@ -101,8 +101,8 @@ export default function App() {
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [accountSuspended, setAccountSuspended] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState({ clinicName: '', plan: '', expiryDate: '' });
-  // Sidebar: open by default on desktop only
-  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  // Sidebar: open by default on desktop only (> 1024px)
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth > 1024 : true);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([]);
@@ -192,10 +192,10 @@ export default function App() {
     return () => window.removeEventListener('auth:subscription_status', handleSubStatus);
   }, []);
 
-  // Auto close sidebar when resizing below 1024px
+  // Auto close sidebar when resizing to tablet/mobile (<= 1024px)
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024) setSidebarOpen(false);
+      if (window.innerWidth <= 1024) setSidebarOpen(false);
       else setSidebarOpen(true);
     };
     window.addEventListener('resize', handleResize);
