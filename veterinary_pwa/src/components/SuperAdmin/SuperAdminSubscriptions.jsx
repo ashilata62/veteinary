@@ -1,27 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, ShieldCheck, Power, RefreshCw } from 'lucide-react';
+import { apiFetch } from '../../utils/api';
 import './SuperAdmin.css';
 
 export default function SuperAdminSubscriptions() {
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  // Dummy data for subscriptions
-  const dummySubscriptions = [
-    { id: 1, clinicName: 'City Vet Clinic', email: 'contact@cityvet.com', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-01-15', amount: '$1,999' },
-    { id: 2, clinicName: 'Paws & Claws Care', email: 'admin@pawsclaws.com', plan: 'Pro', status: 'Active', billingCycle: 'Monthly', nextBilling: '2026-09-01', amount: '$199' },
-    { id: 3, clinicName: 'Happy Pets Hospital', email: 'hello@happypets.net', plan: 'Basic', status: 'Past Due', billingCycle: 'Monthly', nextBilling: '2026-08-01', amount: '$99' },
-    { id: 4, clinicName: 'Downtown Animal ER', email: 'er@downtownvet.org', plan: 'Enterprise', status: 'Active', billingCycle: 'Annual', nextBilling: '2027-03-10', amount: '$1,999' },
-    { id: 5, clinicName: 'Green Valley Vet', email: 'support@greenvalley.com', plan: 'Basic', status: 'Cancelled', billingCycle: 'Monthly', nextBilling: '-', amount: '$0' },
-  ];
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        const response = await apiFetch('/api/super-admin/subscriptions');
+        const data = await response.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          setSubscriptions(data.data);
+        } else {
+          setSubscriptions([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch subscriptions', error);
+        setSubscriptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubscriptions();
+  }, []);
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Active': return 'sa-badge emerald';
-      case 'Past Due': return 'sa-badge yellow';
-      case 'Cancelled': return 'sa-badge red';
+    switch ((status || '').toUpperCase()) {
+      case 'ACTIVE': return 'sa-badge emerald';
+      case 'TRIAL': return 'sa-badge yellow';
+      case 'EXPIRED':
+      case 'CANCELLED': return 'sa-badge red';
       default: return 'sa-badge slate';
     }
   };
+
+  const filteredSubs = subscriptions.filter(sub => {
+    return (sub.clinicName || '').toLowerCase().includes(search.toLowerCase()) ||
+      (sub.email || '').toLowerCase().includes(search.toLowerCase()) ||
+      (sub.plan || '').toLowerCase().includes(search.toLowerCase());
+  });
+
+  const totalMRR = subscriptions.reduce((acc, curr) => {
+    return acc + (Number(curr.amount) || 0);
+  }, 0);
+
+  const activeCount = subscriptions.filter(s => (s.status || '').toUpperCase() === 'ACTIVE').length;
 
   return (
     <div className="sa-dashboard-container">
@@ -42,24 +69,21 @@ export default function SuperAdminSubscriptions() {
               className="sa-search-input"
             />
           </div>
-          <button className="btn btn-secondary" style={{ backgroundColor: '#1e293b', borderColor: '#334155', color: 'white' }}>
-            <Filter size={16} /> Filter
-          </button>
         </div>
       </div>
 
       <div className="sa-stats-grid" style={{ marginBottom: '2rem' }}>
         <div className="sa-stat-card">
           <p className="sa-stat-label">Total MRR</p>
-          <h3 className="sa-stat-value" style={{ color: '#34d399' }}>$42,500</h3>
+          <h3 className="sa-stat-value" style={{ color: '#34d399' }}>₹{totalMRR.toLocaleString('en-IN')}</h3>
         </div>
         <div className="sa-stat-card">
           <p className="sa-stat-label">Active Subscriptions</p>
-          <h3 className="sa-stat-value">342</h3>
+          <h3 className="sa-stat-value">{activeCount}</h3>
         </div>
         <div className="sa-stat-card">
-          <p className="sa-stat-label">Churn Rate</p>
-          <h3 className="sa-stat-value" style={{ color: '#f87171' }}>1.2%</h3>
+          <p className="sa-stat-label">Total Subscriptions</p>
+          <h3 className="sa-stat-value">{subscriptions.length}</h3>
         </div>
       </div>
 
@@ -74,35 +98,36 @@ export default function SuperAdminSubscriptions() {
                 <th>Billing Cycle</th>
                 <th>Next Billing Date</th>
                 <th>Amount</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {dummySubscriptions.map((sub) => (
-                <tr key={sub.id}>
-                  <td>
-                    <p style={{ color: 'white', fontWeight: 500, margin: 0 }}>{sub.clinicName}</p>
-                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', margin: 0 }}>{sub.email}</p>
-                  </td>
-                  <td>
-                    <span style={{ color: '#cbd5e1', fontWeight: 500 }}>{sub.plan}</span>
-                  </td>
-                  <td>
-                    <span className={getStatusBadge(sub.status)}>
-                      {sub.status}
-                    </span>
-                  </td>
-                  <td><span style={{ color: '#94a3b8' }}>{sub.billingCycle}</span></td>
-                  <td><span style={{ color: '#cbd5e1' }}>{sub.nextBilling}</span></td>
-                  <td><span style={{ color: 'white', fontWeight: 600 }}>{sub.amount}</span></td>
-                  <td>
-                    <div className="sa-flex-center">
-                      <button className="sa-action-btn edit" title="Update Plan"><RefreshCw size={16} /></button>
-                      <button className="sa-action-btn suspend" title="Suspend Subscription"><Power size={16} /></button>
-                    </div>
+              {filteredSubs.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                    No subscriptions found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredSubs.map((sub) => (
+                  <tr key={sub.id}>
+                    <td>
+                      <p style={{ color: 'white', fontWeight: 500, margin: 0 }}>{sub.clinicName}</p>
+                      <p style={{ color: '#94a3b8', fontSize: '0.875rem', margin: 0 }}>{sub.email}</p>
+                    </td>
+                    <td>
+                      <span style={{ color: '#cbd5e1', fontWeight: 500 }}>{sub.plan || 'Free Trial'}</span>
+                    </td>
+                    <td>
+                      <span className={getStatusBadge(sub.status)}>
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td><span style={{ color: '#94a3b8' }}>{sub.billingCycle || 'Monthly'}</span></td>
+                    <td><span style={{ color: '#cbd5e1' }}>{sub.nextBilling || '-'}</span></td>
+                    <td><span style={{ color: 'white', fontWeight: 600 }}>₹{sub.amount || '0'}</span></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

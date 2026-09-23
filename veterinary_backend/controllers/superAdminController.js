@@ -145,6 +145,22 @@ const getStats = async (req, res) => {
             WHERE status = 'Open'
         `);
 
+        const [upcomingRenewals] = await db.query(`
+            SELECT 
+                s.id,
+                c.clinic_name as clinic,
+                u.name as owner,
+                s.end_date as expiry,
+                p.name as plan,
+                p.id as planType
+            FROM saas_subscriptions s
+            LEFT JOIN clinics c ON c.id = s.clinic_id
+            LEFT JOIN users u ON u.clinic_id = s.clinic_id AND u.role = 'Admin'
+            LEFT JOIN saas_plans p ON p.id = s.plan_id
+            ORDER BY s.end_date ASC
+            LIMIT 10
+        `);
+
         const stats = {
             totalClinics: clinicStats[0]?.total_clinics || 0,
             activeClinics: clinicStats[0]?.active_clinics || 0,
@@ -156,13 +172,70 @@ const getStats = async (req, res) => {
             totalPatients: petStats[0]?.total_pets || 0,
             totalRevenue: paymentStats[0]?.total_revenue || 0,
             totalPayments: paymentStats[0]?.total_payments || 0,
-            openSupportTickets: ticketStats[0]?.open_tickets || 0
+            openSupportTickets: ticketStats[0]?.open_tickets || 0,
+            upcomingRenewals: upcomingRenewals || []
         };
 
         res.json({ status: 'success', data: stats });
     } catch (error) {
         console.error('Error fetching stats:', error);
         res.status(500).json({ status: 'error', message: 'Failed to fetch stats' });
+    }
+};
+
+// @desc    Get All SaaS Payments
+// @route   GET /api/super-admin/payments
+// @access  Private (SUPER_ADMIN)
+const getPayments = async (req, res) => {
+    try {
+        const [payments] = await db.query(`
+            SELECT 
+                p.id,
+                p.razorpay_order_id as orderId,
+                p.razorpay_payment_id as paymentId,
+                c.clinic_name as clinic,
+                p.payment_date as date,
+                p.amount,
+                p.payment_method as method,
+                p.status,
+                p.invoice_number as invoice
+            FROM saas_payments p
+            LEFT JOIN clinics c ON c.id = p.clinic_id
+            ORDER BY p.payment_date DESC
+        `);
+
+        res.json({ status: 'success', data: payments });
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to fetch payments' });
+    }
+};
+
+// @desc    Get All SaaS Subscriptions
+// @route   GET /api/super-admin/subscriptions
+// @access  Private (SUPER_ADMIN)
+const getSubscriptions = async (req, res) => {
+    try {
+        const [subs] = await db.query(`
+            SELECT 
+                s.id,
+                c.clinic_name as clinicName,
+                c.email,
+                p.name as plan,
+                s.status,
+                'Monthly' as billingCycle,
+                s.end_date as nextBilling,
+                p.price as amount
+            FROM saas_subscriptions s
+            LEFT JOIN clinics c ON c.id = s.clinic_id
+            LEFT JOIN saas_plans p ON p.id = s.plan_id
+            ORDER BY s.created_at DESC
+        `);
+
+        res.json({ status: 'success', data: subs });
+    } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to fetch subscriptions' });
     }
 };
 
@@ -352,6 +425,8 @@ module.exports = {
     loginSuperAdmin,
     getClinics,
     getStats,
+    getPayments,
+    getSubscriptions,
     suspendClinic,
     activateClinic,
     deleteClinic,

@@ -4,6 +4,8 @@ const {
     loginSuperAdmin, 
     getClinics, 
     getStats, 
+    getPayments,
+    getSubscriptions,
     suspendClinic, 
     activateClinic,
     deleteClinic,
@@ -16,6 +18,8 @@ router.post('/login', loginSuperAdmin);
 
 router.get('/stats', superAdminAuth, getStats);
 router.get('/clinics', superAdminAuth, getClinics);
+router.get('/payments', superAdminAuth, getPayments);
+router.get('/subscriptions', superAdminAuth, getSubscriptions);
 router.put('/clinics/:id', superAdminAuth, updateClinic);
 router.delete('/clinics/:id', superAdminAuth, deleteClinic);
 router.post('/clinics/:id/suspend', superAdminAuth, suspendClinic);

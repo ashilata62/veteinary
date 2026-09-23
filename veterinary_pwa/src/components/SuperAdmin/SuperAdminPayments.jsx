@@ -1,23 +1,38 @@
-import React, { useState } from 'react';
-import { Search, Download, CreditCard, Filter, X, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Download, CreditCard, Filter, X, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react';
+import { apiFetch } from '../../utils/api';
 
 export default function SuperAdminPayments() {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedTx, setSelectedTx] = useState(null);
 
-  const payments = [
-    { id: 'PAY-982341', orderId: 'order_M1k298x', clinic: 'Downtown Vet Clinic', date: '2026-08-07 10:14 AM', amount: '₹1,999.00', method: 'Razorpay UPI (gpay@upi)', status: 'Successful', invoice: 'INV-2026-0801' },
-    { id: 'PAY-982340', orderId: 'order_K88129y', clinic: 'Paws & Claws Care', date: '2026-08-06 04:30 PM', amount: '₹18,999.00', method: 'Razorpay NetBanking (HDFC)', status: 'Successful', invoice: 'INV-2026-0802' },
-    { id: 'PAY-982339', orderId: 'order_L99210z', clinic: 'Happy Pets Hospital', date: '2026-08-05 09:22 AM', amount: '₹1,999.00', method: 'Razorpay Card (**** 4242)', status: 'Failed', invoice: '-' },
-    { id: 'PAY-982338', orderId: 'order_P77123a', clinic: 'PetCare Central', date: '2026-08-05 02:15 PM', amount: '₹1,999.00', method: 'Razorpay UPI (paytm@upi)', status: 'Pending', invoice: '-' },
-    { id: 'PAY-982337', orderId: 'order_Q66542b', clinic: 'City Animal Hospital', date: '2026-08-04 11:45 AM', amount: '₹1,999.00', method: 'Razorpay Card (**** 8888)', status: 'Successful', invoice: 'INV-2026-0803' },
-  ];
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const response = await apiFetch('/api/super-admin/payments');
+        const data = await response.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          setPayments(data.data);
+        } else {
+          setPayments([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch payments', error);
+        setPayments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayments();
+  }, []);
 
   const filteredPayments = payments.filter(p => {
-    const matchesSearch = p.id.toLowerCase().includes(search.toLowerCase()) ||
-      p.clinic.toLowerCase().includes(search.toLowerCase()) ||
-      p.orderId.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (p.id || '').toLowerCase().includes(search.toLowerCase()) ||
+      (p.clinic || '').toLowerCase().includes(search.toLowerCase()) ||
+      (p.orderId || '').toLowerCase().includes(search.toLowerCase());
     
     if (statusFilter === 'All') return matchesSearch;
     return matchesSearch && p.status === statusFilter;

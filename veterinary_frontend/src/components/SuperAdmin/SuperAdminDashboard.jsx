@@ -49,33 +49,18 @@ export default function SuperAdminDashboard() {
     return `₹${num.toLocaleString('en-IN')}`;
   };
 
-  const statsData = stats ? {
-    totalRevenue: stats.totalRevenue,
-    totalRevenueRaw: stats.totalRevenue,
-    monthlyRevenue: stats.monthlyRevenue,
-    totalAdmins: stats.totalClinics,
-    activePaidAdmins: stats.paidClinics,
-    freeTrialAdmins: stats.trialClinics,
-    expiredBlocked: stats.expiredTrials,
-    openTickets: stats.openSupportTickets
-  } : {
-    totalRevenue: 520000,
-    totalRevenueRaw: 520000,
-    monthlyRevenue: 45000,
-    totalAdmins: 30,
-    activePaidAdmins: 24,
-    freeTrialAdmins: 9,
-    expiredBlocked: 6,
-    openTickets: 12
+  const statsData = {
+    totalRevenue: stats?.totalRevenue ?? 0,
+    totalRevenueRaw: stats?.totalRevenue ?? 0,
+    monthlyRevenue: stats?.monthlyRevenue ?? 0,
+    totalAdmins: stats?.totalClinics ?? 0,
+    activePaidAdmins: stats?.activeClinics ?? 0,
+    freeTrialAdmins: stats?.trialClinics ?? 0,
+    expiredBlocked: stats?.expiredClinics ?? 0,
+    openTickets: stats?.openSupportTickets ?? 0
   };
 
-  const renewalsList = [
-    { id: 1, clinic: 'Downtown Pet Care', owner: 'Dr. John Doe', expiry: '8/6/2026', plan: '7-Day Trial', planType: 'trial' },
-    { id: 2, clinic: 'PetCare Central', owner: 'Dr. Jane Smith', expiry: '8/10/2026', plan: 'Monthly Pro', planType: 'pro' },
-    { id: 3, clinic: 'Paws & Claws Clinic', owner: 'Dr. Vikram Singh', expiry: '8/12/2026', plan: 'Yearly Enterprise', planType: 'enterprise' },
-    { id: 4, clinic: 'City Vet Hospital', owner: 'Rajesh Kumar', expiry: '8/14/2026', plan: '7-Day Trial', planType: 'trial' },
-    { id: 5, clinic: 'Happy Tails Clinic', owner: 'Dr. Anjali Sharma', expiry: '8/15/2026', plan: 'Monthly Pro', planType: 'pro' },
-  ];
+  const renewalsList = stats?.upcomingRenewals || [];
 
   return (
     <div className="sa-dash-wrapper">
@@ -298,18 +283,26 @@ export default function SuperAdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {renewalsList.map((item) => (
-                <tr key={item.id}>
-                  <td className="sa-td-bold">{item.clinic}</td>
-                  <td>{item.owner}</td>
-                  <td className="sa-td-expiry">{item.expiry}</td>
-                  <td>
-                    <span className={`sa-plan-badge ${item.planType}`}>
-                      {item.plan}
-                    </span>
+              {renewalsList.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                    No upcoming renewals found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                renewalsList.map((item) => (
+                  <tr key={item.id}>
+                    <td className="sa-td-bold">{item.clinic}</td>
+                    <td>{item.owner}</td>
+                    <td className="sa-td-expiry">{item.expiry}</td>
+                    <td>
+                      <span className={`sa-plan-badge ${item.planType}`}>
+                        {item.plan}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
