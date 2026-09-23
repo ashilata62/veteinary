@@ -77,8 +77,14 @@ const getClinics = async (req, res) => {
                 p.price as plan_price
             FROM clinics c
             LEFT JOIN users u ON u.clinic_id = c.id AND u.role = 'Admin'
-            LEFT JOIN saas_subscriptions s ON s.clinic_id = c.id
+            LEFT JOIN saas_subscriptions s ON s.id = (
+                SELECT s2.id FROM saas_subscriptions s2 
+                WHERE s2.clinic_id = c.id 
+                ORDER BY s2.created_at DESC 
+                LIMIT 1
+            )
             LEFT JOIN saas_plans p ON p.id = s.plan_id
+            GROUP BY c.id
             ORDER BY c.created_at DESC
         `);
 
@@ -153,10 +159,17 @@ const getStats = async (req, res) => {
                 s.end_date as expiry,
                 p.name as plan,
                 p.id as planType
-            FROM saas_subscriptions s
-            LEFT JOIN clinics c ON c.id = s.clinic_id
-            LEFT JOIN users u ON u.clinic_id = s.clinic_id AND u.role = 'Admin'
+            FROM clinics c
+            INNER JOIN saas_subscriptions s ON s.id = (
+                SELECT s2.id FROM saas_subscriptions s2 
+                WHERE s2.clinic_id = c.id 
+                ORDER BY s2.created_at DESC 
+                LIMIT 1
+            )
+            LEFT JOIN users u ON u.clinic_id = c.id AND u.role = 'Admin'
             LEFT JOIN saas_plans p ON p.id = s.plan_id
+            WHERE s.end_date IS NOT NULL
+            GROUP BY c.id
             ORDER BY s.end_date ASC
             LIMIT 10
         `);
