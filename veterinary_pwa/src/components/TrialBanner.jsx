@@ -1,25 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function TrialBanner() {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {
+      return {};
+    }
+  });
 
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return null;
+  useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        setUserData(JSON.parse(localStorage.getItem('user') || '{}'));
+      } catch (e) {}
+    };
 
-  let user = {};
-  try {
-    user = JSON.parse(userStr);
-  } catch (e) {
-    return null;
-  }
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('auth:subscription_status', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('auth:subscription_status', handleUpdate);
+    };
+  }, []);
+
+  const user = userData;
+  if (!user || !user.id || user.role === 'SuperAdmin' || localStorage.getItem('sa_token')) return null;
 
   const status = (user.subscription_status || '').toLowerCase();
-  const planId = (user.plan_id || '').toLowerCase();
+  const planId = (user.plan_id || user.plan || '').toLowerCase();
 
-  // Show banner if subscription_status is 'trial' or plan_id is 'plan-free-trial'
-  const isTrial = status === 'trial' || planId === 'plan-free-trial' || planId === 'free-trial';
+  // Show banner if subscription_status is 'trial' or plan is free-trial or not explicitly paid active
+  const isPaid = status === 'active' && planId !== 'plan-free-trial' && planId !== 'free-trial';
+  const isTrial = !isPaid && (status === 'trial' || planId === 'plan-free-trial' || planId === 'free-trial' || !status);
+  
   if (!isTrial) return null;
 
   // Helper to parse dates strictly as local calendar midnight
@@ -36,7 +53,13 @@ export default function TrialBanner() {
   const today = new Date();
   const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const startMid = parseMid(user.trial_start_date || user.created_at) || todayMid;
-  const endMid = parseMid(user.trial_end_date);
+  let endMid = parseMid(user.trial_end_date || user.trialEndDate || user.trial_expires_at);
+
+  if (!endMid && startMid) {
+    const defaultEnd = new Date(startMid);
+    defaultEnd.setDate(defaultEnd.getDate() + 7);
+    endMid = defaultEnd;
+  }
 
   let totalDays = 7;
   let diffDays = 7;
@@ -57,7 +80,7 @@ export default function TrialBanner() {
     }
 
     // If trial is completely over, the TrialExpired page/modal takes over
-    if (diffDays <= 0) return null;
+    if (diffDays <= 0 && status === 'expired') return null;
   }
 
   const formattedRegDate = startMid 

@@ -82,63 +82,79 @@ const loginUser = async (req, res) => {
         );
 
         // Fetch subscription info
-        let subscription_status = 'active';
+        let subscription_status = 'trial';
         let trial_end_date = null;
         let trial_start_date = null;
-        let trial_days_left = 0;
+        let trial_days_left = 7;
         let trial_current_day = 1;
-        let plan_id = 'plan-pro';
+        let plan_id = 'plan-free-trial';
         let clinic_name = null;
         if (user.clinic_id) {
-            const [clinics] = await db.query('SELECT clinic_name FROM clinics WHERE id = ? LIMIT 1', [user.clinic_id]);
+            const [clinics] = await db.query('SELECT clinic_name, status, created_at FROM clinics WHERE id = ? LIMIT 1', [user.clinic_id]);
+            let clinicCreatedAt = null;
             if (clinics.length > 0) {
                 clinic_name = clinics[0].clinic_name;
+                clinicCreatedAt = clinics[0].created_at;
+                if ((clinics[0].status || '').toUpperCase() === 'ACTIVE') {
+                    subscription_status = 'active';
+                    plan_id = 'plan-starter';
+                }
             }
 
             const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
             if (subs.length > 0) {
                 const sub = subs[0];
                 plan_id = sub.plan_id || 'plan-free-trial';
-                if (sub.status === 'Expired') {
+                const subStatus = (sub.status || '').toLowerCase();
+                const subPlan = (sub.plan_id || '').toLowerCase();
+
+                if (subStatus === 'expired') {
                     subscription_status = 'expired';
-                } else if (sub.status === 'Trial' || sub.plan_id === 'plan-free-trial') {
+                } else if (subStatus === 'trial' || subPlan === 'plan-free-trial' || subPlan === 'free-trial') {
                     if (sub.end_date && new Date(sub.end_date) < new Date()) {
                         subscription_status = 'expired';
                     } else {
                         subscription_status = 'trial';
                     }
-                } else if (sub.status === 'Active') {
+                } else if (subStatus === 'active') {
                     if (sub.end_date && new Date(sub.end_date) < new Date()) {
                         subscription_status = 'expired';
                     } else {
                         subscription_status = 'active';
                     }
                 } else {
-                    subscription_status = 'expired';
+                    subscription_status = 'trial';
                 }
-                trial_start_date = sub.start_date || sub.created_at;
+                trial_start_date = sub.start_date || sub.created_at || clinicCreatedAt;
                 trial_end_date = sub.end_date;
+            } else {
+                // If no subscription record found, compute trial from clinic/user created_at
+                const baseDate = new Date(clinicCreatedAt || user.created_at || Date.now());
+                trial_start_date = baseDate.toISOString().slice(0, 10);
+                const expDate = new Date(baseDate);
+                expDate.setDate(expDate.getDate() + 7);
+                trial_end_date = expDate.toISOString().slice(0, 10);
+            }
 
-                if (subscription_status === 'trial' && trial_end_date) {
-                    const today = new Date();
-                    const parseMid = (val) => {
-                        if (!val) return null;
-                        if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
-                            const [y, m, d] = val.slice(0, 10).split('-').map(Number);
-                            return new Date(y, m - 1, d);
-                        }
-                        const dt = new Date(val);
-                        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-                    };
-                    const startMid = parseMid(trial_start_date) || new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    const endMid = parseMid(trial_end_date);
-                    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            if (subscription_status === 'trial' && trial_end_date) {
+                const today = new Date();
+                const parseMid = (val) => {
+                    if (!val) return null;
+                    if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
+                        const [y, m, d] = val.slice(0, 10).split('-').map(Number);
+                        return new Date(y, m - 1, d);
+                    }
+                    const dt = new Date(val);
+                    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                };
+                const startMid = parseMid(trial_start_date) || new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const endMid = parseMid(trial_end_date);
+                const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-                    const totalDays = Math.max(1, Math.round((endMid - startMid) / (1000 * 60 * 60 * 24))) || 7;
-                    const daysPassed = Math.max(0, Math.round((todayMid - startMid) / (1000 * 60 * 60 * 24)));
-                    trial_days_left = Math.max(0, Math.round((endMid - todayMid) / (1000 * 60 * 60 * 24)));
-                    trial_current_day = Math.min(totalDays, daysPassed + 1);
-                }
+                const totalDays = Math.max(1, Math.round((endMid - startMid) / (1000 * 60 * 60 * 24))) || 7;
+                const daysPassed = Math.max(0, Math.round((todayMid - startMid) / (1000 * 60 * 60 * 24)));
+                trial_days_left = Math.max(0, Math.round((endMid - todayMid) / (1000 * 60 * 60 * 24)));
+                trial_current_day = Math.min(totalDays, daysPassed + 1);
             }
         }
 
