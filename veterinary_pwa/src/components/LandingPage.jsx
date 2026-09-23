@@ -30,6 +30,7 @@ import {
   Globe
 } from 'lucide-react';
 import { LANGUAGES, PLAN_PRICING, TRANSLATIONS } from '../data/landingTranslations';
+import LanguageSwitcher from './LanguageSwitcher';
 import './LandingPage.css';
 
 export default function LandingPage() {
@@ -40,16 +41,16 @@ export default function LandingPage() {
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
 
-  // Language & Currency State
-  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem('petcare_lang') || 'en');
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const langDropdownRef = useRef(null);
-
-  // Derive active language and currency
-  const activeLang = LANGUAGES.find((l) => l.id === currentLang) || LANGUAGES[0];
-  const currency = activeLang.currency || 'USD';
-  const pricing = PLAN_PRICING[currency] || PLAN_PRICING.USD;
-  const tData = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+  const pricing = PLAN_PRICING.INR || {
+    symbol: '₹',
+    code: 'INR',
+    'free-trial': { price: '0', unit: 'per week' },
+    starter: { price: '999', unit: 'per month' },
+    standard: { price: '1,299', unit: 'per month' },
+    pro: { price: '1,499', unit: 'per month' },
+    custom: { price: 'Custom', unit: '' }
+  };
+  const tData = TRANSLATIONS.en;
 
   // Translation helper
   const t = (path) => {
@@ -131,37 +132,7 @@ export default function LandingPage() {
 
           {/* Right Actions */}
           <div className="vet-header-actions">
-            {/* Language & Currency Selector Dropdown */}
-            <div className="vet-lang-dropdown-wrapper" ref={langDropdownRef}>
-              <button 
-                className="vet-lang-btn" 
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                title="Select Language & Currency"
-              >
-                <Globe size={15} className="vet-lang-globe-icon" />
-                <span className="vet-lang-text">{activeLang.flag} {activeLang.label}</span>
-                <span className="vet-lang-currency-tag">{pricing.code}</span>
-                <ChevronDown size={13} style={{ opacity: 0.7 }} />
-              </button>
-
-              {langMenuOpen && (
-                <div className="vet-lang-menu">
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.id}
-                      className={`vet-lang-option ${currentLang === lang.id ? 'active' : ''}`}
-                      onClick={() => handleLanguageChange(lang.id)}
-                    >
-                      <div className="vet-lang-option-left">
-                        <span style={{ fontSize: '1.1rem' }}>{lang.flag}</span>
-                        <span>{lang.nativeName} ({lang.label})</span>
-                      </div>
-                      <span className="vet-lang-option-currency">{lang.currency} ({lang.symbol})</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LanguageSwitcher />
 
             <button className="vet-btn-outline vet-header-login-btn" onClick={handleAdminLogin}>
               {t('nav.adminLogin')}
@@ -194,23 +165,8 @@ export default function LandingPage() {
         </div>
 
         {/* Mobile Language Selector */}
-        <div>
-          <div className="vet-drawer-section-title">
-            Language / Currency
-          </div>
-          <div className="vet-drawer-lang-grid">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.id}
-                onClick={() => { handleLanguageChange(lang.id); setMobileMenuOpen(false); }}
-                className={`vet-drawer-lang-card ${currentLang === lang.id ? 'active' : ''}`}
-              >
-                <span>{lang.flag}</span>
-                <span>{lang.nativeName}</span>
-                <span style={{ fontSize: '0.68rem', color: '#94a3b8', marginLeft: 'auto' }}>{lang.currency}</span>
-              </button>
-            ))}
-          </div>
+        <div style={{ padding: '0.5rem 0' }}>
+          <LanguageSwitcher />
         </div>
 
         {/* Mobile Nav Links */}
