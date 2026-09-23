@@ -648,40 +648,59 @@ export default function LandingPage() {
       <footer id="contact" className="vet-footer">
         <div className="vet-section-container" style={{ paddingTop: 0, paddingBottom: 0 }}>
           <div className="vet-footer-grid">
-            {/* Column 1: Brand */}
-            <div>
+            {/* Column 1: Brand & Identity */}
+            <div className="vet-footer-col-brand">
               <div className="vet-footer-brand-title">
-                <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '40px', objectFit: 'contain' }} />
+                <img src="/kt-logo.png" alt="Kiaan Technology Logo" style={{ height: '42px', objectFit: 'contain' }} />
                 <span>KIAAN <span className="vet-text-teal">TECHNOLOGY</span></span>
               </div>
               <p className="vet-footer-desc">
                 {t('footer.tagline')}
               </p>
-              <div style={{ display: 'flex', gap: '12px', marginTop: '1.5rem', alignItems: 'center' }}>
+              
+              <div className="vet-footer-social-row">
                 <a href="https://www.instagram.com/kiaan_technology4/" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', textDecoration: 'none' }} 
-                   title="Instagram">
-                  <Instagram size={18} strokeWidth={2.5} />
+                   className="vet-social-btn instagram"
+                   title="Follow us on Instagram">
+                  <Instagram size={18} strokeWidth={2.2} />
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61560965313920&mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#1877F2', color: '#fff', textDecoration: 'none' }} 
-                   title="Facebook">
-                  <Facebook size={18} strokeWidth={2.5} />
+                   className="vet-social-btn facebook"
+                   title="Follow us on Facebook">
+                  <Facebook size={18} strokeWidth={2.2} />
                 </a>
                 <a href="https://www.linkedin.com/company/kiaan-technology-pvt-ltd/posts/?feedView=all" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#0A66C2', color: '#fff', textDecoration: 'none' }} 
-                   title="LinkedIn">
-                  <Linkedin size={18} strokeWidth={2.5} />
+                   className="vet-social-btn linkedin"
+                   title="Follow us on LinkedIn">
+                  <Linkedin size={18} strokeWidth={2.2} />
                 </a>
                 <a href="https://kiaantechnology.com/" target="_blank" rel="noopener noreferrer" 
-                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: '#14b8a6', color: '#fff', textDecoration: 'none' }} 
-                   title="Website">
-                  <Globe size={18} strokeWidth={2.5} />
+                   className="vet-social-btn website"
+                   title="Visit Official Website">
+                  <Globe size={18} strokeWidth={2.2} />
                 </a>
+              </div>
+
+              <div className="vet-footer-trust-pill">
+                <ShieldCheck size={14} style={{ color: '#2dd4bf' }} />
+                <span>ISO 27001 Certified & HIPAA Ready</span>
               </div>
             </div>
 
-            {/* Column 2: Quick Links */}
+            {/* Column 2: Clinical Modules */}
+            <div>
+              <h4 className="vet-footer-col-title">Clinical Modules</h4>
+              <ul className="vet-footer-links">
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Smart Appointments & Queue</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Electronic Medical Records (EMR)</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Pharmacy & POS Billing</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Automated WhatsApp Alerts</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Hospitalization & IPD Ward</a></li>
+                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Multi-Branch Reports</a></li>
+              </ul>
+            </div>
+
+            {/* Column 3: Quick Navigation */}
             <div>
               <h4 className="vet-footer-col-title">{t('footer.quickLinks')}</h4>
               <ul className="vet-footer-links">
@@ -689,22 +708,26 @@ export default function LandingPage() {
                 <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
                 <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
                 <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
-                <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>{t('nav.contact')}</a></li>
+                <li><a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Clinic Admin Login</a></li>
+                <li><a href="/register?plan=starter" onClick={(e) => { e.preventDefault(); navigate('/register?plan=starter'); }}>Start 7-Day Free Trial</a></li>
               </ul>
             </div>
 
-            {/* Column 3: Contact */}
+            {/* Column 4: Contact & Support */}
             <div>
               <h4 className="vet-footer-col-title">{t('footer.contact')}</h4>
               <ul className="vet-contact-list">
                 <li className="vet-contact-item">
-                  <MapPin size={16} /> 2341, Sector E, Sudama Nagar, Indore, Madhya Pradesh 452009
+                  <MapPin size={18} className="vet-contact-icon" />
+                  <span>2341, Sector E, Sudama Nagar, Indore, Madhya Pradesh 452009</span>
                 </li>
                 <li className="vet-contact-item">
-                  <Phone size={16} /> +91 97521 00980
+                  <Phone size={18} className="vet-contact-icon" />
+                  <a href="tel:+919752100980" style={{ color: 'inherit', textDecoration: 'none' }}>+91 97521 00980</a>
                 </li>
                 <li className="vet-contact-item">
-                  <Mail size={16} /> info@kiaantechnology.com
+                  <Mail size={18} className="vet-contact-icon" />
+                  <a href="mailto:info@kiaantechnology.com" style={{ color: 'inherit', textDecoration: 'none' }}>info@kiaantechnology.com</a>
                 </li>
               </ul>
             </div>
@@ -712,11 +735,12 @@ export default function LandingPage() {
 
           {/* Bottom Bar */}
           <div className="vet-footer-bottom">
-            <div>
-              © 2026 <strong>Kiaan Tech Craft</strong>. {t('footer.rights')}
+            <div className="vet-copyright-text">
+              © 2026 <strong>Kiaan Tech Craft Pvt. Ltd.</strong> All rights reserved. PetCare Pro SaaS Platform.
             </div>
             <div className="vet-bottom-links">
               <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalType('privacy'); setShowLegalModal(true); }}>Privacy Policy</a>
+              <span className="vet-bottom-divider">•</span>
               <a href="#terms" onClick={(e) => { e.preventDefault(); setLegalType('terms'); setShowLegalModal(true); }}>Terms & Conditions</a>
             </div>
           </div>
