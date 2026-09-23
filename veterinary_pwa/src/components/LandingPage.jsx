@@ -97,9 +97,9 @@ export default function LandingPage() {
       <header className="vet-landing-header">
         <div className="vet-header-container">
           {/* Logo */}
-          <div className="vet-brand-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="vet-brand-logo notranslate" translate="no" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img src="/kt-logo.png" alt="PetCare Pro Logo" style={{ height: '36px', objectFit: 'contain', cursor: 'pointer' }} />
-            <span>PetCare <span className="vet-brand-highlight">Pro</span></span>
+            <span className="notranslate" translate="no">PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
 
           {/* Center Links (Desktop) */}
@@ -138,9 +138,9 @@ export default function LandingPage() {
       )}
       <div className={`vet-mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="vet-drawer-header">
-          <div className="vet-brand-logo" onClick={() => { setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          <div className="vet-brand-logo notranslate" translate="no" onClick={() => { setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <img src="/kt-logo.png" alt="PetCare Pro Logo" style={{ height: '30px', objectFit: 'contain' }} />
-            <span style={{ fontSize: '1.2rem' }}>PetCare <span className="vet-brand-highlight">Pro</span></span>
+            <span className="notranslate" translate="no" style={{ fontSize: '1.2rem' }}>PetCare <span className="vet-brand-highlight">Pro</span></span>
           </div>
           <button className="vet-drawer-close-btn" onClick={() => setMobileMenuOpen(false)} title="Close menu">
             <X size={20} />
