@@ -4,15 +4,44 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
 
+// Verify Google reCAPTCHA token helper
+const verifyRecaptcha = async (recaptchaToken) => {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    if (!secretKey) {
+        // If developer hasn't set RECAPTCHA_SECRET_KEY in .env, permit in local dev mode
+        return true;
+    }
+    if (!recaptchaToken) {
+        return false;
+    }
+    try {
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+        const response = await fetch(verifyUrl, { method: 'POST' });
+        const data = await response.json();
+        return !!data.success;
+    } catch (e) {
+        console.error('reCAPTCHA verification error:', e);
+        return false;
+    }
+};
+
 // @desc    Authenticate user & get token
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, recaptchaToken } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ status: 'error', message: 'Please provide email and password' });
+        }
+
+        // Validate reCAPTCHA if configured
+        if (process.env.RECAPTCHA_SECRET_KEY) {
+            const isCaptchaValid = await verifyRecaptcha(recaptchaToken);
+            if (!isCaptchaValid) {
+                return res.status(400).json({ status: 'error', message: 'reCAPTCHA verification failed. Please try again.' });
+            }
         }
 
         // Check if user exists by email or username
@@ -35,9 +64,19 @@ const loginUser = async (req, res) => {
             return res.status(403).json({ status: 'error', message: 'User account is suspended or inactive' });
         }
 
-        // Generate JWT Token
+        // Generate unique Session ID for single active device tracking
+        const sessionId = crypto.randomUUID ? crypto.randomUUID() : `sess-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
+
+        // Update active session in DB (invalidates any previous logins)
+        await db.query(
+            'UPDATE users SET current_session_token = ?, last_login_ip = ?, last_login_at = NOW() WHERE id = ?',
+            [sessionId, String(clientIp).slice(0, 50), user.id]
+        );
+
+        // Generate JWT Token with embedded sessionId
         const token = jwt.sign(
-            { id: user.id, role: user.role, email: user.email, clinic_id: user.clinic_id },
+            { id: user.id, role: user.role, email: user.email, clinic_id: user.clinic_id, sessionId },
             process.env.JWT_SECRET || 'secretkey123',
             { expiresIn: '8h' }
         );
@@ -127,8 +166,17 @@ const registerUser = async (req, res) => {
             mobile,
             password,
             confirmPassword,
-            selectedPlan = 'free-trial'
+            selectedPlan = 'free-trial',
+            recaptchaToken
         } = req.body;
+
+        // Validate reCAPTCHA if configured
+        if (process.env.RECAPTCHA_SECRET_KEY) {
+            const isCaptchaValid = await verifyRecaptcha(recaptchaToken);
+            if (!isCaptchaValid) {
+                return res.status(400).json({ status: 'error', message: 'reCAPTCHA verification failed. Please try again.' });
+            }
+        }
 
         // 1. Basic Field Presence Check
         if (!businessName || !adminName || !email || !mobile || !password) {

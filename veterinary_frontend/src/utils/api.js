@@ -31,6 +31,22 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       const url = error.config && error.config.url ? error.config.url : '';
+      const data = error.response.data || {};
+      const code = data.code;
+      
+      // Handle Concurrent Login Termination
+      if (code === 'SESSION_TERMINATED') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new CustomEvent('session_terminated', {
+          detail: {
+            message: data.message || 'Your account was logged in from another device.'
+          }
+        }));
+        return Promise.reject(error);
+      }
+
       // Don't redirect on login endpoints — let the form handle the error
       const isLoginEndpoint = url.includes('/login');
       if (!isLoginEndpoint) {

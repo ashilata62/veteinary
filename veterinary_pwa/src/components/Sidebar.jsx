@@ -50,13 +50,14 @@ export default function Sidebar({
     return isTabAllowedForPlan(item.id, userPlanId);
   });
 
-  const staffName = {
-    Admin: 'Diana Prince',
-    Manager: 'Bruce Wayne',
-    Doctor: 'Dr. Sarah Connor',
-    Receptionist: 'Barry Allen',
-    'Vet Assistant': 'Kara Danvers'
-  }[currentRole] || currentRole;
+  const displayName = user.name || user.fullName || user.clinic_name || ({
+    Admin: 'Admin User',
+    Manager: 'Clinic Manager',
+    Doctor: 'Doctor',
+    Receptionist: 'Receptionist',
+    'Vet Assistant': 'Vet Assistant'
+  }[currentRole] || currentRole || 'User');
+  const displayRole = user.role || currentRole || 'Admin';
 
   const isActive = (id) => currentTab === id;
 
@@ -191,10 +192,10 @@ export default function Sidebar({
           {sidebarOpen && (
             <>
               <div className="sidebar-user-info">
-                <div className="sidebar-user-name">{staffName}</div>
-                <div className="sidebar-user-role">{currentRole}</div>
+                <div className="sidebar-user-name">{displayName}</div>
+                <div className="sidebar-user-role">{displayRole}</div>
               </div>
-              <button onClick={onLogout} className="logout-btn">
+              <button onClick={onLogout} className="logout-btn" title="Logout">
                 <LogOut size={16} />
               </button>
             </>
