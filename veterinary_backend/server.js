@@ -104,7 +104,7 @@ app.use('/api/v1/reports', protect, subscriptionMiddleware, reportRoutes);
 app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRoutes);
 app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
 app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
-app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicketRoutes);
+app.use('/api/v1/support-tickets', protect, supportTicketRoutes);
 app.use('/api/v1/dashboard', protect, subscriptionMiddleware, dashboardRoutes);
 app.use('/api/v1/hospitalization', protect, subscriptionMiddleware, hospitalizationRoutes);
 app.use('/api/v1/audit-logs', auditRoutes);

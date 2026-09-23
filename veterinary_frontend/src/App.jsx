@@ -359,7 +359,7 @@ export default function App() {
               try { return JSON.parse(localStorage.getItem('user') || '{}'); }
               catch (e) { return {}; }
             })();
-            const userPlanId = userObj.plan_id || (userObj.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-pro');
+            const userPlanId = userObj.plan_id || userObj.plan || (userObj.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-starter');
 
             if (!isTabAllowedForPlan(currentTab, userPlanId)) {
               const reqPlan = getRequiredPlanForTab(currentTab);

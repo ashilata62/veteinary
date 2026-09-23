@@ -47,9 +47,9 @@ export const PLAN_PRICING = {
     symbol: '₹',
     code: 'INR',
     'free-trial': { price: '0', unit: 'per week' },
-    starter: { price: '599', unit: 'per month' },
-    standard: { price: '799', unit: 'per month' },
-    pro: { price: '1,299', unit: 'per month' },
+    starter: { price: '999', unit: 'per month' },
+    standard: { price: '1,299', unit: 'per month' },
+    pro: { price: '1,499', unit: 'per month' },
     custom: { price: 'Custom', unit: '' }
   }
 };

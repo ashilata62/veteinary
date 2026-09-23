@@ -15,7 +15,9 @@ const EXEMPT_PATHS = [
     '/api/payment',
     '/api/super-admin',
     '/api/health',
-    '/uploads'
+    '/uploads',
+    '/api/v1/support-tickets',
+    '/support-tickets'
 ];
 
 const isExempt = (reqPath) => {

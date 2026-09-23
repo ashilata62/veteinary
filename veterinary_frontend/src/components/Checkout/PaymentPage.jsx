@@ -22,21 +22,20 @@ export default function PaymentPage() {
     document.body.appendChild(script);
 
     const PLANS = {
-      'starter': { name: 'Starter Plan', amount: 599 },
-      'standard': { name: 'Standard Plan', amount: 799 },
-      'pro': { name: 'Pro Plan', amount: 1299 },
-      'plan-starter': { name: 'Starter Plan', amount: 599 },
-      'plan-standard': { name: 'Standard Plan', amount: 799 },
-      'plan-pro': { name: 'Pro Plan', amount: 1299 },
-      'custom': { name: 'Custom Plan', amount: 0 },
-      'free-trial': { name: '7-Day Free Trial', amount: 0 }
+      'starter': { name: 'Starter Plan', amount: 999 },
+      'standard': { name: 'Standard Plan', amount: 1299 },
+      'pro': { name: 'Pro Plan', amount: 1499 },
+      'plan-starter': { name: 'Starter Plan', amount: 999 },
+      'plan-standard': { name: 'Standard Plan', amount: 1299 },
+      'plan-pro': { name: 'Pro Plan', amount: 1499 },
+      'custom': { name: 'Custom Plan', amount: 0, isCustom: true }
     };
     
     const key = (planId || '').toLowerCase();
     if (PLANS[key]) {
       setPlanDetails(PLANS[key]);
     } else {
-      setPlanDetails({ name: 'Pro Plan', amount: 1299 });
+      setPlanDetails({ name: 'Pro Plan', amount: 1499 });
     }
 
     return () => {
@@ -157,22 +156,41 @@ export default function PaymentPage() {
           <div className="payment-details">
             <div className="plan-summary">
               <span className="plan-name">{planDetails.name}</span>
-              <span className="plan-price">₹{planDetails.amount}</span>
+              <span className="plan-price" style={{ fontSize: '1.2rem', color: '#0284c7' }}>
+                {planDetails.isCustom ? 'Custom Quote' : `₹${planDetails.amount}`}
+              </span>
             </div>
             
-            <div className="payment-security-badges">
-              <div className="badge"><ShieldCheck size={16} /> 256-bit Encrypted</div>
-              <div className="badge">Razorpay Trusted</div>
-            </div>
+            {planDetails.isCustom ? (
+              <>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '1.25rem 0', lineHeight: 1.6, textAlign: 'center' }}>
+                  Custom plans include personalized setup for your clinic (personal domain, branding, and custom AI integrations). Please contact our sales team to receive a tailored quote.
+                </p>
+                <button 
+                  className="btn-pay" 
+                  style={{ backgroundColor: '#0284c7', borderColor: '#0284c7' }}
+                  onClick={() => navigate('/plans')}
+                >
+                  Contact Sales on Plans Page
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="payment-security-badges">
+                  <div className="badge"><ShieldCheck size={16} /> 256-bit Encrypted</div>
+                  <div className="badge">Razorpay Trusted</div>
+                </div>
 
-            <button 
-              className="btn-pay" 
-              onClick={handlePayment} 
-              disabled={processing}
-            >
-              {processing ? <Loader2 className="spinner" size={20} /> : `Pay ₹${planDetails.amount} Securely`}
-            </button>
-            <p className="test-mode-text">Test Mode Active: No real money will be deducted.</p>
+                <button 
+                  className="btn-pay" 
+                  onClick={handlePayment} 
+                  disabled={processing}
+                >
+                  {processing ? <Loader2 className="spinner" size={20} /> : `Pay ₹${planDetails.amount} Securely`}
+                </button>
+                <p className="test-mode-text">Test Mode Active: No real money will be deducted.</p>
+              </>
+            )}
           </div>
         )}
       </div>

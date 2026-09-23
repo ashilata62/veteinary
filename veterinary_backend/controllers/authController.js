@@ -49,15 +49,31 @@ const loginUser = async (req, res) => {
         let trial_days_left = 0;
         let trial_current_day = 1;
         let plan_id = 'plan-pro';
+        let clinic_name = null;
         if (user.clinic_id) {
+            const [clinics] = await db.query('SELECT clinic_name FROM clinics WHERE id = ? LIMIT 1', [user.clinic_id]);
+            if (clinics.length > 0) {
+                clinic_name = clinics[0].clinic_name;
+            }
+
             const [subs] = await db.query('SELECT * FROM saas_subscriptions WHERE clinic_id = ? ORDER BY created_at DESC LIMIT 1', [user.clinic_id]);
             if (subs.length > 0) {
                 const sub = subs[0];
                 plan_id = sub.plan_id || 'plan-free-trial';
-                if (sub.status === 'Trial' || sub.plan_id === 'plan-free-trial') {
-                    subscription_status = 'trial';
+                if (sub.status === 'Expired') {
+                    subscription_status = 'expired';
+                } else if (sub.status === 'Trial' || sub.plan_id === 'plan-free-trial') {
+                    if (sub.end_date && new Date(sub.end_date) < new Date()) {
+                        subscription_status = 'expired';
+                    } else {
+                        subscription_status = 'trial';
+                    }
                 } else if (sub.status === 'Active') {
-                    subscription_status = 'active';
+                    if (sub.end_date && new Date(sub.end_date) < new Date()) {
+                        subscription_status = 'expired';
+                    } else {
+                        subscription_status = 'active';
+                    }
                 } else {
                     subscription_status = 'expired';
                 }
@@ -99,6 +115,7 @@ const loginUser = async (req, res) => {
                     role: user.role,
                     profile_image: user.profile_image,
                     clinic_id: user.clinic_id,
+                    clinic_name,
                     plan_id,
                     subscription_status,
                     trial_start_date,

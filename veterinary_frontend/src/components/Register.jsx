@@ -93,7 +93,7 @@ export default function Register() {
     'starter': {
       key: 'starter',
       name: 'Starter Plan',
-      price: '₹599',
+      price: '₹999',
       cycle: 'per month',
       badge: 'Starter',
       btnText: 'Create Account & Proceed to Payment',
@@ -108,7 +108,7 @@ export default function Register() {
     'standard': {
       key: 'standard',
       name: 'Standard Plan',
-      price: '₹799',
+      price: '₹1,299',
       cycle: 'per month',
       badge: 'Most Popular',
       btnText: 'Create Account & Proceed to Payment',
@@ -123,7 +123,7 @@ export default function Register() {
     'pro': {
       key: 'pro',
       name: 'Pro Plan',
-      price: '₹1,299',
+      price: '₹1,499',
       cycle: 'per month',
       badge: 'Unlimited',
       btnText: 'Create Account & Proceed to Payment',
@@ -619,9 +619,9 @@ export default function Register() {
                       id="planSelect"
                     >
                       <option value="free-trial">Free Trial (₹0 for 7 Days)</option>
-                      <option value="starter">Starter Plan (₹599 / month)</option>
-                      <option value="standard">Standard Plan (₹799 / month - Most Popular)</option>
-                      <option value="pro">Pro Plan (₹1,299 / month)</option>
+                      <option value="starter">Starter Plan (₹999 / month)</option>
+                      <option value="standard">Standard Plan (₹1,299 / month - Most Popular)</option>
+                      <option value="pro">Pro Plan (₹1,499 / month)</option>
                     </select>
                     <Sparkles size={18} className="premium-input-icon" />
                     <label htmlFor="planSelect" className="input-label-float" style={{ transform: 'translateY(-8px) scale(0.8)', transformOrigin: 'left top', color: 'var(--primary-teal)', fontWeight: '700' }}>Selected Subscription Plan *</label>

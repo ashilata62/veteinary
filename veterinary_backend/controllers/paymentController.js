@@ -14,15 +14,15 @@ exports.createOrder = async (req, res) => {
     const { planId, currency = 'INR', clinicAdminId } = req.body;
 
     const PLANS = {
-      'starter': 599,
-      'standard': 799,
-      'pro': 1299,
-      'plan-starter': 599,
-      'plan-standard': 799,
-      'plan-pro': 1299
+      'starter': 999,
+      'standard': 1299,
+      'pro': 1499,
+      'plan-starter': 999,
+      'plan-standard': 1299,
+      'plan-pro': 1499
     };
     
-    let amount = req.body.amount || PLANS[planId ? planId.toLowerCase() : ''] || 1299;
+    let amount = req.body.amount || PLANS[planId ? planId.toLowerCase() : ''] || 1499;
 
     if (!amount) {
       return res.status(400).json({ status: 'error', message: 'Invalid plan or amount' });

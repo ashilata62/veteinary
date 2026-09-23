@@ -6,9 +6,9 @@ import api from '../utils/api';
 
 const PLANS = {
   'testing':  { name: 'Testing Plan', price: 1,  features: ['Razorpay ₹1 Test', 'Full functionality'] },
-  'starter':  { name: 'Starter',  price: 599,  features: ['Basic clinic management', 'Up to 100 pets'] },
-  'standard': { name: 'Standard', price: 799,  features: ['Complete features', 'Up to 500 pets', 'WhatsApp + Email'] },
-  'pro':      { name: 'Pro',      price: 1299, features: ['Advanced features', 'Unlimited pets', 'Multi-clinic support'] },
+  'starter':  { name: 'Starter',  price: 999,  features: ['Basic clinic management', 'Up to 100 pets'] },
+  'standard': { name: 'Standard', price: 1299, features: ['Complete features', 'Up to 500 pets', 'WhatsApp + Email'] },
+  'pro':      { name: 'Pro',      price: 1499, features: ['Advanced features', 'Unlimited pets', 'Multi-clinic support'] },
 };
 
 export default function TrialExpiredModal({ user, onClose }) {

@@ -15,6 +15,7 @@ import {
   Users,
   BarChart3,
   Lock,
+  AlertTriangle,
 } from 'lucide-react';
 import './TrialExpired.css';
 import Support from './Support';
@@ -84,6 +85,13 @@ export default function TrialExpired({ onLogout }) {
   const [particles, setParticles] = useState([]);
   const [showSupport, setShowSupport] = useState(false);
 
+  const user = (() => {
+    try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+    catch (e) { return {}; }
+  })();
+  const role = user.role || localStorage.getItem('role') || '';
+  const isAdmin = role === 'Admin' || role === 'ClinicAdmin';
+
   // Generate floating particles on mount
   useEffect(() => {
     const pts = Array.from({ length: 18 }, (_, i) => ({
@@ -133,25 +141,27 @@ export default function TrialExpired({ onLogout }) {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            className="trial-support-toggle-btn" 
-            onClick={() => setShowSupport(!showSupport)}
-            style={{
-              background: 'rgba(20, 184, 166, 0.1)',
-              border: '1px solid rgba(20, 184, 166, 0.3)',
-              color: '#2dd4bf',
-              padding: '0.5rem 1rem',
-              borderRadius: '999px',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem'
-            }}
-          >
-            {showSupport ? 'View Subscription Plans' : 'Contact Support'}
-          </button>
+          {isAdmin && (
+            <button 
+              className="trial-support-toggle-btn" 
+              onClick={() => setShowSupport(!showSupport)}
+              style={{
+                background: 'rgba(20, 184, 166, 0.1)',
+                border: '1px solid rgba(20, 184, 166, 0.3)',
+                color: '#2dd4bf',
+                padding: '0.5rem 1rem',
+                borderRadius: '999px',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+            >
+              {showSupport ? 'View Subscription Plans' : 'Contact Support'}
+            </button>
+          )}
           
           <button className="trial-logout-btn" onClick={handleLogout}>
             <LogOut size={16} />
@@ -161,17 +171,114 @@ export default function TrialExpired({ onLogout }) {
       </header>
 
       <div className="trial-expired-content">
-        {showSupport ? (
+        {!isAdmin ? (
+          <div style={{
+            maxWidth: '640px',
+            margin: '3.5rem auto',
+            padding: '2.5rem',
+            backgroundColor: '#1e293b',
+            borderRadius: '20px',
+            border: '1px solid #334155',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+            textAlign: 'center',
+            color: '#f8fafc'
+          }}>
+            <div style={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '2px solid rgba(239, 68, 68, 0.3)',
+              color: '#ef4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem auto'
+            }}>
+              <Lock size={36} />
+            </div>
+
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.3rem 0.8rem',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              borderRadius: '999px',
+              color: '#f87171',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              marginBottom: '1rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              <AlertTriangle size={14} /> Clinic Subscription Expired
+            </div>
+
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.75rem', color: '#fff' }}>
+              Please Contact Your Clinic Admin
+            </h2>
+
+            <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.75rem', maxWidth: '480px', margin: '0 auto 1.75rem auto' }}>
+              Your clinic's trial or subscription plan has expired. Access to the dashboard is temporarily suspended. Please contact your Clinic Administrator to renew the subscription.
+            </p>
+
+            <div style={{
+              backgroundColor: '#0f172a',
+              border: '1px solid #334155',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              marginBottom: '2rem',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.88rem' }}>
+                <span style={{ color: '#64748b' }}>Clinic:</span>
+                <span style={{ color: '#f8fafc', fontWeight: 600 }}>{user.clinic_name || 'Your Clinic'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.88rem' }}>
+                <span style={{ color: '#64748b' }}>Your Account:</span>
+                <span style={{ color: '#f8fafc', fontWeight: 600 }}>{user.name || user.email} ({role})</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                <span style={{ color: '#64748b' }}>Action Required:</span>
+                <span style={{ color: '#38bdf8', fontWeight: 600 }}>Contact Administrator to Renew</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: '0.75rem 2.25rem',
+                backgroundColor: '#334155',
+                border: '1px solid #475569',
+                borderRadius: '10px',
+                color: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '0.92rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#475569'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#334155'}
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
+        ) : showSupport ? (
           <div className="trial-expired-support-wrap" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '1rem 0' }}>
             <div style={{ 
-              backgroundColor: '#1E293B', 
+              backgroundColor: '#1e293b', 
               borderRadius: '16px', 
               color: '#f8fafc', 
               overflow: 'hidden', 
-              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255, 255, 255, 0.08)'
+              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '1.5rem 2rem'
             }}>
-              <Support />
+              <Support isDarkTheme={true} />
             </div>
           </div>
         ) : (

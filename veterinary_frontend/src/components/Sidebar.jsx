@@ -19,7 +19,7 @@ export default function Sidebar({
     try { return JSON.parse(localStorage.getItem('user') || '{}'); }
     catch (e) { return {}; }
   })();
-  const userPlanId = user.plan_id || (user.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-pro');
+  const userPlanId = user.plan_id || user.plan || (user.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-starter');
 
   const menuItems = [
     { id: 'dashboard',    label: 'Dashboard',             icon: LayoutDashboard, roles: ['Admin','Manager','Doctor','Receptionist','Vet Assistant'] },
