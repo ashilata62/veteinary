@@ -650,6 +650,23 @@ export default function Register() {
               </button>
             </form>
 
+            {/* Trust Indicators */}
+            <div className="trust-indicators">
+              <div className="trust-item"><ShieldCheck size={14} /> 256-Bit SSL Encrypted</div>
+              <div className="trust-item"><CheckCircle2 size={14} /> 7-Day Free Guarantee</div>
+              <div className="trust-item"><Shield size={14} /> HIPAA Ready</div>
+            </div>
+
+            {/* Footer Login Redirect */}
+            <div className="register-footer-redirect">
+              <p>
+                Already have a clinic account?{' '}
+                <span className="register-link-btn" onClick={() => navigate('/login')}>
+                  Login to Dashboard
+                </span>
+              </p>
+            </div>
+
           </div>
         </div>
 
