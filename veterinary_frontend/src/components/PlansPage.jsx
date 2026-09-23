@@ -69,7 +69,7 @@ export default function PlansPage() {
 
   const isYearly = billingCycle === 'yearly';
 
-  const handleBuyPlan = async (planKey) => {
+  const handleBuyPlan = (planKey) => {
     if (planKey === 'custom') {
       setShowContactModal(true);
       return;
@@ -78,120 +78,8 @@ export default function PlansPage() {
     const planConfig = PLAN_PRICES[planKey];
     if (!planConfig) return;
 
-    // Calculate exact payment amount
     const totalAmount = isYearly ? planConfig.yearlyTotal : planConfig.monthlyPrice;
-    setPurchasingPlan(planKey);
-
-    try {
-      // 1. Create Razorpay order on backend
-      const res = await apiFetch('/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          planId: planConfig.id,
-          amount: totalAmount,
-          currency: 'INR',
-          billingCycle: billingCycle,
-          clinicAdminId: currentUser.id || currentUser.userId || 'guest'
-        })
-      });
-
-      const data = await res.json();
-      if (data.status !== 'success') {
-        throw new Error(data.message || 'Failed to create payment order');
-      }
-
-      // Check if Razorpay is loaded
-      if (typeof window.Razorpay === 'undefined') {
-        // Fallback to checkout page with calculated params
-        navigate(`/checkout/${planConfig.id}?billing=${billingCycle}&amount=${totalAmount}`);
-        return;
-      }
-
-      // 2. Launch Razorpay Checkout Modal
-      const options = {
-        key: data.data.key_id || 'rzp_test_dummyKeyId',
-        amount: data.data.amount,
-        currency: data.data.currency || 'INR',
-        name: 'KT PetCare Pro',
-        description: `${planConfig.name} (${isYearly ? 'Annual Billing' : 'Monthly Billing'})`,
-        image: '/kt-logo.png',
-        order_id: data.data.order_id,
-        handler: async function (response) {
-          try {
-            // 3. Verify Payment
-            const verifyRes = await apiFetch('/api/payment/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                clinicAdminId: currentUser.id || currentUser.userId,
-                planId: planConfig.id,
-                amount: totalAmount,
-                billingCycle: billingCycle
-              })
-            });
-
-            const verifyData = await verifyRes.json();
-            if (verifyData.status === 'success') {
-              // Update local state
-              try {
-                const u = JSON.parse(localStorage.getItem('user') || '{}');
-                u.subscription_status = 'active';
-                u.plan_id = planConfig.id;
-                localStorage.setItem('user', JSON.stringify(u));
-                window.dispatchEvent(new CustomEvent('auth:subscription_status', { 
-                  detail: { code: 'ACTIVE', data: { plan: planConfig.id } } 
-                }));
-              } catch (e) {}
-
-              setSuccessPayment({
-                planName: planConfig.name,
-                invoiceNumber: verifyData.data?.invoiceNumber || `INV-${Date.now()}`,
-                amount: totalAmount,
-                billingCycle: isYearly ? 'Annual' : 'Monthly',
-                validTill: verifyData.data?.validTill
-              });
-            } else {
-              alert(verifyData.message || 'Payment verification failed');
-            }
-          } catch (err) {
-            console.error('Payment verification error:', err);
-            alert('Error verifying transaction: ' + err.message);
-          } finally {
-            setPurchasingPlan(null);
-          }
-        },
-        prefill: {
-          name: currentUser.name || 'Clinic Administrator',
-          email: currentUser.email || 'admin@vetclinic.com',
-          contact: currentUser.phone || '9999999999'
-        },
-        theme: {
-          color: '#0d9488'
-        },
-        modal: {
-          ondismiss: function () {
-            setPurchasingPlan(null);
-          }
-        }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (resp) {
-        console.warn('Payment failed or cancelled:', resp);
-        setPurchasingPlan(null);
-      });
-      rzp.open();
-    } catch (err) {
-      console.error('Razorpay initiation error:', err);
-      // Fallback navigate to checkout
-      navigate(`/checkout/${planConfig.id}?billing=${billingCycle}&amount=${totalAmount}`);
-    } finally {
-      setPurchasingPlan(null);
-    }
+    navigate(`/checkout/${planConfig.id}?billing=${billingCycle}&amount=${totalAmount}`);
   };
 
   const handleInquirySubmit = async (e) => {
