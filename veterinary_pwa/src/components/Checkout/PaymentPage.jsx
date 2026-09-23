@@ -1,262 +1,142 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, CircleCheck, AlertCircle, Loader2, CreditCard, Sparkles, FileText, ArrowRight, Download, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, CircleCheck, AlertCircle, Loader2 } from 'lucide-react';
 import './PaymentPage.css';
 import { apiFetch } from '../../utils/api';
 
 export default function PaymentPage() {
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const billingCycle = searchParams.get('billing') || 'monthly';
-  const customAmountParam = parseFloat(searchParams.get('amount'));
-  const rawPlanId = location.pathname.split('/').pop() || 'plan-pro';
+  const planId = location.pathname.split('/').pop();
   const navigate = useNavigate();
-  
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, success, failed
-  const [planDetails, setPlanDetails] = useState({ id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1499, currency: 'INR', billingCycle: 'monthly' });
-  const [paymentConfig, setPaymentConfig] = useState({ activeGateway: 'razorpay', defaultCurrency: 'INR' });
-  const [selectedGateway, setSelectedGateway] = useState('razorpay');
-  const [invoiceInfo, setInvoiceInfo] = useState(null);
+  const [planDetails, setPlanDetails] = useState({ name: 'Standard Plan', amount: 1299 });
 
   useEffect(() => {
-    // 1. Load Razorpay script dynamically
+    // Load Razorpay Script
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
+    script.onload = () => setLoading(false);
     document.body.appendChild(script);
 
-    // 2. Fetch plans & config from backend
-    const initializeData = async () => {
-      try {
-        const [configRes, plansRes] = await Promise.all([
-          apiFetch('/api/payment/config').catch(() => null),
-          apiFetch('/api/subscriptions/plans').catch(() => null)
-        ]);
-
-        if (configRes && configRes.ok) {
-          const cfgData = await configRes.json();
-          if (cfgData.status === 'success') {
-            setPaymentConfig(cfgData.data);
-            if (cfgData.data.activeGateway === 'stripe') setSelectedGateway('stripe');
-          }
-        }
-
-        const normalizedKey = rawPlanId.toLowerCase();
-        if (normalizedKey === 'custom' || normalizedKey === 'plan-custom') {
-          setPlanDetails({ id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true, billingCycle });
-          setLoading(false);
-          return;
-        }
-
-        const isYearly = billingCycle === 'yearly';
-
-        // Catalog with monthly and annual totals
-        const FALLBACK_PLANS = {
-          'starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
-          'plan-starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
-          'standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
-          'plan-standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
-          'pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
-          'plan-pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
-          'custom': { id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true }
-        };
-
-        const resolved = FALLBACK_PLANS[normalizedKey] || { id: normalizedKey, name: 'Medical SaaS Plan', amount: isYearly ? 12468 : 1299 };
-        const finalAmount = !isNaN(customAmountParam) && customAmountParam > 0 ? customAmountParam : resolved.amount;
-
-        setPlanDetails({
-          ...resolved,
-          amount: finalAmount,
-          billingCycle
-        });
-      } catch (err) {
-        console.error('Initialization error:', err);
-      } finally {
-        setLoading(false);
-      }
+    const PLANS = {
+      'starter': { name: 'Starter Plan', amount: 999 },
+      'standard': { name: 'Standard Plan', amount: 1299 },
+      'pro': { name: 'Pro Plan', amount: 1499 },
+      'plan-starter': { name: 'Starter Plan', amount: 999 },
+      'plan-standard': { name: 'Standard Plan', amount: 1299 },
+      'plan-pro': { name: 'Pro Plan', amount: 1499 },
+      'custom': { name: 'Custom Plan', amount: 0, isCustom: true }
     };
-
-    initializeData();
+    
+    const key = (planId || '').toLowerCase();
+    if (PLANS[key]) {
+      setPlanDetails(PLANS[key]);
+    } else {
+      setPlanDetails({ name: 'Standard Plan', amount: 1299 });
+    }
 
     return () => {
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
     };
-  }, [rawPlanId]);
-
-  const [showSimulator, setShowSimulator] = useState(false);
-  const [simulatorOrder, setSimulatorOrder] = useState(null);
-  const [simulatingPayment, setSimulatingPayment] = useState(false);
-  const [selectedSimMethod, setSelectedSimMethod] = useState('upi');
-
-  const executeVerification = async ({ order_id, payment_id, signature, user, method = 'Razorpay' }) => {
-    setSimulatingPayment(true);
-    try {
-      const verifyRes = await apiFetch('/api/payment/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          razorpay_order_id: order_id,
-          razorpay_payment_id: payment_id || `pay_${Date.now()}`,
-          razorpay_signature: signature || 'sig_verified',
-          clinicAdminId: user.id || user.userId,
-          planId: planDetails.id,
-          amount: planDetails.amount,
-          billingCycle: planDetails.billingCycle
-        })
-      });
-      const verifyData = await verifyRes.json();
-      if (verifyData.status === 'success') {
-        try {
-          const u = JSON.parse(localStorage.getItem('user') || '{}');
-          u.subscription_status = 'active';
-          u.plan_id = planDetails.id;
-          localStorage.setItem('user', JSON.stringify(u));
-          window.dispatchEvent(new CustomEvent('auth:subscription_status', {
-            detail: { code: 'ACTIVE', data: { plan: planDetails.id } }
-          }));
-        } catch(e) {}
-        setInvoiceInfo(verifyData.data);
-        setStatus('success');
-        setShowSimulator(false);
-      } else {
-        alert(verifyData.message || 'Payment verification failed');
-      }
-    } catch(err) {
-      alert('Verification error: ' + err.message);
-    } finally {
-      setSimulatingPayment(false);
-    }
-  };
-
-  const handleRazorpayPayment = async (user) => {
-    // 1. Create Order
-    const orderRes = await apiFetch('/api/payment/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        planId: planDetails.id,
-        amount: planDetails.amount,
-        clinicAdminId: user.id || user.userId,
-        currency: 'INR',
-        billingCycle: planDetails.billingCycle
-      })
-    });
-    const orderData = await orderRes.json();
-
-    if (orderData.status !== 'success') {
-      throw new Error(orderData.message || 'Failed to create Razorpay order');
-    }
-
-    const key = orderData.data.key_id;
-    const isMockKey = !key || key.includes('dummy') || key === 'rzp_test_dummyKeyId';
-
-    // If key is dummy or unconfigured, use Sandbox Simulator
-    if (isMockKey || typeof window.Razorpay === 'undefined') {
-      setSimulatorOrder({
-        order_id: orderData.data.order_id,
-        amount: planDetails.amount,
-        planName: planDetails.name,
-        user
-      });
-      setShowSimulator(true);
-      return;
-    }
-
-    // 2. Launch Official Razorpay Checkout Modal
-    const options = {
-      key: key,
-      amount: orderData.data.amount,
-      currency: orderData.data.currency || 'INR',
-      name: 'Kiaan Veterinary Cloud',
-      description: `Subscription for ${planDetails.name}`,
-      image: '/kt-logo.png',
-      order_id: orderData.data.order_id,
-      handler: async function (response) {
-        await executeVerification({
-          order_id: response.razorpay_order_id,
-          payment_id: response.razorpay_payment_id,
-          signature: response.razorpay_signature,
-          user
-        });
-      },
-      prefill: {
-        name: `${user.name || user.first_name || 'Clinic Administrator'}`,
-        email: user.email || 'admin@vetclinic.com',
-        contact: user.phone || '9999999999'
-      },
-      theme: {
-        color: '#0d9488'
-      }
-    };
-
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function () {
-        // If official Razorpay fails (e.g. invalid test key credentials on CDN), offer instant sandbox simulation!
-        setSimulatorOrder({
-          order_id: orderData.data.order_id,
-          amount: planDetails.amount,
-          planName: planDetails.name,
-          user
-        });
-        setShowSimulator(true);
-      });
-      rzp.open();
-    } catch(e) {
-      setSimulatorOrder({
-        order_id: orderData.data.order_id,
-        amount: planDetails.amount,
-        planName: planDetails.name,
-        user
-      });
-      setShowSimulator(true);
-    }
-  };
-
-  const handleStripePayment = async (user) => {
-    const sessionRes = await apiFetch('/api/payment/stripe/create-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        planId: planDetails.id,
-        clinicAdminId: user.id,
-        currency: 'USD',
-        successUrl: `${window.location.origin}/dashboard?payment=success`,
-        cancelUrl: `${window.location.origin}/checkout/${planDetails.id}`
-      })
-    });
-    const sessionData = await sessionRes.json();
-
-    if (sessionData.status === 'success' && sessionData.data?.checkoutUrl) {
-      window.location.href = sessionData.data.checkoutUrl;
-    } else {
-      throw new Error(sessionData.message || 'Stripe Checkout unavailable');
-    }
-  };
+  }, [planId]);
 
   const handlePayment = async () => {
     setProcessing(true);
     setStatus('idle');
-
-    let user = { id: 'temp_user_id', name: 'Clinic Administrator', email: 'admin@vetclinic.com' };
     try {
-      const parsed = JSON.parse(localStorage.getItem('user'));
-      if (parsed && typeof parsed === 'object') user = parsed;
-    } catch (e) {}
+      // 1. Create Order on Backend
+      let user = { id: 'temp_user_id', name: 'Clinic Administrator', email: 'admin@vetclinic.com', phone: '9999999999' };
+      try {
+        const parsed = JSON.parse(localStorage.getItem('user'));
+        if (parsed && typeof parsed === 'object') user = parsed;
+      } catch(e) {}
+      
+      const orderRes = await apiFetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: planId || 'standard',
+          amount: planDetails.amount,
+          clinicAdminId: user.id || user.userId
+        })
+      });
+      const orderData = await orderRes.json();
 
-    try {
-      if (selectedGateway === 'stripe') {
-        await handleStripePayment(user);
-      } else {
-        await handleRazorpayPayment(user);
+      if (orderData.status !== 'success') {
+        throw new Error(orderData.message || 'Failed to create order');
       }
+
+      // 2. Open Razorpay Checkout Modal
+      const options = {
+        key: orderData.data.key_id,
+        amount: orderData.data.amount,
+        currency: orderData.data.currency || 'INR',
+        name: 'PetCare Pro',
+        description: `Subscription for ${planDetails.name}`,
+        image: '/kt-logo.png',
+        order_id: orderData.data.order_id,
+        handler: async function (response) {
+          // 3. Verify Payment Signature
+          try {
+            const verifyRes = await apiFetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                clinicAdminId: user.id || user.userId,
+                planId: planId || 'standard',
+                amount: planDetails.amount
+              })
+            });
+            const verifyData = await verifyRes.json();
+            
+            if (verifyData.status === 'success') {
+              try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                u.subscription_status = 'active';
+                u.plan_id = planId || 'plan-standard';
+                localStorage.setItem('user', JSON.stringify(u));
+                window.dispatchEvent(new CustomEvent('auth:subscription_status', {
+                  detail: { code: 'ACTIVE', data: { plan: planId || 'plan-standard' } }
+                }));
+              } catch (e) {}
+              
+              setStatus('success');
+              setTimeout(() => navigate('/dashboard'), 2500);
+            } else {
+              setStatus('failed');
+            }
+          } catch (err) {
+            console.error('Verification error:', err);
+            setStatus('failed');
+          }
+        },
+        prefill: {
+          name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Clinic Administrator',
+          email: user.email || 'admin@vetclinic.com',
+          contact: user.phone || '9999999999'
+        },
+        theme: {
+          color: '#2dd4bf'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response){
+        console.error('Razorpay payment failed:', response.error);
+        setStatus('failed');
+      });
+      rzp.open();
     } catch (error) {
-      console.error(error);
-      alert(error.message || 'Payment initiation error');
+      console.error('Payment initiation error:', error);
+      alert(error.message || 'Payment initiation failed');
       setStatus('failed');
     } finally {
       setProcessing(false);
@@ -264,131 +144,48 @@ export default function PaymentPage() {
   };
 
   if (loading) {
-    return (
-      <div className="payment-loading">
-        <Loader2 className="spinner" size={48} color="#0d9488" />
-        <p style={{ marginTop: '1rem', color: '#64748b' }}>Loading secure checkout gateway...</p>
-      </div>
-    );
+    return <div className="payment-loading"><Loader2 className="spinner" size={48} /></div>;
   }
 
   return (
     <div className="payment-container">
-      <div className="payment-card" style={{ maxWidth: '540px' }}>
+      <div className="payment-card">
         <div className="payment-header">
-          <img src="/kt-logo.png" alt="Kiaan Veterinary" className="payment-logo" />
-          <h2 style={{ color: '#0f172a', fontWeight: 800 }}>Complete Your Subscription</h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Activate unlimited cloud access for your veterinary clinic</p>
+          <img src="/kt-logo.png" alt="PetCare Pro" className="payment-logo" />
+          <h2>Complete Your Subscription</h2>
+          <p>Secure checkout via Razorpay</p>
         </div>
 
         {status === 'success' ? (
-          <div className="payment-status success" style={{ padding: '1.5rem 1rem', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-              <CheckCircle2 size={36} />
-            </div>
-            <h3 style={{ color: '#0f172a', fontWeight: 800, fontSize: '1.35rem' }}>Payment Successful!</h3>
-            <p style={{ color: '#475569', fontSize: '0.92rem', marginTop: '0.25rem' }}>
-              Your subscription to <strong>{planDetails.name}</strong> is now active.
-            </p>
-
-            {invoiceInfo?.invoiceNumber && (
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', margin: '1.25rem 0', fontSize: '0.85rem' }}>
-                <span style={{ color: '#64748b' }}>Invoice Reference: </span>
-                <strong style={{ color: '#0f766e', fontFamily: 'monospace' }}>{invoiceInfo.invoiceNumber}</strong>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-              {invoiceInfo?.invoiceNumber && (
-                <a
-                  href={`http://localhost:5002/api/payment/invoice/${invoiceInfo.invoiceNumber}/html`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#334155',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  <FileText size={16} /> View Tax Invoice
-                </a>
-              )}
-              <button
-                onClick={() => navigate('/dashboard')}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#0d9488',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontSize: '0.9rem'
-                }}
-              >
-                Go to Dashboard <ArrowRight size={16} />
-              </button>
-            </div>
+          <div className="payment-status success">
+            <CircleCheck size={64} color="#34d399" />
+            <h3>Payment Successful!</h3>
+            <p>Your subscription is now active. Redirecting to dashboard...</p>
           </div>
         ) : status === 'failed' ? (
-          <div className="payment-status failed" style={{ padding: '1.5rem 1rem', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-              <AlertCircle size={36} />
-            </div>
-            <h3 style={{ color: '#0f172a', fontWeight: 800 }}>Payment Incomplete</h3>
-            <p style={{ color: '#64748b', fontSize: '0.9rem' }}>We were unable to complete your transaction. No charges were made.</p>
-            <button onClick={() => setStatus('idle')} className="btn-retry" style={{ marginTop: '1.25rem' }}>
-              Try Again
-            </button>
+          <div className="payment-status failed">
+            <AlertCircle size={64} color="#f87171" />
+            <h3>Payment Failed</h3>
+            <p>We couldn't process your payment. Please try again.</p>
+            <button onClick={() => setStatus('idle')} className="btn-retry">Try Again</button>
           </div>
         ) : (
           <div className="payment-details">
+            <div className="plan-summary">
+              <span className="plan-name">{planDetails.name}</span>
+              <span className="plan-price" style={{ fontSize: '1.4rem', color: '#2dd4bf' }}>
+                {planDetails.isCustom ? 'Custom Quote' : `₹${planDetails.amount}`}
+              </span>
+            </div>
+            
             {planDetails.isCustom ? (
               <>
-                <div className="plan-summary" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Enterprise Custom Setup</span>
-                    </div>
-                    <span className="plan-price" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0284c7' }}>
-                      Custom Quote
-                    </span>
-                  </div>
-                </div>
-
-                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '1.25rem 0', lineHeight: 1.6, textAlign: 'center' }}>
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '1.25rem 0', lineHeight: 1.6, textAlign: 'center' }}>
                   Custom plans include personalized setup for your clinic (personal domain, branding, and custom AI integrations). Please contact our sales team to receive a tailored quote.
                 </p>
                 <button 
                   className="btn-pay" 
-                  style={{ 
-                    backgroundColor: '#0284c7', 
-                    borderColor: '#0284c7',
-                    width: '100%',
-                    padding: '0.85rem',
-                    borderRadius: '8px',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '1rem',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
+                  style={{ backgroundColor: '#0284c7', borderColor: '#0284c7' }}
                   onClick={() => navigate('/plans')}
                 >
                   Contact Sales on Plans Page
@@ -396,251 +193,24 @@ export default function PaymentPage() {
               </>
             ) : (
               <>
-                {/* Plan Summary Box */}
-                <div className="plan-summary" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                        {billingCycle === 'yearly' ? '365 Days Access · Annual Billing (20% Saved)' : '30 Days Access · Monthly Billing'} · 18% GST Included
-                      </span>
-                    </div>
-                    <span className="plan-price" style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0d9488' }}>
-                      ₹{planDetails.amount?.toLocaleString()}
-                    </span>
-                  </div>
+                <div className="payment-security-badges">
+                  <div className="badge"><ShieldCheck size={16} /> 256-bit Encrypted</div>
+                  <div className="badge">Razorpay Trusted</div>
                 </div>
 
-                {/* Gateway Switcher if both enabled */}
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-                    Select Payment Method
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div
-                      onClick={() => setSelectedGateway('razorpay')}
-                      style={{
-                        border: selectedGateway === 'razorpay' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                        background: selectedGateway === 'razorpay' ? '#f0fdfa' : '#ffffff',
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <CreditCard size={20} color={selectedGateway === 'razorpay' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'razorpay' ? '#0f766e' : '#334155' }}>UPI / NetBanking / Cards</div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Razorpay (INR)</div>
-                    </div>
-
-                    <div
-                      onClick={() => setSelectedGateway('stripe')}
-                      style={{
-                        border: selectedGateway === 'stripe' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                        background: selectedGateway === 'stripe' ? '#f0fdfa' : '#ffffff',
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <CreditCard size={20} color={selectedGateway === 'stripe' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'stripe' ? '#0f766e' : '#334155' }}>International Cards</div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Stripe (USD)</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security Badges */}
-                <div className="payment-security-badges" style={{ marginBottom: '1.25rem' }}>
-                  <div className="badge"><ShieldCheck size={16} /> 256-Bit SSL Encrypted</div>
-                  <div className="badge"><Sparkles size={16} /> Instant Auto Activation</div>
-                </div>
-
-                <button
-                  className="btn-pay"
-                  onClick={handlePayment}
+                <button 
+                  className="btn-pay" 
+                  onClick={handlePayment} 
                   disabled={processing}
-                  style={{
-                    width: '100%',
-                    padding: '0.85rem',
-                    borderRadius: '8px',
-                    background: '#0d9488',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '1rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)'
-                  }}
                 >
-                  {processing ? (
-                    <>
-                      <Loader2 className="spinner" size={20} /> Processing Payment...
-                    </>
-                  ) : (
-                    `Pay ₹${planDetails.amount} Securely`
-                  )}
+                  {processing ? <Loader2 className="spinner" size={20} /> : `Pay ₹${planDetails.amount} Securely`}
                 </button>
-                <p className="test-mode-text" style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.75rem' }}>
-                  Instant Tax Invoice & GST Receipt generated automatically upon successful payment.
-                </p>
+                <p className="test-mode-text">Official Razorpay Checkout Integration Active</p>
               </>
             )}
           </div>
         )}
       </div>
-
-      {/* Razorpay Interactive Sandbox Simulator Modal */}
-      {showSimulator && simulatorOrder && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.85)',
-          zIndex: 99999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
-          backdropFilter: 'blur(8px)'
-        }}>
-          <div style={{
-            backgroundColor: '#0f172a',
-            border: '2px solid #0d9488',
-            borderRadius: '20px',
-            padding: '2rem',
-            width: '100%',
-            maxWidth: '480px',
-            color: '#f8fafc',
-            boxShadow: '0 25px 60px -15px rgba(13, 148, 136, 0.4)',
-            position: 'relative'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/kt-logo.png" alt="Logo" style={{ width: '28px', height: '28px' }} />
-                <div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>Razorpay Checkout Sandbox</div>
-                  <div style={{ fontSize: '0.75rem', color: '#14b8a6', fontWeight: 600 }}>Interactive Test Mode Simulator</div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowSimulator(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 700 }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ background: '#1e293b', borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Plan:</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{simulatorOrder.planName}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Total Payable Amount:</span>
-                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#2dd4bf' }}>₹{simulatorOrder.amount.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '0.6rem', textTransform: 'uppercase' }}>
-                Select Simulated Payment Instrument:
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[
-                  { id: 'upi', label: 'UPI / QR (Google Pay, PhonePe, Paytm)', desc: 'Instant UPI simulator' },
-                  { id: 'card', label: 'Debit / Credit Card (Visa, Mastercard)', desc: 'Test card simulator (4111...)' },
-                  { id: 'netbanking', label: 'NetBanking (HDFC / ICICI / SBI)', desc: 'Direct bank debit simulator' }
-                ].map((item) => (
-                  <label
-                    key={item.id}
-                    onClick={() => setSelectedSimMethod(item.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: selectedSimMethod === item.id ? '1.5px solid #0d9488' : '1px solid #334155',
-                      background: selectedSimMethod === item.id ? 'rgba(13, 148, 136, 0.15)' : '#090d16',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="simMethod"
-                      checked={selectedSimMethod === item.id}
-                      onChange={() => setSelectedSimMethod(item.id)}
-                      style={{ accentColor: '#0d9488' }}
-                    />
-                    <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{item.label}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{item.desc}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => executeVerification({
-                order_id: simulatorOrder.order_id,
-                payment_id: `pay_sim_${Date.now()}`,
-                user: simulatorOrder.user,
-                method: selectedSimMethod
-              })}
-              disabled={simulatingPayment}
-              style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '12px',
-                fontWeight: 800,
-                fontSize: '0.98rem',
-                cursor: simulatingPayment ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 14px rgba(13, 148, 136, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '0.6rem'
-              }}
-            >
-              {simulatingPayment ? (
-                <>
-                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>Verifying & Activating...</span>
-                </>
-              ) : (
-                `Simulate Successful Payment (₹${simulatorOrder.amount.toLocaleString()})`
-              )}
-            </button>
-
-            <button
-              onClick={() => setShowSimulator(false)}
-              style={{
-                width: '100%',
-                background: 'transparent',
-                color: '#94a3b8',
-                border: '1px solid #334155',
-                borderRadius: '8px',
-                padding: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Cancel Transaction
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
