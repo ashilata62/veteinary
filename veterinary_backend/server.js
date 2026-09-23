@@ -88,6 +88,7 @@ const hospitalizationRoutes = require('./routes/hospitalizationRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const messagingRoutes = require('./routes/messagingRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -106,6 +107,7 @@ app.use('/api/v1/invoices', protect, subscriptionMiddleware, invoiceRoutes);
 app.use('/api/v1/attendance', protect, subscriptionMiddleware, attendanceRoutes);
 app.use('/api/v1/reports', protect, subscriptionMiddleware, reportRoutes);
 app.use('/api/v1/notifications', protect, subscriptionMiddleware, notificationRoutes);
+app.use('/api/v1/messaging', protect, subscriptionMiddleware, messagingRoutes);
 app.use('/api/v1/settings', protect, subscriptionMiddleware, settingsRoutes);
 app.use('/api/v1/assistance-tasks', protect, subscriptionMiddleware, assistanceTaskRoutes);
 app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicketRoutes);

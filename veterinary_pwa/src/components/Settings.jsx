@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight, MessageSquare, Send, Smartphone, Check } from 'lucide-react';
 import { CLINIC_SETTINGS } from '../data/mockData';
 export default function SettingsPage({ currentRole }) {
   const [activeTab, setActiveTab] = useState('profile');
@@ -33,6 +33,27 @@ export default function SettingsPage({ currentRole }) {
   const [invoicesHistory, setInvoicesHistory] = useState([]);
   const [plansList, setPlansList] = useState([]);
   const [billingLoading, setBillingLoading] = useState(false);
+
+  // WhatsApp & SMS Messaging State
+  const [whatsappProvider, setWhatsappProvider] = useState('simulator');
+  const [whatsappToken, setWhatsappToken] = useState('');
+  const [whatsappPhoneId, setWhatsappPhoneId] = useState('');
+  const [smsProvider, setSmsProvider] = useState('simulator');
+  const [twilioSid, setTwilioSid] = useState('');
+  const [twilioAuthToken, setTwilioAuthToken] = useState('');
+  const [twilioPhone, setTwilioPhone] = useState('');
+  const [fast2smsApiKey, setFast2smsApiKey] = useState('');
+  const [messagingTemplates, setMessagingTemplates] = useState([]);
+  const [messagingLogs, setMessagingLogs] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [templateEditTitle, setTemplateEditTitle] = useState('');
+  const [templateEditBody, setTemplateEditBody] = useState('');
+  const [templateEditActive, setTemplateEditActive] = useState(true);
+  const [testPhone, setTestPhone] = useState('');
+  const [testChannel, setTestChannel] = useState('whatsapp');
+  const [testMessage, setTestMessage] = useState('');
+  const [testSending, setTestSending] = useState(false);
+  const [testStatusMessage, setTestStatusMessage] = useState(null);
 
   // Personal Profile State
   const [profileName, setProfileName] = useState('');
@@ -146,12 +167,155 @@ export default function SettingsPage({ currentRole }) {
       }
     };
 
+    const fetchMessagingData = async () => {
+      try {
+        const [settingsRes, tmplRes, logsRes] = await Promise.all([
+          apiFetch('/api/v1/messaging/settings').catch(() => null),
+          apiFetch('/api/v1/messaging/templates').catch(() => null),
+          apiFetch('/api/v1/messaging/logs').catch(() => null)
+        ]);
+
+        if (settingsRes && settingsRes.ok) {
+          const sData = await settingsRes.json();
+          if (sData.status === 'success' && sData.data) {
+            setWhatsappProvider(sData.data.whatsappProvider || 'simulator');
+            setWhatsappToken(sData.data.whatsappToken || '');
+            setWhatsappPhoneId(sData.data.whatsappPhoneId || '');
+            setSmsProvider(sData.data.smsProvider || 'simulator');
+            setTwilioSid(sData.data.twilioSid || '');
+            setTwilioAuthToken(sData.data.twilioAuthToken || '');
+            setTwilioPhone(sData.data.twilioPhone || '');
+            setFast2smsApiKey(sData.data.fast2smsApiKey || '');
+          }
+        }
+
+        if (tmplRes && tmplRes.ok) {
+          const tData = await tmplRes.json();
+          if (tData.status === 'success' && tData.data) {
+            setMessagingTemplates(tData.data);
+            if (tData.data.length > 0) {
+              const first = tData.data[0];
+              setSelectedTemplateId(first.id);
+              setTemplateEditTitle(first.title);
+              setTemplateEditBody(first.body_template);
+              setTemplateEditActive(first.is_active === 1);
+            }
+          }
+        }
+
+        if (logsRes && logsRes.ok) {
+          const lData = await logsRes.json();
+          if (lData.status === 'success') {
+            setMessagingLogs(lData.data || []);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load messaging data', err);
+      }
+    };
+
     fetchProfile();
     fetchClinicSettings();
     fetchBackupHistory();
     fetchStorageSettings();
     fetchBillingData();
+    fetchMessagingData();
   }, []);
+
+  const handleSaveMessagingGateways = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      const res = await apiFetch('/api/v1/messaging/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          whatsappProvider,
+          whatsappToken,
+          whatsappPhoneId,
+          smsProvider,
+          twilioSid,
+          twilioAuthToken,
+          twilioPhone,
+          fast2smsApiKey
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        setSuccessModal({ isOpen: true, message: 'WhatsApp & SMS Gateway settings saved successfully!' });
+      } else {
+        alert(data.message || 'Failed to save messaging settings');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating messaging settings');
+    }
+  };
+
+  const handleSaveTemplateChanges = async () => {
+    if (!selectedTemplateId) return;
+    try {
+      const res = await apiFetch(`/api/v1/messaging/templates/${selectedTemplateId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: templateEditTitle,
+          body_template: templateEditBody,
+          is_active: templateEditActive ? 1 : 0
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        setSuccessModal({ isOpen: true, message: 'Notification template updated and saved!' });
+        // Refresh templates
+        const tmplRes = await apiFetch('/api/v1/messaging/templates');
+        const tData = await tmplRes.json();
+        if (tData.status === 'success') setMessagingTemplates(tData.data);
+      } else {
+        alert(data.message || 'Failed to update template');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error saving template');
+    }
+  };
+
+  const handleSendTestMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!testPhone || !testMessage) {
+      alert('Please enter a recipient phone number and test message');
+      return;
+    }
+
+    try {
+      setTestSending(true);
+      setTestStatusMessage(null);
+      const res = await apiFetch('/api/v1/messaging/send-direct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: testChannel,
+          phone: testPhone,
+          message: testMessage,
+          recipientName: 'Test Recipient',
+          templateType: 'live_test'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        setTestStatusMessage({ success: true, text: `✅ ${testChannel.toUpperCase()} dispatched! Status: ${data.data?.status || 'Sent'}` });
+        // Refresh logs
+        const logsRes = await apiFetch('/api/v1/messaging/logs');
+        const lData = await logsRes.json();
+        if (lData.status === 'success') setMessagingLogs(lData.data || []);
+      } else {
+        setTestStatusMessage({ success: false, text: `❌ Dispatch failed: ${data.message || 'Error'}` });
+      }
+    } catch (err) {
+      setTestStatusMessage({ success: false, text: `❌ Error: ${err.message}` });
+    } finally {
+      setTestSending(false);
+    }
+  };
 
   const handleDownloadBackup = async () => {
     try {
@@ -413,8 +577,8 @@ export default function SettingsPage({ currentRole }) {
     { id: 'profile', label: 'Personal Profile', icon: User },
     { id: 'clinic', label: 'Hospital Information', icon: Settings },
     { id: 'billing', label: 'Subscription & Invoices', icon: CreditCard },
+    { id: 'notifications', label: 'WhatsApp & SMS Alerts', icon: MessageSquare },
     { id: 'branding', label: 'Visual Branding & Themes', icon: Palette },
-    { id: 'notifications', label: 'Notification Preferences', icon: Bell },
     { id: 'backup', label: 'Database Backup', icon: Database },
     { id: 'storage', label: 'Storage & S3 Cloud', icon: Cloud }
   ];
@@ -774,53 +938,460 @@ export default function SettingsPage({ currentRole }) {
               </div>
             )}
 
-            {/* NOTIFICATION PREFERENCES */}
+            {/* WHATSAPP, SMS & AUTOMATED ALERTS HUB */}
             {activeTab === 'notifications' && (
-              <div className="card animate-fade-in" style={{ margin: 0 }}>
-                <h3 className="font-bold text-lg mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-                  <Bell size={20} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
-                  Notification Preferences
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1rem', backgroundColor: '#fafafa', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
-                    <input
-                      type="checkbox"
-                      id="autoEmailAdmin"
-                      checked={autoEmail}
-                      onChange={(e) => setAutoEmail(e.target.checked)}
-                      style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: 'var(--primary-teal)' }}
-                    />
-                    <div>
-                      <label htmlFor="autoEmailAdmin" className="font-bold" style={{ cursor: 'pointer', display: 'block', marginBottom: '4px' }}>
-                        Enable Automatic Appointment Reminders
-                      </label>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        Automatically send an email to pet owners before their scheduled appointment.
-                      </span>
-                    </div>
-                  </div>
-                  {autoEmail && (
-                    <div className="form-group" style={{ paddingLeft: '1rem', borderLeft: '2px solid var(--primary-teal)' }}>
-                      <label className="form-label">Send Email Reminder</label>
-                      <select
-                        className="form-control"
-                        value={reminderTime}
-                        onChange={(e) => setReminderTime(e.target.value)}
-                      >
-                        <option value="12h">12 Hours before appointment</option>
-                        <option value="24h">24 Hours before appointment</option>
-                        <option value="48h">48 Hours before appointment</option>
-                      </select>
-                    </div>
-                  )}
+              <div className="card animate-fade-in" style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                  <h3 className="font-bold text-lg" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                    <MessageSquare size={20} style={{ color: 'var(--primary-teal)' }} />
+                    WhatsApp, SMS & Automated Alerts Center
+                  </h3>
                   <button
-                    onClick={handleNotificationSave}
-                    className="btn btn-primary"
-                    style={{ display: 'flex', gap: '6px' }}
+                    onClick={() => {
+                      fetchMessagingData();
+                    }}
+                    style={{ background: 'none', border: 'none', color: 'var(--primary-teal)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}
                   >
-                    <Mail size={16} /> Save Email Settings
+                    <RefreshCw size={14} /> Refresh Logs
                   </button>
                 </div>
+
+                {/* Automation Toggles Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <input
+                      type="checkbox"
+                      id="autoEmailToggle"
+                      checked={autoEmail}
+                      onChange={(e) => setAutoEmail(e.target.checked)}
+                      style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: 'var(--primary-teal)' }}
+                    />
+                    <div>
+                      <label htmlFor="autoEmailToggle" style={{ fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'block', color: '#0f172a' }}>
+                        Auto Email Appointment Reminders
+                      </label>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Sends HTML email confirmation 24h prior to appointment visit.</span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <input
+                      type="checkbox"
+                      id="autoWaToggle"
+                      defaultChecked={true}
+                      style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: 'var(--primary-teal)' }}
+                    />
+                    <div>
+                      <label htmlFor="autoWaToggle" style={{ fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'block', color: '#0f766e' }}>
+                        Auto WhatsApp & SMS Reminders
+                      </label>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Dispatches WhatsApp and SMS reminders on booking and before visit.</span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#fefce8', border: '1px solid #fef08a', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <input
+                      type="checkbox"
+                      id="autoVaxToggle"
+                      defaultChecked={true}
+                      style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: '#ca8a04' }}
+                    />
+                    <div>
+                      <label htmlFor="autoVaxToggle" style={{ fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'block', color: '#854d0e' }}>
+                        Vaccination Due Alerts
+                      </label>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Notifies pet owners 7 days before vaccine booster due dates.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Gateway Configuration Form */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
+                    <Smartphone size={16} style={{ color: 'var(--primary-teal)' }} />
+                    Messaging Gateways & API Credentials
+                  </h4>
+
+                  <form onSubmit={handleSaveMessagingGateways}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">WhatsApp Gateway Provider</label>
+                        <select
+                          className="form-control"
+                          value={whatsappProvider}
+                          onChange={(e) => setWhatsappProvider(e.target.value)}
+                        >
+                          <option value="simulator">Sandbox Simulator (Zero Setup / Free Testing)</option>
+                          <option value="meta_cloud">Meta WhatsApp Cloud API (Official)</option>
+                          <option value="twilio">Twilio WhatsApp</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">SMS Gateway Provider</label>
+                        <select
+                          className="form-control"
+                          value={smsProvider}
+                          onChange={(e) => setSmsProvider(e.target.value)}
+                        >
+                          <option value="simulator">Sandbox Simulator (Zero Setup / Free Testing)</option>
+                          <option value="twilio">Twilio SMS (Global)</option>
+                          <option value="fast2sms">Fast2SMS (India Quick DLT)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {whatsappProvider === 'meta_cloud' && (
+                      <div className="form-row" style={{ gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label className="form-label">Meta Phone Number ID</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="e.g. 1098472918239"
+                            value={whatsappPhoneId}
+                            onChange={(e) => setWhatsappPhoneId(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group" style={{ flex: 2 }}>
+                          <label className="form-label">Meta Permanent Access Token</label>
+                          <input
+                            type="password"
+                            className="form-control"
+                            placeholder="EAAG..."
+                            value={whatsappToken}
+                            onChange={(e) => setWhatsappToken(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {(whatsappProvider === 'twilio' || smsProvider === 'twilio') && (
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
+                        <div className="form-row" style={{ gap: '1rem' }}>
+                          <div className="form-group" style={{ flex: 1 }}>
+                            <label className="form-label">Twilio Account SID</label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="AC..."
+                              value={twilioSid}
+                              onChange={(e) => setTwilioSid(e.target.value)}
+                            />
+                          </div>
+                          <div className="form-group" style={{ flex: 1 }}>
+                            <label className="form-label">Twilio Auth Token</label>
+                            <input
+                              type="password"
+                              className="form-control"
+                              placeholder="Auth Token"
+                              value={twilioAuthToken}
+                              onChange={(e) => setTwilioAuthToken(e.target.value)}
+                            />
+                          </div>
+                          <div className="form-group" style={{ flex: 1 }}>
+                            <label className="form-label">Twilio Sender Number</label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="+14155238886"
+                              value={twilioPhone}
+                              onChange={(e) => setTwilioPhone(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {smsProvider === 'fast2sms' && (
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label className="form-label">Fast2SMS Authorization API Key</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          placeholder="Your Fast2SMS API Key"
+                          value={fast2smsApiKey}
+                          onChange={(e) => setFast2smsApiKey(e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Save size={16} /> Save Gateway Configuration
+                    </button>
+                  </form>
+                </div>
+
+                {/* Section 2: Live Message Template Customizer */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
+                    <FileText size={16} style={{ color: 'var(--primary-teal)' }} />
+                    Message Templates & Dynamic Placeholders
+                  </h4>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                    <div>
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <label className="form-label">Select Notification Template</label>
+                        <select
+                          className="form-control"
+                          value={selectedTemplateId}
+                          onChange={(e) => {
+                            const tid = e.target.value;
+                            setSelectedTemplateId(tid);
+                            const found = messagingTemplates.find(t => t.id === tid);
+                            if (found) {
+                              setTemplateEditTitle(found.title);
+                              setTemplateEditBody(found.body_template);
+                              setTemplateEditActive(found.is_active === 1);
+                            }
+                          }}
+                        >
+                          {messagingTemplates.map(t => (
+                            <option key={t.id} value={t.id}>
+                              [{t.channel.toUpperCase()}] {t.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Dynamic Placeholder Variable Pills */}
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                          CLICK TO INSERT VARIABLE:
+                        </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {['{{owner_name}}', '{{pet_name}}', '{{clinic_name}}', '{{appointment_date}}', '{{appointment_time}}', '{{doctor_name}}', '{{vaccine_name}}', '{{due_date}}', '{{clinic_phone}}'].map((tag) => (
+                            <button
+                              type="button"
+                              key={tag}
+                              onClick={() => setTemplateEditBody(prev => `${prev} ${tag}`)}
+                              style={{
+                                background: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '4px',
+                                padding: '2px 6px',
+                                fontSize: '0.72rem',
+                                color: '#0f766e',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + {tag}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <label className="form-label">Template Body Message</label>
+                        <textarea
+                          rows={6}
+                          className="form-control"
+                          value={templateEditBody}
+                          onChange={(e) => setTemplateEditBody(e.target.value)}
+                          style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveTemplateChanges}
+                        className="btn btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0.45rem 1rem' }}
+                      >
+                        <Check size={16} /> Update Template
+                      </button>
+                    </div>
+
+                    {/* Live WhatsApp / SMS Chat Bubble Preview */}
+                    <div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '6px' }}>
+                        LIVE RECIPIENT PREVIEW
+                      </span>
+                      <div style={{
+                        background: '#e5ddd5',
+                        borderRadius: '10px',
+                        padding: '1.25rem',
+                        minHeight: '220px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <div style={{
+                          background: '#dcf8c6',
+                          borderRadius: '8px 8px 0 8px',
+                          padding: '1rem',
+                          maxWidth: '90%',
+                          alignSelf: 'flex-start',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                          fontSize: '0.85rem',
+                          lineHeight: 1.5,
+                          whiteSpace: 'pre-wrap',
+                          color: '#111b21'
+                        }}>
+                          {templateEditBody
+                            .replace(/\{\{owner_name\}\}/g, 'Rahul Sharma')
+                            .replace(/\{\{pet_name\}\}/g, 'Milo (Golden Retriever)')
+                            .replace(/\{\{clinic_name\}\}/g, clinicName || 'Kiaan Veterinary')
+                            .replace(/\{\{appointment_date\}\}/g, 'Tomorrow, 24th Sept')
+                            .replace(/\{\{appointment_time\}\}/g, '11:00 AM')
+                            .replace(/\{\{doctor_name\}\}/g, 'Dr. Sarah Jenkins')
+                            .replace(/\{\{vaccine_name\}\}/g, 'Rabies Booster')
+                            .replace(/\{\{due_date\}\}/g, '28th Sept 2026')
+                            .replace(/\{\{clinic_phone\}\}/g, phone || '+91 99999 99999')
+                            .replace(/\{\{clinic_address\}\}/g, address || 'Clinic Address')
+                          }
+                          <div style={{ textAlign: 'right', fontSize: '0.68rem', color: '#667781', marginTop: '4px' }}>
+                            10:30 AM · Delivered ✓✓
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Test Dispatch Console */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
+                    <Send size={16} style={{ color: 'var(--primary-teal)' }} />
+                    Direct Test Dispatch Console
+                  </h4>
+
+                  <form onSubmit={handleSendTestMessage}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">Recipient Phone Number</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="+919876543210"
+                          value={testPhone}
+                          onChange={(e) => setTestPhone(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Dispatch Channel</label>
+                        <select
+                          className="form-control"
+                          value={testChannel}
+                          onChange={(e) => setTestChannel(e.target.value)}
+                        >
+                          <option value="whatsapp">WhatsApp Message</option>
+                          <option value="sms">SMS Message</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                      <label className="form-label">Test Message Content</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="🐾 Test alert from Kiaan Veterinary: Milo appointment confirmed for tomorrow!"
+                        value={testMessage}
+                        onChange={(e) => setTestMessage(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    {testStatusMessage && (
+                      <div style={{
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        marginBottom: '0.75rem',
+                        background: testStatusMessage.success ? '#dcfce7' : '#fee2e2',
+                        color: testStatusMessage.success ? '#15803d' : '#b91c1c'
+                      }}>
+                        {testStatusMessage.text}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={testSending}
+                      className="btn btn-primary"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Send size={14} /> {testSending ? 'Dispatching...' : `Send Test ${testChannel.toUpperCase()}`}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Section 4: Outgoing Logs Table */}
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
+                  <FileText size={16} style={{ color: 'var(--primary-teal)' }} />
+                  Recent Outgoing Dispatch Logs
+                </h4>
+
+                {messagingLogs.length === 0 ? (
+                  <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '1.25rem', textAlign: 'center', color: '#64748b', fontSize: '0.88rem' }}>
+                    No outgoing messaging logs recorded yet. Send a test dispatch above to see live records!
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                          <th style={{ padding: '8px 12px' }}>Timestamp</th>
+                          <th style={{ padding: '8px 12px' }}>Channel</th>
+                          <th style={{ padding: '8px 12px' }}>Recipient</th>
+                          <th style={{ padding: '8px 12px' }}>Type</th>
+                          <th style={{ padding: '8px 12px' }}>Message Preview</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'right' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {messagingLogs.map((log) => (
+                          <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '8px 12px', color: '#64748b', fontSize: '0.78rem' }}>
+                              {new Date(log.created_at).toLocaleString('en-IN')}
+                            </td>
+                            <td style={{ padding: '8px 12px' }}>
+                              <span style={{
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                background: log.channel === 'whatsapp' ? '#dcfce7' : '#e0e7ff',
+                                color: log.channel === 'whatsapp' ? '#15803d' : '#4338ca'
+                              }}>
+                                {log.channel.toUpperCase()}
+                              </span>
+                            </td>
+                            <td style={{ padding: '8px 12px', fontWeight: 600 }}>
+                              {log.recipient_contact}
+                              {log.recipient_name && <span style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>{log.recipient_name}</span>}
+                            </td>
+                            <td style={{ padding: '8px 12px', color: '#475569' }}>{log.template_type}</td>
+                            <td style={{ padding: '8px 12px', color: '#334155', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {log.message_content}
+                            </td>
+                            <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                              <span style={{
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                background: log.status === 'Delivered' || log.status === 'Sent' || log.status === 'Simulated' ? '#dcfce7' : '#fee2e2',
+                                color: log.status === 'Delivered' || log.status === 'Sent' || log.status === 'Simulated' ? '#15803d' : '#b91c1c'
+                              }}>
+                                {log.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
