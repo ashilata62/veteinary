@@ -243,26 +243,40 @@ const deleteClinic = async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction();
 
-        // Tables with clinic_id reference
+        // Temporarily disable foreign key checks to allow clean cascade deletion
+        await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+
+        // All tables that may contain clinic_id references
         const tables = [
-            'audit_logs',
-            'reminders',
-            'staff_attendance',
-            'invoice_items',
+            'invoice_line_items',
+            'invoices',
+            'billing_invoice_items',
             'billing_invoices',
-            'inventory_items',
+            'prescriptions',
+            'treatment_notes',
+            'diagnostic_reports',
+            'clinical_encounters',
+            'home_visits',
+            'hospitalization_cages',
+            'hospitalizations',
             'inpatient_treatments',
             'inpatient_vitals',
-            'hospitalizations',
-            'home_visits',
-            'prescriptions',
-            'medical_records',
+            'email_reminders',
+            'reminders',
+            'notification_logs',
+            'notifications',
+            'staff_attendance',
+            'inventory_items',
+            'inventory',
             'appointments',
             'pets',
             'pet_owners',
             'saas_payments',
             'saas_support_tickets',
             'saas_subscriptions',
+            'clinic_settings',
+            'system_settings',
+            'audit_logs',
             'users'
         ];
 
@@ -270,18 +284,21 @@ const deleteClinic = async (req, res) => {
             try {
                 await connection.query(`DELETE FROM ${tbl} WHERE clinic_id = ?`, [id]);
             } catch (tblErr) {
-                // Ignore if table/column does not exist
+                // Ignore if table/column does not exist in schema
             }
         }
 
-        // Delete clinic record
+        // Delete clinic master row
         await connection.query('DELETE FROM clinics WHERE id = ?', [id]);
+
+        // Re-enable foreign key checks
+        await connection.query('SET FOREIGN_KEY_CHECKS = 1');
 
         await connection.commit();
 
         try {
             await createAuditLog({
-                userId: req.user?.id || 'super-admin',
+                userId: null,
                 clinicId: id,
                 action: 'CLINIC_DELETED',
                 entity: 'clinic',
@@ -294,7 +311,12 @@ const deleteClinic = async (req, res) => {
 
         res.json({ status: 'success', message: 'Clinic and all associated records deleted successfully' });
     } catch (error) {
-        if (connection) await connection.rollback();
+        if (connection) {
+            try {
+                await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+                await connection.rollback();
+            } catch (rbErr) {}
+        }
         console.error('Error deleting clinic:', error);
         res.status(500).json({ status: 'error', message: 'Failed to delete clinic', error: error.message });
     } finally {
