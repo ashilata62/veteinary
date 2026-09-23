@@ -87,8 +87,7 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 12%</span>
-            <span className="sa-trend-sub">{formatRawRevenue(statsData.totalRevenueRaw)}</span>
+            <span className="sa-trend-sub">All-time revenue ({formatRawRevenue(statsData.totalRevenueRaw)})</span>
           </div>
         </div>
 
@@ -104,25 +103,23 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 9%</span>
-            <span className="sa-trend-sub">This month</span>
+            <span className="sa-trend-sub">Current month</span>
           </div>
         </div>
 
-        {/* Card 3: Total Admins */}
+        {/* Card 3: Total Admins / Clinics */}
         <div className="sa-card border-purple">
           <div className="sa-card-top">
             <div>
-              <span className="sa-card-label">TOTAL ADMINS</span>
-              <div className="sa-card-value">{statsData.totalAdmins || 30}</div>
+              <span className="sa-card-label">TOTAL ADMINS / CLINICS</span>
+              <div className="sa-card-value">{statsData.totalAdmins ?? 0}</div>
             </div>
             <div className="sa-card-watermark purple">
               <Users size={28} />
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 8%</span>
-            <span className="sa-trend-sub">4 new this month</span>
+            <span className="sa-trend-sub">Registered clinics</span>
           </div>
         </div>
 
@@ -131,15 +128,14 @@ export default function SuperAdminDashboard() {
           <div className="sa-card-top">
             <div>
               <span className="sa-card-label">ACTIVE PAID ADMINS</span>
-              <div className="sa-card-value">{statsData.activePaidAdmins || 24}</div>
+              <div className="sa-card-value">{statsData.activePaidAdmins ?? 0}</div>
             </div>
             <div className="sa-card-watermark green">
               <UserCheck size={28} />
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 5%</span>
-            <span className="sa-trend-sub">Subscribed owners</span>
+            <span className="sa-trend-sub">Subscribed clinics</span>
           </div>
         </div>
 
@@ -148,15 +144,14 @@ export default function SuperAdminDashboard() {
           <div className="sa-card-top">
             <div>
               <span className="sa-card-label">FREE TRIAL ADMINS</span>
-              <div className="sa-card-value">{statsData.freeTrialAdmins || 9}</div>
+              <div className="sa-card-value">{statsData.freeTrialAdmins ?? 0}</div>
             </div>
             <div className="sa-card-watermark amber">
               <Clock size={28} />
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 3%</span>
-            <span className="sa-trend-sub">7-Day Trial active</span>
+            <span className="sa-trend-sub">Active trial clinics</span>
           </div>
         </div>
 
@@ -164,16 +159,15 @@ export default function SuperAdminDashboard() {
         <div className="sa-card border-red">
           <div className="sa-card-top">
             <div>
-              <span className="sa-card-label">EXPIRED / BLOCKED</span>
-              <div className="sa-card-value">{statsData.expiredBlocked || 6}</div>
+              <span className="sa-card-label">EXPIRED / SUSPENDED</span>
+              <div className="sa-card-value">{statsData.expiredBlocked ?? 0}</div>
             </div>
             <div className="sa-card-watermark red">
               <AlertTriangle size={28} />
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend red">↓ 2%</span>
-            <span className="sa-trend-sub">Action required</span>
+            <span className="sa-trend-sub">Needs renewal</span>
           </div>
         </div>
 
@@ -189,56 +183,7 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
           <div className="sa-card-bottom">
-            <span className="sa-trend green">↑ 0%</span>
-            <span className="sa-trend-sub">Support requests</span>
-          </div>
-        </div>
-
-        {/* Card 8 (from banner): Total Revenue Overall */}
-        <div className="sa-card border-slate">
-          <div className="sa-card-top">
-            <div>
-              <span className="sa-card-label">OVERALL REVENUE</span>
-              <div className="sa-card-value">{formatRevenue(statsData.totalRevenue)}</div>
-            </div>
-            <div className="sa-card-watermark slate">
-              <IndianRupee size={28} />
-            </div>
-          </div>
-          <div className="sa-card-bottom">
-            <span className="sa-trend-sub">All time total</span>
-          </div>
-        </div>
-
-        {/* Card 9 (from banner): Monthly Performance */}
-        <div className="sa-card border-indigo">
-          <div className="sa-card-top">
-            <div>
-              <span className="sa-card-label">MONTHLY SUMMARY</span>
-              <div className="sa-card-value">{formatRevenue(statsData.monthlyRevenue)}</div>
-            </div>
-            <div className="sa-card-watermark indigo">
-              <TrendingUp size={28} />
-            </div>
-          </div>
-          <div className="sa-card-bottom">
-            <span className="sa-trend-sub">Current Month</span>
-          </div>
-        </div>
-
-        {/* Card 10 (from banner): Platform Admins */}
-        <div className="sa-card border-fuchsia">
-          <div className="sa-card-top">
-            <div>
-              <span className="sa-card-label">TOTAL CLINICS</span>
-              <div className="sa-card-value">{statsData.totalAdmins}</div>
-            </div>
-            <div className="sa-card-watermark fuchsia">
-              <UserCheck size={28} />
-            </div>
-          </div>
-          <div className="sa-card-bottom">
-            <span className="sa-trend-sub">Registered Clinics</span>
+            <span className="sa-trend-sub">Pending support requests</span>
           </div>
         </div>
 
