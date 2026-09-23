@@ -140,12 +140,21 @@ const loginUser = async (req, res) => {
                 const today = new Date();
                 const parseMid = (val) => {
                     if (!val) return null;
-                    if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
-                        const [y, m, d] = val.slice(0, 10).split('-').map(Number);
-                        return new Date(y, m - 1, d);
+                    if (val instanceof Date) {
+                        return new Date(val.getFullYear(), val.getMonth(), val.getDate());
                     }
-                    const dt = new Date(val);
-                    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                    if (typeof val === 'string') {
+                        const trimmed = val.trim();
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                            const [y, m, d] = trimmed.split('-').map(Number);
+                            return new Date(y, m - 1, d);
+                        }
+                        const dt = new Date(val);
+                        if (!isNaN(dt.getTime())) {
+                            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                        }
+                    }
+                    return null;
                 };
                 const startMid = parseMid(trial_start_date) || new Date(today.getFullYear(), today.getMonth(), today.getDate());
                 const endMid = parseMid(trial_end_date);
