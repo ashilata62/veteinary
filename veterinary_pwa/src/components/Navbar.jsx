@@ -2,6 +2,7 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu, ShieldCheck, AlertTriangle, CheckCircle, Info, X, LogOut, User, Settings, Download } from 'lucide-react';
 import { USERS } from '../data/mockData';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar({
   sidebarOpen,
@@ -256,6 +257,8 @@ export default function Navbar({
             {unreadCount > 0 && <span className="app-navbar__notif-dot" />}
           </button>
         </div>
+
+        <LanguageSwitcher />
 
         {showNotifications && (
           <>
