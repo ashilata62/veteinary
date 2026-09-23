@@ -86,6 +86,7 @@ const supportTicketRoutes = require('./routes/supportTicketRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const hospitalizationRoutes = require('./routes/hospitalizationRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const systemRoutes = require('./routes/systemRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -108,6 +109,7 @@ app.use('/api/v1/support-tickets', protect, subscriptionMiddleware, supportTicke
 app.use('/api/v1/dashboard', protect, subscriptionMiddleware, dashboardRoutes);
 app.use('/api/v1/hospitalization', protect, subscriptionMiddleware, hospitalizationRoutes);
 app.use('/api/v1/audit-logs', auditRoutes);
+app.use('/api/v1/system', systemRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/payment', paymentLimiter, paymentRoutes);
 

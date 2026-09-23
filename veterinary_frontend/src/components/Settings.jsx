@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode } from 'lucide-react';
 import { CLINIC_SETTINGS } from '../data/mockData';
 export default function SettingsPage({ currentRole }) {
   const [activeTab, setActiveTab] = useState('profile');
@@ -13,6 +13,20 @@ export default function SettingsPage({ currentRole }) {
   const [logo, setLogo] = useState(CLINIC_SETTINGS.logo);
   const [autoEmail, setAutoEmail] = useState(true);
   const [reminderTime, setReminderTime] = useState('24h');
+
+  // Database Backup State
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [backupHistory, setBackupHistory] = useState([]);
+  const [backupSuccessInfo, setBackupSuccessInfo] = useState(null);
+
+  // Cloud Storage Settings State
+  const [storageProvider, setStorageProvider] = useState('local');
+  const [s3Bucket, setS3Bucket] = useState('');
+  const [s3Region, setS3Region] = useState('us-east-1');
+  const [s3AccessKey, setS3AccessKey] = useState('');
+  const [s3SecretKey, setS3SecretKey] = useState('');
+  const [s3Endpoint, setS3Endpoint] = useState('');
+  const [storageLoading, setStorageLoading] = useState(false);
 
   // Personal Profile State
   const [profileName, setProfileName] = useState('');
@@ -68,9 +82,125 @@ export default function SettingsPage({ currentRole }) {
       }
     };
 
+    const fetchBackupHistory = async () => {
+      try {
+        const response = await apiFetch('/api/v1/system/backup/history');
+        const data = await response.json();
+        if (data.status === 'success') {
+          setBackupHistory(data.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch backup history', err);
+      }
+    };
+
+    const fetchStorageSettings = async () => {
+      try {
+        const response = await apiFetch('/api/v1/system/storage/settings');
+        const data = await response.json();
+        if (data.status === 'success' && data.data) {
+          setStorageProvider(data.data.storage_provider || 'local');
+          setS3Bucket(data.data.s3_bucket_name || '');
+          setS3Region(data.data.s3_region || 'us-east-1');
+          setS3AccessKey(data.data.s3_access_key || '');
+          setS3Endpoint(data.data.s3_endpoint || '');
+        }
+      } catch (err) {
+        console.error('Failed to fetch storage settings', err);
+      }
+    };
+
     fetchProfile();
     fetchClinicSettings();
+    fetchBackupHistory();
+    fetchStorageSettings();
   }, []);
+
+  const handleDownloadBackup = async () => {
+    try {
+      setBackupLoading(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/v1/system/backup/download', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to generate database dump');
+      }
+
+      const blob = await res.blob();
+      const contentDisp = res.headers.get('Content-Disposition');
+      let filename = 'petcare-database-backup.sql';
+      if (contentDisp && contentDisp.includes('filename=')) {
+        filename = contentDisp.split('filename=')[1].replace(/["']/g, '').trim();
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setSuccessModal({
+        isOpen: true,
+        message: `Database backup (${filename}) successfully generated and downloaded to your computer!`
+      });
+
+      // Refresh backup list
+      const histRes = await apiFetch('/api/v1/system/backup/history');
+      const histData = await histRes.json();
+      if (histData.status === 'success') {
+        setBackupHistory(histData.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error generating database backup: ' + err.message);
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const handleStorageSave = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      setStorageLoading(true);
+      const res = await apiFetch('/api/v1/system/storage/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storage_provider: storageProvider,
+          s3_bucket_name: s3Bucket,
+          s3_region: s3Region,
+          s3_access_key: s3AccessKey,
+          s3_secret_key: s3SecretKey,
+          s3_endpoint: s3Endpoint
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setSuccessModal({
+          isOpen: true,
+          message: 'Storage configuration saved successfully! Cloud storage is now active.'
+        });
+        if (data.data) {
+          setS3AccessKey(data.data.s3_access_key || '');
+          setS3SecretKey('');
+        }
+      } else {
+        alert(data.message || 'Failed to update storage settings');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating storage settings');
+    } finally {
+      setStorageLoading(false);
+    }
+  };
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
@@ -246,7 +376,9 @@ export default function SettingsPage({ currentRole }) {
     { id: 'profile', label: 'Personal Profile', icon: User },
     { id: 'clinic', label: 'Hospital Information', icon: Settings },
     { id: 'branding', label: 'Visual Branding & Themes', icon: Palette },
-    { id: 'notifications', label: 'Notification Preferences', icon: Bell }
+    { id: 'notifications', label: 'Notification Preferences', icon: Bell },
+    { id: 'backup', label: 'Database Backup', icon: Database },
+    { id: 'storage', label: 'Storage & S3 Cloud', icon: Cloud }
   ];
 
   const renderProfileForm = () => (
@@ -651,6 +783,274 @@ export default function SettingsPage({ currentRole }) {
                     <Mail size={16} /> Save Email Settings
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* DATABASE BACKUP & EXPORT */}
+            {activeTab === 'backup' && (
+              <div className="card animate-fade-in" style={{ margin: 0 }}>
+                <h3 className="font-bold text-lg mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+                  <Database size={20} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
+                  Database Backup & Recovery
+                </h3>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Backup Banner */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%)',
+                    border: '1px solid rgba(20, 184, 166, 0.25)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '1rem'
+                  }}>
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        Instant Full SQL Database Backup
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        Export complete clinic records (Pets, Appointments, Invoices, Staff, Medical Logs) in standard .sql format.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handleDownloadBackup}
+                      disabled={backupLoading}
+                      className="btn btn-primary"
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.9rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      {backupLoading ? (
+                        <>
+                          <div className="animate-spin" style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                          Generating SQL Dump...
+                        </>
+                      ) : (
+                        <>
+                          <Download size={18} /> Download SQL Backup (.sql)
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Auto-Backup Status Info */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                    <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Database Engine</span>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0 0' }}>MySQL 8.0</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Total Tables</span>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-teal)', margin: '4px 0 0 0' }}>29 System Tables</p>
+                    </div>
+                    <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Automated Daily Backups</span>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--success)', margin: '4px 0 0 0' }}>Active (02:00 AM UTC)</p>
+                    </div>
+                  </div>
+
+                  {/* Backup History Table */}
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+                      Recent Backup Logs
+                    </h4>
+                    {backupHistory.length === 0 ? (
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No previous backup logs recorded.</p>
+                    ) : (
+                      <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: '10px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                          <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Filename</th>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Size</th>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Tables / Rows</th>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Type</th>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Status</th>
+                              <th style={{ padding: '0.65rem 1rem', color: 'var(--text-secondary)' }}>Timestamp</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {backupHistory.map((b) => (
+                              <tr key={b.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                <td style={{ padding: '0.65rem 1rem', fontWeight: 600 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <FileCode size={16} color="#14b8a6" />
+                                    {b.filename}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '0.65rem 1rem' }}>{b.file_size_kb} KB</td>
+                                <td style={{ padding: '0.65rem 1rem' }}>{b.tables_count} Tables / {b.total_rows} Rows</td>
+                                <td style={{ padding: '0.65rem 1rem' }}>
+                                  <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>{b.backup_type}</span>
+                                </td>
+                                <td style={{ padding: '0.65rem 1rem' }}>
+                                  <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>{b.status}</span>
+                                </td>
+                                <td style={{ padding: '0.65rem 1rem', color: 'var(--text-muted)' }}>
+                                  {new Date(b.created_at).toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STORAGE & AWS S3 CLOUD SETTINGS */}
+            {activeTab === 'storage' && (
+              <div className="card animate-fade-in" style={{ margin: 0 }}>
+                <h3 className="font-bold text-lg mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+                  <Cloud size={20} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
+                  Storage & Cloud S3 Settings
+                </h3>
+
+                <form onSubmit={handleStorageSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Provider Selection */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.6rem', display: 'block' }}>
+                      Active Storage Provider
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div
+                        onClick={() => setStorageProvider('local')}
+                        style={{
+                          padding: '1.25rem',
+                          borderRadius: '12px',
+                          border: storageProvider === 'local' ? '2px solid var(--primary-teal)' : '1px solid var(--border)',
+                          backgroundColor: storageProvider === 'local' ? 'rgba(20, 184, 166, 0.05)' : '#fff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.75rem',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <HardDrive size={24} style={{ color: storageProvider === 'local' ? 'var(--primary-teal)' : 'var(--text-muted)' }} />
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Local Server Storage</div>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Stores files in server /uploads directory. Free & default for single servers.</span>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setStorageProvider('s3')}
+                        style={{
+                          padding: '1.25rem',
+                          borderRadius: '12px',
+                          border: storageProvider === 's3' ? '2px solid var(--primary-teal)' : '1px solid var(--border)',
+                          backgroundColor: storageProvider === 's3' ? 'rgba(20, 184, 166, 0.05)' : '#fff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.75rem',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <Cloud size={24} style={{ color: storageProvider === 's3' ? 'var(--primary-teal)' : 'var(--text-muted)' }} />
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Amazon S3 / Cloud Bucket</div>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Highly scalable & persistent cloud storage (Recommended for Railway/Render).</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* S3 Credentials Form (Visible when S3 selected) */}
+                  {storageProvider === 's3' && (
+                    <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                      <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        AWS S3 / Compatible Object Storage Credentials
+                      </h4>
+
+                      <div className="form-row">
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label className="form-label">S3 Bucket Name</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="my-petcare-assets"
+                            value={s3Bucket}
+                            onChange={(e) => setS3Bucket(e.target.value)}
+                            required={storageProvider === 's3'}
+                          />
+                        </div>
+
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label className="form-label">AWS Region</label>
+                          <select
+                            className="form-control"
+                            value={s3Region}
+                            onChange={(e) => setS3Region(e.target.value)}
+                          >
+                            <option value="us-east-1">US East (N. Virginia)</option>
+                            <option value="us-west-2">US West (Oregon)</option>
+                            <option value="ap-south-1">Asia Pacific (Mumbai)</option>
+                            <option value="me-central-1">Middle East (UAE)</option>
+                            <option value="eu-west-1">Europe (Ireland)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row" style={{ marginTop: '0.75rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label className="form-label">Access Key ID</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="AKIAIOSFODNN7EXAMPLE"
+                            value={s3AccessKey}
+                            onChange={(e) => setS3AccessKey(e.target.value)}
+                            required={storageProvider === 's3'}
+                          />
+                        </div>
+
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label className="form-label">Secret Access Key</label>
+                          <input
+                            type="password"
+                            className="form-control"
+                            placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                            value={s3SecretKey}
+                            onChange={(e) => setS3SecretKey(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                        <label className="form-label">Custom Endpoint URL (Optional - For DigitalOcean Spaces / MinIO)</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="https://nyc3.digitaloceanspaces.com"
+                          value={s3Endpoint}
+                          onChange={(e) => setS3Endpoint(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={storageLoading}
+                    className="btn btn-primary"
+                    style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Save size={16} /> {storageLoading ? 'Saving...' : 'Save Storage Configuration'}
+                  </button>
+                </form>
               </div>
             )}
 
