@@ -6,13 +6,16 @@ import { apiFetch } from '../../utils/api';
 
 export default function PaymentPage() {
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const billingCycle = searchParams.get('billing') || 'monthly';
+  const customAmountParam = parseFloat(searchParams.get('amount'));
   const rawPlanId = location.pathname.split('/').pop() || 'plan-pro';
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, success, failed
-  const [planDetails, setPlanDetails] = useState({ id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1999, currency: 'INR' });
+  const [planDetails, setPlanDetails] = useState({ id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1499, currency: 'INR', billingCycle: 'monthly' });
   const [paymentConfig, setPaymentConfig] = useState({ activeGateway: 'razorpay', defaultCurrency: 'INR' });
   const [selectedGateway, setSelectedGateway] = useState('razorpay');
   const [invoiceInfo, setInvoiceInfo] = useState(null);
@@ -42,43 +45,32 @@ export default function PaymentPage() {
 
         const normalizedKey = rawPlanId.toLowerCase();
         if (normalizedKey === 'custom' || normalizedKey === 'plan-custom') {
-          setPlanDetails({ id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true });
+          setPlanDetails({ id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true, billingCycle });
           setLoading(false);
           return;
         }
 
-        if (plansRes && plansRes.ok) {
-          const plansData = await plansRes.json();
-          if (plansData.status === 'success' && plansData.data.length > 0) {
-            const found = plansData.data.find(p => 
-              p.id.toLowerCase() === normalizedKey || 
-              p.name.toLowerCase().includes(normalizedKey.replace('plan-', ''))
-            );
-            if (found) {
-              setPlanDetails({
-                id: found.id,
-                name: found.name,
-                amount: parseFloat(found.price),
-                features: found.features || []
-              });
-              setLoading(false);
-              return;
-            }
-          }
-        }
+        const isYearly = billingCycle === 'yearly';
 
-        // Fallback pricing if API is warming up (screen matching prices: 999, 1299, 1499)
+        // Catalog with monthly and annual totals
         const FALLBACK_PLANS = {
-          'starter': { id: 'plan-starter', name: 'Starter Plan', amount: 999 },
-          'standard': { id: 'plan-standard', name: 'Standard Plan', amount: 1299 },
-          'pro': { id: 'plan-pro', name: 'Pro Plan', amount: 1499 },
-          'plan-starter': { id: 'plan-starter', name: 'Starter Plan', amount: 999 },
-          'plan-standard': { id: 'plan-standard', name: 'Standard Plan', amount: 1299 },
-          'plan-pro': { id: 'plan-pro', name: 'Pro Plan', amount: 1499 },
+          'starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
+          'plan-starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
+          'standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
+          'plan-standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
+          'pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
+          'plan-pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
           'custom': { id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true }
         };
 
-        setPlanDetails(FALLBACK_PLANS[normalizedKey] || { id: 'plan-pro', name: 'Pro Plan', amount: 1499 });
+        const resolved = FALLBACK_PLANS[normalizedKey] || { id: normalizedKey, name: 'Medical SaaS Plan', amount: isYearly ? 12468 : 1299 };
+        const finalAmount = !isNaN(customAmountParam) && customAmountParam > 0 ? customAmountParam : resolved.amount;
+
+        setPlanDetails({
+          ...resolved,
+          amount: finalAmount,
+          billingCycle
+        });
       } catch (err) {
         console.error('Initialization error:', err);
       } finally {
@@ -350,10 +342,12 @@ export default function PaymentPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>30 Days Full Cloud Access · 18% GST Included</span>
+                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        {billingCycle === 'yearly' ? '365 Days Access · Annual Billing (20% Saved)' : '30 Days Access · Monthly Billing'} · 18% GST Included
+                      </span>
                     </div>
                     <span className="plan-price" style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0d9488' }}>
-                      ₹{planDetails.amount}
+                      ₹{planDetails.amount?.toLocaleString()}
                     </span>
                   </div>
                 </div>

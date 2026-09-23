@@ -1,36 +1,197 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, Check, ArrowLeft, X, Mail, Phone, Building, Send, 
-  CheckCircle2, Sparkles, Shield, Zap, Lock, HelpCircle, ArrowRight, Star
+  CheckCircle2, Sparkles, Shield, Zap, Lock, HelpCircle, ArrowRight, Star,
+  Loader2, ShieldCheck, FileText, CheckCircle
 } from 'lucide-react';
 import { apiFetch } from '../utils/api';
+
+const PLAN_PRICES = {
+  starter: {
+    id: 'plan-starter',
+    name: 'Starter Practice',
+    monthlyPrice: 999,
+    yearlyPerMonth: 799,
+    yearlyTotal: 9588
+  },
+  standard: {
+    id: 'plan-standard',
+    name: 'Standard Growth',
+    monthlyPrice: 1299,
+    yearlyPerMonth: 1039,
+    yearlyTotal: 12468
+  },
+  pro: {
+    id: 'plan-pro',
+    name: 'Pro Enterprise',
+    monthlyPrice: 1499,
+    yearlyPerMonth: 1199,
+    yearlyTotal: 14388
+  }
+};
 
 export default function PlansPage() {
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'yearly'
   const [showContactModal, setShowContactModal] = useState(false);
-  const [inquiryData, setInquiryData] = useState(() => {
-    let defaultEmail = '';
-    let defaultName = '';
+  const [purchasingPlan, setPurchasingPlan] = useState(null); // 'starter' | 'standard' | 'pro' | null
+  const [successPayment, setSuccessPayment] = useState(null);
+  
+  const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const u = JSON.parse(localStorage.getItem('user'));
-      if (u) {
-        defaultEmail = u.email || '';
-        defaultName = u.name || '';
-      }
-    } catch(e) {}
+      return JSON.parse(localStorage.getItem('user')) || {};
+    } catch(e) {
+      return {};
+    }
+  });
+
+  const [inquiryData, setInquiryData] = useState(() => {
+    let defaultEmail = currentUser.email || '';
+    let defaultName = currentUser.name || '';
     return { name: defaultName, email: defaultEmail, phone: '', clinicName: '', message: '' };
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleBuyPlan = (planId) => {
-    if (planId === 'custom') {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  const isYearly = billingCycle === 'yearly';
+
+  const handleBuyPlan = async (planKey) => {
+    if (planKey === 'custom') {
       setShowContactModal(true);
       return;
     }
-    navigate(`/checkout/${planId}`);
+
+    const planConfig = PLAN_PRICES[planKey];
+    if (!planConfig) return;
+
+    // Calculate exact payment amount
+    const totalAmount = isYearly ? planConfig.yearlyTotal : planConfig.monthlyPrice;
+    setPurchasingPlan(planKey);
+
+    try {
+      // 1. Create Razorpay order on backend
+      const res = await apiFetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: planConfig.id,
+          amount: totalAmount,
+          currency: 'INR',
+          billingCycle: billingCycle,
+          clinicAdminId: currentUser.id || currentUser.userId || 'guest'
+        })
+      });
+
+      const data = await res.json();
+      if (data.status !== 'success') {
+        throw new Error(data.message || 'Failed to create payment order');
+      }
+
+      // Check if Razorpay is loaded
+      if (typeof window.Razorpay === 'undefined') {
+        // Fallback to checkout page with calculated params
+        navigate(`/checkout/${planConfig.id}?billing=${billingCycle}&amount=${totalAmount}`);
+        return;
+      }
+
+      // 2. Launch Razorpay Checkout Modal
+      const options = {
+        key: data.data.key_id || 'rzp_test_dummyKeyId',
+        amount: data.data.amount,
+        currency: data.data.currency || 'INR',
+        name: 'KT PetCare Pro',
+        description: `${planConfig.name} (${isYearly ? 'Annual Billing' : 'Monthly Billing'})`,
+        image: '/kt-logo.png',
+        order_id: data.data.order_id,
+        handler: async function (response) {
+          try {
+            // 3. Verify Payment
+            const verifyRes = await apiFetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                clinicAdminId: currentUser.id || currentUser.userId,
+                planId: planConfig.id,
+                amount: totalAmount,
+                billingCycle: billingCycle
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.status === 'success') {
+              // Update local state
+              try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                u.subscription_status = 'active';
+                u.plan_id = planConfig.id;
+                localStorage.setItem('user', JSON.stringify(u));
+                window.dispatchEvent(new CustomEvent('auth:subscription_status', { 
+                  detail: { code: 'ACTIVE', data: { plan: planConfig.id } } 
+                }));
+              } catch (e) {}
+
+              setSuccessPayment({
+                planName: planConfig.name,
+                invoiceNumber: verifyData.data?.invoiceNumber || `INV-${Date.now()}`,
+                amount: totalAmount,
+                billingCycle: isYearly ? 'Annual' : 'Monthly',
+                validTill: verifyData.data?.validTill
+              });
+            } else {
+              alert(verifyData.message || 'Payment verification failed');
+            }
+          } catch (err) {
+            console.error('Payment verification error:', err);
+            alert('Error verifying transaction: ' + err.message);
+          } finally {
+            setPurchasingPlan(null);
+          }
+        },
+        prefill: {
+          name: currentUser.name || 'Clinic Administrator',
+          email: currentUser.email || 'admin@vetclinic.com',
+          contact: currentUser.phone || '9999999999'
+        },
+        theme: {
+          color: '#0d9488'
+        },
+        modal: {
+          ondismiss: function () {
+            setPurchasingPlan(null);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (resp) {
+        console.warn('Payment failed or cancelled:', resp);
+        setPurchasingPlan(null);
+      });
+      rzp.open();
+    } catch (err) {
+      console.error('Razorpay initiation error:', err);
+      // Fallback navigate to checkout
+      navigate(`/checkout/${planConfig.id}?billing=${billingCycle}&amount=${totalAmount}`);
+    } finally {
+      setPurchasingPlan(null);
+    }
   };
 
   const handleInquirySubmit = async (e) => {
@@ -54,8 +215,6 @@ export default function PlansPage() {
       setSubmitted(true);
     }
   };
-
-  const isYearly = billingCycle === 'yearly';
 
   return (
     <div style={{ 
@@ -298,23 +457,39 @@ export default function PlansPage() {
 
             <button
               onClick={() => handleBuyPlan('starter')}
+              disabled={purchasingPlan !== null}
               style={{
                 width: '100%',
                 backgroundColor: '#1f2937',
                 color: '#fff',
                 border: '1px solid #374151',
                 borderRadius: '12px',
-                padding: '12px',
+                padding: '13px',
                 fontWeight: 700,
                 fontSize: '0.92rem',
-                cursor: 'pointer',
+                cursor: purchasingPlan ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
-                marginTop: '1rem'
+                marginTop: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: purchasingPlan && purchasingPlan !== 'starter' ? 0.6 : 1
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#374151'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#1f2937'; }}
+              onMouseEnter={(e) => { if (!purchasingPlan) e.currentTarget.style.backgroundColor = '#374151'; }}
+              onMouseLeave={(e) => { if (!purchasingPlan) e.currentTarget.style.backgroundColor = '#1f2937'; }}
             >
-              Get Started with Starter
+              {purchasingPlan === 'starter' ? (
+                <>
+                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Opening Razorpay...</span>
+                </>
+              ) : (
+                <>
+                  <span>Choose Starter ({isYearly ? '₹9,588/yr' : '₹999/mo'})</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </div>
 
@@ -396,6 +571,7 @@ export default function PlansPage() {
 
             <button
               onClick={() => handleBuyPlan('standard')}
+              disabled={purchasingPlan !== null}
               style={{
                 width: '100%',
                 background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
@@ -405,20 +581,30 @@ export default function PlansPage() {
                 padding: '14px',
                 fontWeight: 800,
                 fontSize: '0.98rem',
-                cursor: 'pointer',
+                cursor: purchasingPlan ? 'not-allowed' : 'pointer',
                 boxShadow: '0 6px 20px rgba(13, 148, 136, 0.4)',
                 transition: 'all 0.2s',
                 marginTop: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                opacity: purchasingPlan && purchasingPlan !== 'standard' ? 0.6 : 1
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(13, 148, 136, 0.5)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13, 148, 136, 0.4)'; }}
+              onMouseEnter={(e) => { if (!purchasingPlan) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(13, 148, 136, 0.5)'; } }}
+              onMouseLeave={(e) => { if (!purchasingPlan) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13, 148, 136, 0.4)'; } }}
             >
-              <span>Choose Standard Growth</span>
-              <ArrowRight size={16} />
+              {purchasingPlan === 'standard' ? (
+                <>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Opening Razorpay...</span>
+                </>
+              ) : (
+                <>
+                  <span>Choose Standard ({isYearly ? '₹12,468/yr' : '₹1,299/mo'})</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </div>
 
@@ -479,24 +665,40 @@ export default function PlansPage() {
 
             <button
               onClick={() => handleBuyPlan('pro')}
+              disabled={purchasingPlan !== null}
               style={{
                 width: '100%',
                 backgroundColor: '#0284c7',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '12px',
-                padding: '12px',
+                padding: '13px',
                 fontWeight: 700,
-                fontSize: '0.92rem',
-                cursor: 'pointer',
+                fontSize: '0.95rem',
+                cursor: purchasingPlan ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
                 marginTop: '1rem',
-                boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)'
+                boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: purchasingPlan && purchasingPlan !== 'pro' ? 0.6 : 1
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
+              onMouseEnter={(e) => { if (!purchasingPlan) { e.currentTarget.style.backgroundColor = '#0369a1'; } }}
+              onMouseLeave={(e) => { if (!purchasingPlan) { e.currentTarget.style.backgroundColor = '#0284c7'; } }}
             >
-              Get Started with Pro
+              {purchasingPlan === 'pro' ? (
+                <>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Opening Razorpay...</span>
+                </>
+              ) : (
+                <>
+                  <span>Choose Pro ({isYearly ? '₹14,388/yr' : '₹1,499/mo'})</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </div>
 
@@ -735,6 +937,126 @@ export default function PlansPage() {
                 </form>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* Payment Success Celebratory Modal */}
+      {successPayment && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem',
+          backdropFilter: 'blur(8px)'
+        }}>
+          <div style={{
+            backgroundColor: '#0f172a',
+            border: '2px solid #0d9488',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            width: '100%',
+            maxWidth: '520px',
+            color: '#f8fafc',
+            textAlign: 'center',
+            boxShadow: '0 25px 60px -15px rgba(13, 148, 136, 0.5)',
+            position: 'relative'
+          }}>
+            <div style={{
+              width: '72px',
+              height: '72px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.25rem auto',
+              boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)'
+            }}>
+              <CheckCircle2 size={42} />
+            </div>
+
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              color: '#34d399',
+              padding: '4px 14px',
+              borderRadius: '999px',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              marginBottom: '0.75rem'
+            }}>
+              <Sparkles size={13} /> Payment & Subscription Active!
+            </div>
+
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', margin: '0 0 0.5rem 0' }}>
+              Welcome to {successPayment.planName}!
+            </h2>
+
+            <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: '0 0 1.5rem 0', lineHeight: 1.5 }}>
+              Your payment of <strong style={{ color: '#2dd4bf' }}>₹{successPayment.amount.toLocaleString()}</strong> ({successPayment.billingCycle} billing) has been processed securely. All features of this plan have been unlocked for your clinic.
+            </p>
+
+            <div style={{
+              backgroundColor: '#1e293b',
+              border: '1px solid #334155',
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              textAlign: 'left',
+              fontSize: '0.85rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#94a3b8' }}>Tax Invoice Number:</span>
+                <span style={{ fontWeight: 700, color: '#2dd4bf', fontFamily: 'monospace' }}>{successPayment.invoiceNumber}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#94a3b8' }}>Payment Method:</span>
+                <span style={{ fontWeight: 600, color: '#f8fafc' }}>Razorpay (100% Verified)</span>
+              </div>
+              {successPayment.validTill && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#94a3b8' }}>Subscription Valid Until:</span>
+                  <span style={{ fontWeight: 600, color: '#38bdf8' }}>{new Date(successPayment.validTill).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => {
+                  setSuccessPayment(null);
+                  navigate('/dashboard');
+                }}
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  fontWeight: 800,
+                  fontSize: '0.98rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 20px rgba(13, 148, 136, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <span>Go to Clinic Dashboard</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -6,13 +6,16 @@ import { apiFetch } from '../../utils/api';
 
 export default function PaymentPage() {
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const billingCycle = searchParams.get('billing') || 'monthly';
+  const customAmountParam = parseFloat(searchParams.get('amount'));
   const rawPlanId = location.pathname.split('/').pop() || 'plan-pro';
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, success, failed
-  const [planDetails, setPlanDetails] = useState({ id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1999, currency: 'INR' });
+  const [planDetails, setPlanDetails] = useState({ id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1499, currency: 'INR', billingCycle: 'monthly' });
   const [paymentConfig, setPaymentConfig] = useState({ activeGateway: 'razorpay', defaultCurrency: 'INR' });
   const [selectedGateway, setSelectedGateway] = useState('razorpay');
   const [invoiceInfo, setInvoiceInfo] = useState(null);
@@ -41,37 +44,33 @@ export default function PaymentPage() {
         }
 
         const normalizedKey = rawPlanId.toLowerCase();
-        if (plansRes && plansRes.ok) {
-          const plansData = await plansRes.json();
-          if (plansData.status === 'success' && plansData.data.length > 0) {
-            const found = plansData.data.find(p => 
-              p.id.toLowerCase() === normalizedKey || 
-              p.name.toLowerCase().includes(normalizedKey.replace('plan-', ''))
-            );
-            if (found) {
-              setPlanDetails({
-                id: found.id,
-                name: found.name,
-                amount: parseFloat(found.price),
-                features: found.features || []
-              });
-              setLoading(false);
-              return;
-            }
-          }
+        if (normalizedKey === 'custom' || normalizedKey === 'plan-custom') {
+          setPlanDetails({ id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true, billingCycle });
+          setLoading(false);
+          return;
         }
 
-        // Fallback pricing if API is warming up
+        const isYearly = billingCycle === 'yearly';
+
+        // Catalog with monthly and annual totals
         const FALLBACK_PLANS = {
-          'starter': { id: 'plan-starter', name: 'Starter Plan', amount: 599 },
-          'standard': { id: 'plan-standard', name: 'Standard Growth', amount: 999 },
-          'pro': { id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1999 },
-          'plan-starter': { id: 'plan-starter', name: 'Starter Plan', amount: 599 },
-          'plan-standard': { id: 'plan-standard', name: 'Standard Growth', amount: 999 },
-          'plan-pro': { id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1999 },
+          'starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
+          'plan-starter': { id: 'plan-starter', name: 'Starter Practice', amount: isYearly ? 9588 : 999 },
+          'standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
+          'plan-standard': { id: 'plan-standard', name: 'Standard Growth', amount: isYearly ? 12468 : 1299 },
+          'pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
+          'plan-pro': { id: 'plan-pro', name: 'Pro Enterprise', amount: isYearly ? 14388 : 1499 },
+          'custom': { id: 'custom', name: 'Custom Plan', amount: 0, isCustom: true }
         };
 
-        setPlanDetails(FALLBACK_PLANS[normalizedKey] || { id: 'plan-pro', name: 'Pro Enterprise Clinic', amount: 1999 });
+        const resolved = FALLBACK_PLANS[normalizedKey] || { id: normalizedKey, name: 'Medical SaaS Plan', amount: isYearly ? 12468 : 1299 };
+        const finalAmount = !isNaN(customAmountParam) && customAmountParam > 0 ? customAmountParam : resolved.amount;
+
+        setPlanDetails({
+          ...resolved,
+          amount: finalAmount,
+          billingCycle
+        });
       } catch (err) {
         console.error('Initialization error:', err);
       } finally {
@@ -300,97 +299,139 @@ export default function PaymentPage() {
           </div>
         ) : (
           <div className="payment-details">
-            {/* Plan Summary Box */}
-            <div className="plan-summary" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
-                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>30 Days Full Cloud Access · 18% GST Included</span>
+            {planDetails.isCustom ? (
+              <>
+                <div className="plan-summary" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
+                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Enterprise Custom Setup</span>
+                    </div>
+                    <span className="plan-price" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0284c7' }}>
+                      Custom Quote
+                    </span>
+                  </div>
                 </div>
-                <span className="plan-price" style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0d9488' }}>
-                  ₹{planDetails.amount}
-                </span>
-              </div>
-            </div>
 
-            {/* Gateway Switcher if both enabled */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-                Select Payment Method
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div
-                  onClick={() => setSelectedGateway('razorpay')}
-                  style={{
-                    border: selectedGateway === 'razorpay' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                    background: selectedGateway === 'razorpay' ? '#f0fdfa' : '#ffffff',
-                    padding: '0.75rem',
+                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '1.25rem 0', lineHeight: 1.6, textAlign: 'center' }}>
+                  Custom plans include personalized setup for your clinic (personal domain, branding, and custom AI integrations). Please contact our sales team to receive a tailored quote.
+                </p>
+                <button 
+                  className="btn-pay" 
+                  style={{ 
+                    backgroundColor: '#0284c7', 
+                    borderColor: '#0284c7',
+                    width: '100%',
+                    padding: '0.85rem',
                     borderRadius: '8px',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => navigate('/plans')}
+                >
+                  Contact Sales on Plans Page
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Plan Summary Box */}
+                <div className="plan-summary" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span className="plan-name" style={{ display: 'block', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>{planDetails.name}</span>
+                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        {billingCycle === 'yearly' ? '365 Days Access · Annual Billing (20% Saved)' : '30 Days Access · Monthly Billing'} · 18% GST Included
+                      </span>
+                    </div>
+                    <span className="plan-price" style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0d9488' }}>
+                      ₹{planDetails.amount?.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Gateway Switcher if both enabled */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                    Select Payment Method
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div
+                      onClick={() => setSelectedGateway('razorpay')}
+                      style={{
+                        border: selectedGateway === 'razorpay' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                        background: selectedGateway === 'razorpay' ? '#f0fdfa' : '#ffffff',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <CreditCard size={20} color={selectedGateway === 'razorpay' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'razorpay' ? '#0f766e' : '#334155' }}>UPI / NetBanking / Cards</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Razorpay (INR)</div>
+                    </div>
+
+                    <div
+                      onClick={() => setSelectedGateway('stripe')}
+                      style={{
+                        border: selectedGateway === 'stripe' ? '2px solid #0d9488' : '1px solid #e2e8f0',
+                        background: selectedGateway === 'stripe' ? '#f0fdfa' : '#ffffff',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <CreditCard size={20} color={selectedGateway === 'stripe' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'stripe' ? '#0f766e' : '#334155' }}>International Cards</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Stripe (USD)</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security Badges */}
+                <div className="payment-security-badges" style={{ marginBottom: '1.25rem' }}>
+                  <div className="badge"><ShieldCheck size={16} /> 256-Bit SSL Encrypted</div>
+                  <div className="badge"><Sparkles size={16} /> Instant Auto Activation</div>
+                </div>
+
+                <button
+                  className="btn-pay"
+                  onClick={handlePayment}
+                  disabled={processing}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem',
+                    borderRadius: '8px',
+                    background: '#0d9488',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    border: 'none',
                     cursor: 'pointer',
-                    textAlign: 'center'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)'
                   }}
                 >
-                  <CreditCard size={20} color={selectedGateway === 'razorpay' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'razorpay' ? '#0f766e' : '#334155' }}>UPI / NetBanking / Cards</div>
-                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Razorpay (INR)</div>
-                </div>
-
-                <div
-                  onClick={() => setSelectedGateway('stripe')}
-                  style={{
-                    border: selectedGateway === 'stripe' ? '2px solid #0d9488' : '1px solid #e2e8f0',
-                    background: selectedGateway === 'stripe' ? '#f0fdfa' : '#ffffff',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    textAlign: 'center'
-                  }}
-                >
-                  <CreditCard size={20} color={selectedGateway === 'stripe' ? '#0d9488' : '#64748b'} style={{ margin: '0 auto 4px' }} />
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedGateway === 'stripe' ? '#0f766e' : '#334155' }}>International Cards</div>
-                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Stripe (USD)</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Security Badges */}
-            <div className="payment-security-badges" style={{ marginBottom: '1.25rem' }}>
-              <div className="badge"><ShieldCheck size={16} /> 256-Bit SSL Encrypted</div>
-              <div className="badge"><Sparkles size={16} /> Instant Auto Activation</div>
-            </div>
-
-            <button
-              className="btn-pay"
-              onClick={handlePayment}
-              disabled={processing}
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                borderRadius: '8px',
-                background: '#0d9488',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '1rem',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(13, 148, 136, 0.3)'
-              }}
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="spinner" size={20} /> Processing Payment...
-                </>
-              ) : (
-                `Pay ₹${planDetails.amount} Securely`
-              )}
-            </button>
-            <p className="test-mode-text" style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.75rem' }}>
-              Instant Tax Invoice & GST Receipt generated automatically upon successful payment.
-            </p>
+                  {processing ? (
+                    <>
+                      <Loader2 className="spinner" size={20} /> Processing Payment...
+                    </>
+                  ) : (
+                    `Pay ₹${planDetails.amount} Securely`
+                  )}
+                </button>
+                <p className="test-mode-text" style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.75rem' }}>
+                  Instant Tax Invoice & GST Receipt generated automatically upon successful payment.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
