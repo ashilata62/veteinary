@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, Calendar, AlertTriangle, TrendingUp, Clock, ArrowRight, Eye, ZoomIn, ZoomOut, Maximize2, X, Navigation, CheckCircle2, TrendingDown, Bell, Briefcase } from 'lucide-react';
 import TrialBanner from './TrialBanner';
 import TrialPopup from './TrialPopup';
+import OnboardingChecklist from './OnboardingChecklist';
 
 // Reusable chart card with zoom + fullscreen (only for charts)
 function ChartCard({ title, badge, badgeClass, children }) {
@@ -422,6 +423,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <TrialPopup />
+      <OnboardingChecklist setCurrentTab={setCurrentTab} />
       {/* Hero Banner — Admin gradient */}
       <div
         className="animate-fade-in-up"

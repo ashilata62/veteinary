@@ -406,4 +406,123 @@ const registerUser = async (req, res) => {
     }
 };
 
-module.exports = { loginUser, registerUser };
+// @desc    Forgot Password - Send secure reset link via email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ status: 'error', message: 'Please provide your registered email address' });
+        }
+
+        const [users] = await db.query('SELECT id, name, email FROM users WHERE email = ?', [email.trim().toLowerCase()]);
+
+        if (users.length === 0) {
+            // For security, return standard success message to avoid email enumeration
+            return res.json({ 
+                status: 'success', 
+                message: 'If an account exists with that email, a password reset link has been sent.' 
+            });
+        }
+
+        const user = users[0];
+
+        // Generate a cryptographically secure 32-byte token
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+        // Set token expiration to 15 minutes from now
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+        await db.query(
+            'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?',
+            [tokenHash, expiresAt, user.id]
+        );
+
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+        const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+
+        // Send Email
+        try {
+            await emailService.sendPasswordResetEmail({
+                email: user.email,
+                name: user.name,
+                resetUrl
+            });
+        } catch (mailErr) {
+            console.error('Error sending reset email:', mailErr);
+        }
+
+        res.json({
+            status: 'success',
+            message: 'If an account exists with that email, a password reset link has been sent.'
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ status: 'error', message: 'Server error processing password reset request' });
+    }
+};
+
+// @desc    Reset Password - Set new password with valid token
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword, confirmPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ status: 'error', message: 'Token and new password are required' });
+        }
+
+        if (confirmPassword && newPassword !== confirmPassword) {
+            return res.status(400).json({ status: 'error', message: 'Passwords do not match' });
+        }
+
+        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passRegex.test(newPassword)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character'
+            });
+        }
+
+        // Hash token to compare with DB
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+        // Find user by token and valid expiration
+        const [users] = await db.query(
+            'SELECT id, email, name FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()',
+            [tokenHash]
+        );
+
+        if (users.length === 0) {
+            return res.status(400).json({ 
+                status: 'error', 
+                message: 'Password reset link is invalid or has expired (15-min limit). Please request a new link.' 
+            });
+        }
+
+        const user = users[0];
+        const saltRounds = 10;
+        const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password, clear reset token & invalidate all active sessions
+        await db.query(
+            'UPDATE users SET password_hash = ?, reset_password_token = NULL, reset_password_expires = NULL, current_session_token = NULL WHERE id = ?',
+            [newPasswordHash, user.id]
+        );
+
+        res.json({
+            status: 'success',
+            message: 'Password has been reset successfully. You can now log in with your new password.'
+        });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ status: 'error', message: 'Server error resetting password' });
+    }
+};
+
+module.exports = { loginUser, registerUser, forgotPassword, resetPassword };
+

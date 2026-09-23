@@ -18,6 +18,7 @@ import Reports from './components/Reports';
 import Hospitalization from './components/Hospitalization';
 import SettingsPage from './components/Settings';
 import Login from './components/Login';
+import ResetPassword from './components/ResetPassword';
 import LandingPage from './components/LandingPage';
 import Register from './components/Register';
 import BrochurePage from './components/BrochurePage';
@@ -264,6 +265,10 @@ export default function App() {
 
   if (location.pathname === '/brochure') {
     return <BrochurePage />;
+  }
+
+  if (location.pathname === '/reset-password') {
+    return <ResetPassword />;
   }
 
   if (!isAuthenticated) {

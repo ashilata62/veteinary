@@ -8,6 +8,7 @@ import {
   HeartHandshake, Briefcase, Eye, EyeOff, CalendarCheck,
   FileText, CreditCard, Box, PieChart, Shield, CheckCircle, ArrowLeft
 } from 'lucide-react';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAdmin, onLoginSuccess }) {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [capsLockActive, setCapsLockActive] = useState(false);
   const [transitionOut, setTransitionOut] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -319,6 +321,27 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 </div>
               </div>
 
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#2dd4bf',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
               <button
                 type="submit"
                 className="premium-submit-btn"
@@ -339,6 +362,11 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
                 )}
               </button>
             </form>
+
+            <ForgotPasswordModal
+              isOpen={showForgotPassword}
+              onClose={() => setShowForgotPassword(false)}
+            />
 
             <div className="trust-indicators">
               <div className="trust-item"><ShieldCheck size={14} /> SSL Secured</div>
