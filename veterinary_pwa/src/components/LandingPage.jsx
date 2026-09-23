@@ -72,23 +72,6 @@ export default function LandingPage() {
     return current;
   };
 
-  const handleLanguageChange = (langId) => {
-    setCurrentLang(langId);
-    localStorage.setItem('petcare_lang', langId);
-    setLangMenuOpen(false);
-  };
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
-        setLangMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleAdminLogin = () => {
     navigate('/login');
   };
@@ -106,7 +89,7 @@ export default function LandingPage() {
     }
   };
 
-  const isRTL = currentLang === 'ar';
+  const isRTL = false;
 
   return (
     <div className={`vet-landing ${isRTL ? 'rtl' : ''}`}>
