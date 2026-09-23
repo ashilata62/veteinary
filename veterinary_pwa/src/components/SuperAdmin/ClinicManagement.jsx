@@ -47,30 +47,77 @@ export default function ClinicManagement() {
     fetchClinics();
   }, []);
 
-  const handleToggleStatus = (id) => {
-    setClinics(prev => prev.map(c => {
-      if (c.id === id) {
-        const currentStatus = c.subStatus || c.subscriptionStatus || 'Unknown';
-        const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
-        showToast(`Clinic "${c.name || c.clinic_name}" status updated to ${newStatus}`);
-        return { ...c, subStatus: newStatus, subscriptionStatus: newStatus };
+  const handleToggleStatus = async (id) => {
+    const target = clinics.find(c => c.id === id);
+    if (!target) return;
+    const currentStatus = target.subStatus || target.subscriptionStatus || target.status || 'Active';
+    const isCurrentlyActive = currentStatus === 'Active' || currentStatus === 'ACTIVE' || currentStatus === 'Trial' || currentStatus === 'trial';
+    const action = isCurrentlyActive ? 'suspend' : 'activate';
+    
+    try {
+      const res = await apiFetch(`/api/super-admin/clinics/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: isCurrentlyActive ? 'Suspended by SuperAdmin' : 'Reactivated by SuperAdmin' })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        const newStatus = isCurrentlyActive ? 'Suspended' : 'Active';
+        setClinics(prev => prev.map(c => c.id === id ? { ...c, subStatus: newStatus, subscriptionStatus: newStatus, status: newStatus } : c));
+        showToast(data.message || `Clinic status updated to ${newStatus}`);
+      } else {
+        showToast(data.message || 'Failed to update status');
       }
-      return c;
-    }));
-  };
-
-  const handleDeleteClinic = (id, name) => {
-    if (window.confirm(`Are you sure you want to delete clinic "${name}"?`)) {
-      setClinics(prev => prev.filter(c => c.id !== id));
-      showToast(`Clinic "${name}" deleted successfully.`);
+    } catch (err) {
+      console.error('Error toggling clinic status:', err);
+      showToast('Error updating clinic status');
     }
   };
 
-  const handleSaveEdit = (e) => {
+  const handleDeleteClinic = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to permanently delete clinic "${name}" and all its records? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await apiFetch(`/api/super-admin/clinics/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setClinics(prev => prev.filter(c => c.id !== id));
+        showToast(`Clinic "${name}" deleted successfully.`);
+      } else {
+        showToast(data.message || 'Failed to delete clinic');
+      }
+    } catch (err) {
+      console.error('Error deleting clinic:', err);
+      showToast('Network error while deleting clinic');
+    }
+  };
+
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
-    setClinics(prev => prev.map(c => c.id === selectedClinic.id ? selectedClinic : c));
-    setIsEditModalOpen(false);
-    showToast(`Clinic details updated successfully.`);
+    if (!selectedClinic) return;
+
+    try {
+      const res = await apiFetch(`/api/super-admin/clinics/${selectedClinic.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectedClinic)
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setClinics(prev => prev.map(c => c.id === selectedClinic.id ? selectedClinic : c));
+        setIsEditModalOpen(false);
+        showToast('Clinic details updated successfully.');
+      } else {
+        showToast(data.message || 'Failed to save changes');
+      }
+    } catch (err) {
+      console.error('Error updating clinic:', err);
+      showToast('Network error while saving clinic');
+    }
   };
 
   // Normalize data — handle both API fields and default data fields

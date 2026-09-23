@@ -196,32 +196,96 @@ const suspendClinic = async (req, res) => {
     }
 };
 
-// @desc    Activate Clinic
-// @route   POST /api/super-admin/clinics/:id/activate
+// @desc    Delete Clinic & Associated Data
+// @route   DELETE /api/super-admin/clinics/:id
 // @access  Private (SUPER_ADMIN)
-const activateClinic = async (req, res) => {
+const deleteClinic = async (req, res) => {
+    let connection;
     try {
         const { id } = req.params;
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        // Tables with clinic_id reference
+        const tables = [
+            'audit_logs',
+            'reminders',
+            'staff_attendance',
+            'invoice_items',
+            'billing_invoices',
+            'inventory_items',
+            'inpatient_treatments',
+            'inpatient_vitals',
+            'hospitalizations',
+            'home_visits',
+            'prescriptions',
+            'medical_records',
+            'appointments',
+            'pets',
+            'pet_owners',
+            'saas_payments',
+            'saas_support_tickets',
+            'saas_subscriptions',
+            'users'
+        ];
+
+        for (const tbl of tables) {
+            try {
+                await connection.query(`DELETE FROM ${tbl} WHERE clinic_id = ?`, [id]);
+            } catch (tblErr) {
+                // Ignore if table/column does not exist
+            }
+        }
+
+        // Delete clinic record
+        await connection.query('DELETE FROM clinics WHERE id = ?', [id]);
+
+        await connection.commit();
+
+        try {
+            await createAuditLog({
+                userId: req.user?.id || 'super-admin',
+                clinicId: id,
+                action: 'CLINIC_DELETED',
+                entity: 'clinic',
+                entityId: id,
+                req
+            });
+        } catch (auditErr) {
+            // Ignore audit log write failure
+        }
+
+        res.json({ status: 'success', message: 'Clinic and all associated records deleted successfully' });
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error deleting clinic:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to delete clinic', error: error.message });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
+// @desc    Update Clinic Details
+// @route   PUT /api/super-admin/clinics/:id
+// @access  Private (SUPER_ADMIN)
+const updateClinic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email, phone, address, city, state, country, status, adminName } = req.body;
 
         await db.query(
-            "UPDATE clinics SET status = 'ACTIVE', updated_at = NOW() WHERE id = ?",
-            [id]
+            `UPDATE clinics SET clinic_name = COALESCE(?, clinic_name), email = COALESCE(?, email), phone = COALESCE(?, phone), address = COALESCE(?, address), city = COALESCE(?, city), state = COALESCE(?, state), country = COALESCE(?, country), status = COALESCE(?, status), updated_at = NOW() WHERE id = ?`,
+            [name, email, phone, address, city, state, country, status, id]
         );
 
-        await createAuditLog({
-            userId: req.user.id,
-            clinicId: id,
-            action: 'CLINIC_ACTIVATED',
-            entity: 'clinic',
-            entityId: id,
-            newValues: { status: 'ACTIVE' },
-            req
-        });
+        if (adminName) {
+            await db.query(`UPDATE users SET name = ? WHERE clinic_id = ? AND role = 'Admin'`, [adminName, id]);
+        }
 
-        res.json({ status: 'success', message: 'Clinic activated successfully' });
+        res.json({ status: 'success', message: 'Clinic details updated successfully' });
     } catch (error) {
-        console.error('Error activating clinic:', error);
-        res.status(500).json({ status: 'error', message: 'Failed to activate clinic' });
+        console.error('Error updating clinic:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to update clinic', error: error.message });
     }
 };
 
@@ -230,5 +294,7 @@ module.exports = {
     getClinics,
     getStats,
     suspendClinic,
-    activateClinic
+    activateClinic,
+    deleteClinic,
+    updateClinic
 };
