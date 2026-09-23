@@ -4,11 +4,13 @@ const pool = require('../config/db');
 const emailService = require('../services/emailService');
 require('dotenv').config();
 
-// Initialize Razorpay instance safely
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummyKeyId',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummyKeySecret',
-});
+// Initialize Razorpay instance dynamically from env
+const getRazorpay = () => {
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummyKeyId',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummyKeySecret',
+  });
+};
 
 // Initialize Stripe instance lazily/safely if key is present
 let stripeInstance = null;
@@ -115,7 +117,7 @@ exports.createOrder = async (req, res) => {
 
     let order;
     try {
-      order = await razorpay.orders.create(options);
+      order = await getRazorpay().orders.create(options);
     } catch (rzpErr) {
       console.warn('Razorpay API notice / local test mode:', rzpErr.message);
       order = {
