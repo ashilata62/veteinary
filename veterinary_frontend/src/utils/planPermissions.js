@@ -142,7 +142,26 @@ export function isTabAllowedForPlan(tabId, planId) {
  * @returns {string}
  */
 export function getRequiredPlanForTab(tabId) {
-  if (tabId === 'hospitalization' || tabId === 'audit-logs') return 'Pro';
-  if (['billing', 'inventory', 'home-visits', 'reports'].includes(tabId)) return 'Standard';
+  if (tabId === 'hospitalization' || tabId === 'audit-logs') return 'Pro Enterprise';
+  if (['billing', 'inventory', 'home-visits', 'reports'].includes(tabId)) return 'Standard Growth';
   return 'Starter';
+}
+
+/**
+ * Get human-friendly name for a tab
+ * @param {string} tabId 
+ * @returns {string}
+ */
+export function getTabDisplayName(tabId) {
+  const names = {
+    'hospitalization': 'Hospitalization & Inpatient Management',
+    'audit-logs': 'Audit Logs & Security Trail',
+    'billing': 'Billing, POS & Digital Invoicing',
+    'inventory': 'Pharmacy & Inventory Management',
+    'home-visits': 'Home Visit Appointments & Tracking',
+    'reports': 'Reports & Financial Analytics',
+    'staff': 'Staff & User Access Management',
+    'attendance': 'Staff Attendance & Shift Logs'
+  };
+  return names[tabId] || (tabId.charAt(0).toUpperCase() + tabId.slice(1).replace('-', ' '));
 }

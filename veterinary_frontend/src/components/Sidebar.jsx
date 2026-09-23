@@ -45,10 +45,7 @@ export default function Sidebar({
   ];
 
   const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
-  const filteredItems = menuItems.filter(item => {
-    if (!item.roles.includes(currentRole)) return false;
-    return isTabAllowedForPlan(item.id, userPlanId);
-  });
+  const filteredItems = menuItems.filter(item => item.roles.includes(currentRole));
 
   const displayName = user.name || user.fullName || user.clinic_name || ({
     Admin: 'Admin User',
@@ -144,20 +141,42 @@ export default function Sidebar({
           {filteredItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.id);
+            const isAllowed = isTabAllowedForPlan(item.id, userPlanId);
+
             return (
               <button 
                 key={item.id}
                 className={`sidebar-menu-btn ${active ? 'active' : ''}`}
                 onClick={() => { setCurrentTab(item.id); if (window.innerWidth < 1024) setSidebarOpen(false); }}
-                title={item.label}
+                title={!isAllowed ? `${item.label} (Locked in your plan)` : item.label}
+                style={!isAllowed ? { opacity: 0.78 } : {}}
               >
                 <div className="sidebar-menu-icon" style={{ color: getIconColor(item.id, active) }}>
                   <Icon size={20} />
                 </div>
                 {sidebarOpen && (
                   <>
-                    <span className="sidebar-menu-label">{item.label}</span>
-                    <ChevronRight size={16} className="chevron" />
+                    <span className="sidebar-menu-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <span>{item.label}</span>
+                      {!isAllowed && (
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                          color: '#fbbf24',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(245, 158, 11, 0.3)',
+                          marginLeft: '6px'
+                        }}>
+                          🔒 Lock
+                        </span>
+                      )}
+                    </span>
+                    {isAllowed && <ChevronRight size={16} className="chevron" />}
                   </>
                 )}
               </button>

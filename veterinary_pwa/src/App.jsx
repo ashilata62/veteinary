@@ -37,7 +37,7 @@ import AccountSuspended from './components/AccountSuspended';
 import Support from './components/Support';
 import PlansPage from './components/PlansPage';
 import TrialBanner from './components/TrialBanner';
-import { isTabAllowedForPlan, getRequiredPlanForTab } from './utils/planPermissions';
+import { isTabAllowedForPlan, getRequiredPlanForTab, getTabDisplayName } from './utils/planPermissions';
 import AuditLogs from './components/AuditLogs/AuditLogs';
 import SessionTerminatedModal from './components/SessionTerminatedModal';
 import { tabFromPath, pathForTab, isLegacyPath } from './utils/routes';
@@ -366,59 +366,107 @@ export default function App() {
               try { return JSON.parse(localStorage.getItem('user') || '{}'); }
               catch (e) { return {}; }
             })();
-            const userPlanId = userObj.plan_id || (userObj.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-pro');
+            const userPlanId = userObj.plan_id || userObj.plan || (userObj.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-starter');
 
             if (!isTabAllowedForPlan(currentTab, userPlanId)) {
               const reqPlan = getRequiredPlanForTab(currentTab);
+              const moduleName = getTabDisplayName(currentTab);
               return (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minHeight: '55vh',
+                  minHeight: '60vh',
                   textAlign: 'center',
-                  padding: '2.5rem',
-                  backgroundColor: 'var(--surface)',
-                  borderRadius: 'var(--radius-xl)',
-                  border: '1px solid var(--border)',
+                  padding: '3rem 2rem',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
                   margin: '1rem 0'
                 }}>
                   <div style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    background: 'rgba(234, 88, 12, 0.1)',
+                    width: 72,
+                    height: 72,
+                    borderRadius: '20px',
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '1.25rem',
-                    color: '#ea580c'
+                    marginBottom: '1.5rem',
+                    color: '#d97706',
+                    boxShadow: '0 8px 16px -4px rgba(245, 158, 11, 0.2)'
                   }}>
-                    <Lock size={32} />
+                    <Lock size={36} />
                   </div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                    Module Locked in Current Plan
+
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: '#fef3c7',
+                    color: '#92400e',
+                    padding: '4px 12px',
+                    borderRadius: '999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    marginBottom: '0.85rem'
+                  }}>
+                    Feature Locked in Current Plan
+                  </div>
+
+                  <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem', letterSpacing: '-0.01em' }}>
+                    {moduleName}
                   </h2>
-                  <p style={{ color: 'var(--text-secondary)', maxWidth: 460, marginBottom: '1.5rem', fontSize: '0.92rem', lineHeight: '1.5' }}>
-                    Access to <strong>{currentTab.toUpperCase()}</strong> requires the <strong>{reqPlan} Plan</strong>. Upgrade your clinic plan to unlock this module and all its features.
+                  <p style={{ color: '#64748b', maxWidth: 520, marginBottom: '1.75rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                    This module is exclusive to the <strong>{reqPlan} Plan</strong>. Upgrade your subscription to gain immediate access to this feature and supercharge your clinic workflow.
                   </p>
-                  <button
-                    onClick={() => navigate('/plans')}
-                    style={{
-                      backgroundColor: '#ea580c',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '24px',
-                      padding: '10px 24px',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.3)'
-                    }}
-                  >
-                    Upgrade to {reqPlan} Plan
-                  </button>
+
+                  <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button
+                      onClick={() => navigate('/plans')}
+                      style={{
+                        backgroundColor: '#0f766e',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '12px 28px',
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(15, 118, 110, 0.3)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0d9488';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0f766e';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      Upgrade to {reqPlan} Plan
+                    </button>
+                    <button
+                      onClick={() => setCurrentTab('dashboard')}
+                      style={{
+                        backgroundColor: '#f1f5f9',
+                        color: '#475569',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '12px',
+                        padding: '12px 24px',
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Back to Dashboard
+                    </button>
+                  </div>
                 </div>
               );
             }
