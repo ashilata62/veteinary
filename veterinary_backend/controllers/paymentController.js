@@ -277,21 +277,6 @@ exports.verifyPayment = async (req, res) => {
     res.status(500).json({ status: 'error', message: error.message || 'Payment verification failed' });
   }
 };
-        }
-      });
-    } else {
-      await pool.query(
-        `UPDATE saas_payments SET status = 'Failed' WHERE razorpay_order_id = ?`,
-        [razorpay_order_id]
-      );
-
-      res.status(400).json({ status: 'error', message: 'Invalid payment signature' });
-    }
-  } catch (error) {
-    console.error('Error verifying payment:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error during verification' });
-  }
-};
 
 // @desc    Create Stripe Checkout Session / Payment Intent
 // @route   POST /api/payment/stripe/create-session
