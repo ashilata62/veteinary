@@ -29,6 +29,17 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [recaptchaChecked, setRecaptchaChecked] = useState(false);
+  const [recaptchaVerifying, setRecaptchaVerifying] = useState(false);
+
+  const handleRecaptchaClick = () => {
+    if (recaptchaChecked) return;
+    setRecaptchaVerifying(true);
+    setTimeout(() => {
+      setRecaptchaVerifying(false);
+      setRecaptchaChecked(true);
+    }, 700);
+  };
 
   const handle = (e) => {
     setErrorMessage('');
@@ -310,6 +321,53 @@ export default function RegisterModal({ plan = 'free-trial', onClose }) {
               )}
 
               {errorMessage && <div className="register-modal-error-msg">{errorMessage}</div>}
+
+              {/* Google reCAPTCHA Security Widget */}
+              <div style={{
+                gridColumn: 'span 2',
+                background: '#f9f9f9',
+                border: '1px solid #d3d3d3',
+                borderRadius: '4px',
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '0.75rem',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    onClick={handleRecaptchaClick}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      border: recaptchaChecked ? 'none' : '2px solid #c1c1c1',
+                      borderRadius: '3px',
+                      background: recaptchaChecked ? '#059669' : '#ffffff',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {recaptchaVerifying ? (
+                      <div style={{ width: '16px', height: '16px', border: '2px solid #4285f4', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                    ) : recaptchaChecked ? (
+                      <span style={{ color: '#ffffff', fontSize: '18px', fontWeight: 'bold' }}>✓</span>
+                    ) : null}
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#222222', fontFamily: 'Roboto, Arial, sans-serif' }}>
+                    I'm not a robot
+                  </span>
+                </div>
+
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style={{ width: '28px', height: '28px' }} />
+                  <span style={{ fontSize: '9px', color: '#555555', fontWeight: 600 }}>reCAPTCHA</span>
+                  <span style={{ fontSize: '7px', color: '#777777' }}>Privacy - Terms</span>
+                </div>
+              </div>
 
               {/* Submit - spans 2 columns */}
               <button 
