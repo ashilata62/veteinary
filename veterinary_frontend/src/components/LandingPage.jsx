@@ -161,8 +161,8 @@ export default function LandingPage() {
         </div>
 
         {/* Mobile Language Selector */}
-        <div style={{ padding: '0.5rem 0' }}>
-          <LanguageSwitcher selectedRegion={selectedRegionId} onRegionChange={setSelectedRegionId} />
+        <div style={{ padding: '0.5rem 0', width: '100%' }}>
+          <LanguageSwitcher selectedRegion={selectedRegionId} onRegionChange={setSelectedRegionId} inDrawer={true} />
         </div>
 
         {/* Mobile Nav Links */}
