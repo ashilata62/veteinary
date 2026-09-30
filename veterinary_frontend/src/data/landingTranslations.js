@@ -165,6 +165,24 @@ const baseEnglish = {
     btnGetStarted: 'Get Started',
     btnContactSales: 'Contact Sales'
   },
+  apps: {
+    badge: 'Mobile App Available',
+    sectionTitle: 'Manage Your Clinic',
+    sectionGradient: 'Anywhere, Anytime',
+    sectionSubtitle: 'Take PetCare Pro on rounds, home visits, or emergency calls with our fast, offline-ready Android APK and iOS Progressive Web App.',
+    downloadAndroid: 'Download for Android',
+    downloadAndroidSub: 'Direct APK (v1.0.0)',
+    downloadIos: 'Download for iOS',
+    downloadIosSub: 'PWA Web App',
+    feature1Title: 'Works Offline with Cloud Sync',
+    feature1Desc: 'Record patient vitals and consultations even without an active internet connection.',
+    feature2Title: 'Direct WhatsApp Alerts',
+    feature2Desc: 'Send vaccine reminders, appointment updates, and PDF prescriptions on the go.',
+    feature3Title: 'Fast Billing & Wireless POS',
+    feature3Desc: 'Collect payments and print receipts wirelessly from mobile POS thermal printers.',
+    feature4Title: 'Zero Storage Clutter',
+    feature4Desc: 'Ultra-lightweight (< 10 MB APK / < 3 MB PWA) with lightning-fast performance.'
+  },
   footer: {
     tagline: 'Leading next-generation veterinary clinic management and clinical health record software.',
     quickLinks: 'Quick Links',

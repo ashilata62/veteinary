@@ -27,11 +27,104 @@ import {
   Instagram,
   Facebook,
   ShieldCheck,
-  Globe
+  Globe,
+  Smartphone,
+  Share2,
+  Copy,
+  Download
 } from 'lucide-react';
 import { LANGUAGES, PLAN_PRICING, TRANSLATIONS } from '../data/landingTranslations';
 import LanguageSwitcher from './LanguageSwitcher';
 import './LandingPage.css';
+
+function AndroidIcon({ size = 20, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
+      <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993s-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9994.4482.9994.9993s-.4483.9997-.9994.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1523-.5676.416.416 0 00-.5676.1523l-2.0223 3.503C15.5898 8.404 13.8488 8 12 8s-3.5898.404-5.1326.95l-2.0223-3.503a.416.416 0 00-.5676-.1523.416.416 0 00-.1523.5676l1.9973 3.4592C2.6884 11.0967.3432 15.0064 0 19.5765h24c-.3432-4.5701-2.6884-8.4798-6.1185-10.2551"/>
+    </svg>
+  );
+}
+
+function AppleIcon({ size = 20, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
+      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 0.92-2.87-.9.04-1.99.6-2.64 1.36-.57.65-1.07 1.71-.93 2.73 1.01.08 2.04-.47 2.65-1.22z"/>
+    </svg>
+  );
+}
+
+function IosModal({ onClose }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.origin);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  return (
+    <div className="vet-drawer-backdrop" onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 10000 }}>
+      <div className="vet-ios-modal-card" onClick={(e) => e.stopPropagation()}>
+        <button className="vet-ios-modal-close" onClick={onClose} aria-label="Close">
+          <X size={18} />
+        </button>
+
+        <div className="vet-ios-modal-header">
+          <div className="vet-ios-apple-icon">
+            <AppleIcon size={30} color="#ffffff" />
+          </div>
+          <div>
+            <h3 className="vet-ios-modal-title">Install PetCare Pro on iOS</h3>
+            <p className="vet-ios-modal-sub">Works seamlessly on iPhone & iPad with native PWA speed</p>
+          </div>
+        </div>
+
+        <div className="vet-ios-steps-container">
+          <div className="vet-ios-step-card">
+            <div className="vet-ios-step-num">1</div>
+            <div className="vet-ios-step-body">
+              <strong>Open in Safari</strong>
+              <p>Open this website in Apple Safari browser on your iPhone or iPad.</p>
+            </div>
+          </div>
+
+          <div className="vet-ios-step-card">
+            <div className="vet-ios-step-num">2</div>
+            <div className="vet-ios-step-body">
+              <strong>Tap the Share Button</strong>
+              <p>Tap the <strong>Share</strong> icon (<Share2 size={13} style={{ display: 'inline', verticalAlign: 'middle' }} /> square with up arrow) in the Safari toolbar.</p>
+            </div>
+          </div>
+
+          <div className="vet-ios-step-card">
+            <div className="vet-ios-step-num">3</div>
+            <div className="vet-ios-step-body">
+              <strong>Tap "Add to Home Screen"</strong>
+              <p>Scroll down and select <strong>"Add to Home Screen"</strong>, then tap <strong>Add</strong> at top right.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="vet-ios-perks-row">
+          <div className="vet-ios-perk"><CheckCircle size={14} color="#14b8a6" /> Fast Offline Access</div>
+          <div className="vet-ios-perk"><CheckCircle size={14} color="#14b8a6" /> Fullscreen Native UI</div>
+          <div className="vet-ios-perk"><CheckCircle size={14} color="#14b8a6" /> Under 3 MB Size</div>
+        </div>
+
+        <div className="vet-ios-modal-actions">
+          <button type="button" className="vet-btn-outline" onClick={handleCopyLink} style={{ flex: 1, justifyContent: 'center' }}>
+            {copied ? <><Check size={16} color="#14b8a6" /> Link Copied!</> : <><Copy size={16} /> Copy Web App URL</>}
+          </button>
+          <button type="button" className="vet-btn-primary" onClick={onClose} style={{ flex: 1, justifyContent: 'center' }}>
+            Got It 👍
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -41,11 +134,20 @@ export default function LandingPage() {
   const [selectedPlan, setSelectedPlan] = useState('free-trial');
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
+  const [showIosModal, setShowIosModal] = useState(false);
+  const [downloadToast, setDownloadToast] = useState('');
 
-  // Auto-scroll when visiting /contact, /features, /pricing, /benefits, /testimonials
+  const handleAndroidDownload = () => {
+    setDownloadToast('⬇️ Downloading PetCare Pro Android APK (10 MB)... Once downloaded, open the file to install.');
+    setTimeout(() => {
+      setDownloadToast('');
+    }, 4500);
+  };
+
+  // Auto-scroll when visiting /contact, /features, /pricing, /benefits, /testimonials, /mobile-app
   useEffect(() => {
     const rawPath = location.pathname.toLowerCase().replace(/^\//, '');
-    if (['features', 'benefits', 'testimonials', 'pricing', 'contact', 'home'].includes(rawPath)) {
+    if (['features', 'benefits', 'testimonials', 'pricing', 'contact', 'home', 'mobile-app'].includes(rawPath)) {
       const targetId = rawPath === 'home' ? 'home' : rawPath;
       const el = document.getElementById(targetId);
       if (el) {
@@ -132,6 +234,7 @@ export default function LandingPage() {
           <ul className="vet-nav-links">
             <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
             <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+            <li><a href="/#mobile-app" onClick={(e) => { e.preventDefault(); scrollToSection('mobile-app'); }}>Mobile App 📱</a></li>
             <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
             <li><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
             <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
@@ -186,6 +289,7 @@ export default function LandingPage() {
           <ul className="vet-drawer-nav-list">
             <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
             <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+            <li><a href="/#mobile-app" onClick={(e) => { e.preventDefault(); scrollToSection('mobile-app'); }}>Mobile App 📱</a></li>
             <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
             <li><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
             <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
@@ -194,6 +298,45 @@ export default function LandingPage() {
             <li><a href="/privacy-policy" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/privacy-policy'); }}>Privacy Policy 🛡️</a></li>
             <li><a href="/terms" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/terms'); }}>Terms & Conditions 📜</a></li>
           </ul>
+        </div>
+
+        {/* Mobile App Download Block in Drawer */}
+        <div className="vet-drawer-apps-block">
+          <div className="vet-drawer-section-title">
+            📱 Mobile App
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <a
+              href="/PetCare_Veterinary.apk"
+              download="PetCare_Veterinary.apk"
+              onClick={() => { setMobileMenuOpen(false); handleAndroidDownload(); }}
+              className="vet-app-store-btn vet-app-btn-android"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+            >
+              <div className="vet-app-icon-wrap android-wrap">
+                <AndroidIcon size={22} color="#22c55e" />
+              </div>
+              <div className="vet-app-text-wrap">
+                <span className="vet-app-text-top">Download App for</span>
+                <span className="vet-app-text-bottom">Android (APK - 10 MB)</span>
+              </div>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => { setMobileMenuOpen(false); setShowIosModal(true); }}
+              className="vet-app-store-btn vet-app-btn-ios"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+            >
+              <div className="vet-app-icon-wrap ios-wrap">
+                <AppleIcon size={22} color="#ffffff" />
+              </div>
+              <div className="vet-app-text-wrap">
+                <span className="vet-app-text-top">Download for</span>
+                <span className="vet-app-text-bottom">iOS (Apple PWA)</span>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Actions (Buttons) */}
@@ -231,6 +374,46 @@ export default function LandingPage() {
               <button className="vet-btn-outline" onClick={() => scrollToSection('pricing')}>
                 {t('hero.explorePricing')}
               </button>
+            </div>
+
+            {/* Mobile App Download Row in Hero */}
+            <div className="vet-hero-app-row">
+              <div className="vet-hero-app-title">
+                <Smartphone size={16} className="vet-text-teal" />
+                <span>Download PetCare Pro Mobile App:</span>
+              </div>
+              <div className="vet-app-buttons-group">
+                <a
+                  href="/PetCare_Veterinary.apk"
+                  download="PetCare_Veterinary.apk"
+                  onClick={handleAndroidDownload}
+                  className="vet-app-store-btn vet-app-btn-android"
+                  title="Download PetCare Pro Android APK"
+                >
+                  <div className="vet-app-icon-wrap android-wrap">
+                    <AndroidIcon size={24} color="#22c55e" />
+                  </div>
+                  <div className="vet-app-text-wrap">
+                    <span className="vet-app-text-top">Download App for</span>
+                    <span className="vet-app-text-bottom">Android (APK)</span>
+                  </div>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setShowIosModal(true)}
+                  className="vet-app-store-btn vet-app-btn-ios"
+                  title="Download PetCare Pro for iOS"
+                >
+                  <div className="vet-app-icon-wrap ios-wrap">
+                    <AppleIcon size={24} color="#ffffff" />
+                  </div>
+                  <div className="vet-app-text-wrap">
+                    <span className="vet-app-text-top">Download for</span>
+                    <span className="vet-app-text-bottom">iOS (Apple)</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Stats Row */}
@@ -351,6 +534,112 @@ export default function LandingPage() {
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="vet-feature-link">
               {t('nav.pricing')} <ChevronRight size={16} />
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 3.5 MOBILE APP SHOWCASE SECTION */}
+      <section id="mobile-app" className="vet-section-container" style={{ paddingTop: '2.5rem', paddingBottom: '3.5rem' }}>
+        <div className="vet-app-showcase-box">
+          <div className="vet-app-showcase-left">
+            <div className="vet-badge">
+              <Smartphone size={14} /> {t('apps.badge')}
+            </div>
+            <h2 className="vet-section-title" style={{ textAlign: 'left', marginBottom: '1rem', fontSize: '2.4rem' }}>
+              {t('apps.sectionTitle')} <span className="vet-text-gradient">{t('apps.sectionGradient')}</span>
+            </h2>
+            <p className="vet-section-subtitle" style={{ textAlign: 'left', margin: '0 0 2rem 0', maxWidth: '600px' }}>
+              {t('apps.sectionSubtitle')}
+            </p>
+
+            <div className="vet-app-bullets-grid">
+              <div className="vet-app-bullet-item">
+                <div className="vet-app-bullet-icon"><CheckCircle size={18} color="#14b8a6" /></div>
+                <div>
+                  <div className="vet-app-bullet-title">{t('apps.feature1Title')}</div>
+                  <div className="vet-app-bullet-desc">{t('apps.feature1Desc')}</div>
+                </div>
+              </div>
+
+              <div className="vet-app-bullet-item">
+                <div className="vet-app-bullet-icon"><CheckCircle size={18} color="#14b8a6" /></div>
+                <div>
+                  <div className="vet-app-bullet-title">{t('apps.feature2Title')}</div>
+                  <div className="vet-app-bullet-desc">{t('apps.feature2Desc')}</div>
+                </div>
+              </div>
+
+              <div className="vet-app-bullet-item">
+                <div className="vet-app-bullet-icon"><CheckCircle size={18} color="#14b8a6" /></div>
+                <div>
+                  <div className="vet-app-bullet-title">{t('apps.feature3Title')}</div>
+                  <div className="vet-app-bullet-desc">{t('apps.feature3Desc')}</div>
+                </div>
+              </div>
+
+              <div className="vet-app-bullet-item">
+                <div className="vet-app-bullet-icon"><CheckCircle size={18} color="#14b8a6" /></div>
+                <div>
+                  <div className="vet-app-bullet-title">{t('apps.feature4Title')}</div>
+                  <div className="vet-app-bullet-desc">{t('apps.feature4Desc')}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="vet-app-buttons-group" style={{ marginTop: '2.25rem' }}>
+              <a
+                href="/PetCare_Veterinary.apk"
+                download="PetCare_Veterinary.apk"
+                onClick={handleAndroidDownload}
+                className="vet-app-store-btn vet-app-btn-android"
+                title="Download PetCare Pro Android APK"
+              >
+                <div className="vet-app-icon-wrap android-wrap">
+                  <AndroidIcon size={26} color="#22c55e" />
+                </div>
+                <div className="vet-app-text-wrap">
+                  <span className="vet-app-text-top">Download App for</span>
+                  <span className="vet-app-text-bottom">Android (APK)</span>
+                </div>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setShowIosModal(true)}
+                className="vet-app-store-btn vet-app-btn-ios"
+                title="Download PetCare Pro for iOS"
+              >
+                <div className="vet-app-icon-wrap ios-wrap">
+                  <AppleIcon size={26} color="#ffffff" />
+                </div>
+                <div className="vet-app-text-wrap">
+                  <span className="vet-app-text-top">Download for</span>
+                  <span className="vet-app-text-bottom">iOS (Apple)</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="vet-app-showcase-right">
+            <div className="vet-app-phone-container">
+              <div className="vet-app-phone-outer">
+                <div className="vet-app-phone-speaker"></div>
+                <div className="vet-app-phone-camera"></div>
+                <div className="vet-app-phone-screen">
+                  <div className="vet-app-screen-header">
+                    <div className="vet-app-screen-brand">
+                      <img src="/kt-logo.png" alt="Logo" style={{ height: '20px', objectFit: 'contain' }} />
+                      <span>PetCare Pro</span>
+                    </div>
+                    <span className="vet-app-screen-live">● LIVE</span>
+                  </div>
+                  <img src="/sidebar-vet-dog.png" alt="PetCare Mobile App" className="vet-app-screen-img" />
+                  <div className="vet-app-screen-badge">
+                    <Zap size={14} color="#14b8a6" /> PWA Mobile Edition Active
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -704,6 +993,8 @@ export default function LandingPage() {
                 <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
                 <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
                 <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+                <li><a href="/#mobile-app" onClick={(e) => { e.preventDefault(); scrollToSection('mobile-app'); }}>Mobile Apps (Android & iOS)</a></li>
+                <li><a href="/PetCare_Veterinary.apk" download="PetCare_Veterinary.apk" onClick={handleAndroidDownload}>Download Android APK</a></li>
                 <li><a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Clinic Admin Login</a></li>
                 <li><a href="/register?plan=starter" onClick={(e) => { e.preventDefault(); navigate('/register?plan=starter'); }}>Start 7-Day Free Trial</a></li>
               </ul>
@@ -792,6 +1083,17 @@ export default function LandingPage() {
 
       {showLegalModal && (
         <LegalModal type={legalType} onClose={() => setShowLegalModal(false)} />
+      )}
+
+      {showIosModal && (
+        <IosModal onClose={() => setShowIosModal(false)} />
+      )}
+
+      {downloadToast && (
+        <div className="vet-download-toast">
+          <CheckCircle size={18} color="#22c55e" style={{ flexShrink: 0 }} />
+          <span>{downloadToast}</span>
+        </div>
       )}
     </div>
   );

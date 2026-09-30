@@ -1,9 +1,11 @@
 export const LANGUAGES = [
-  { id: 'usa', label: 'USA', nativeName: 'USA (English)', flag: '🇺🇸', currency: 'USD', symbol: '$' },
-  { id: 'uk', label: 'UK', nativeName: 'UK (English)', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
-  { id: 'uae', label: 'UAE', nativeName: 'UAE (English)', flag: '🇦🇪', currency: 'AED', symbol: 'AED' },
-  { id: 'au', label: 'Australia', nativeName: 'Australia (English)', flag: '🇦🇺', currency: 'AUD', symbol: 'A$' },
-  { id: 'en', label: 'Global', nativeName: 'Global (English)', flag: '🌐', currency: 'INR', symbol: '₹' },
+  { id: 'us', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$', flag: '🇺🇸' },
+  { id: 'in', label: 'India (₹)', short: 'IN', lang: 'en', currency: 'INR', symbol: '₹', flag: '🇮🇳' },
+  { id: 'ae', label: 'UAE (AED)', short: 'AE', lang: 'en', currency: 'AED', symbol: 'AED', flag: '🇦🇪' },
+  { id: 'fr', label: 'France (€)', short: 'FR', lang: 'fr', currency: 'EUR', symbol: '€', flag: '🇫🇷' },
+  { id: 'es', label: 'Spain ($)', short: 'ES', lang: 'es', currency: 'USD', symbol: '$', flag: '🇪🇸' },
+  { id: 'de', label: 'Germany (€)', short: 'DE', lang: 'de', currency: 'EUR', symbol: '€', flag: '🇩🇪' },
+  { id: 'gb', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£', flag: '🇬🇧' }
 ];
 
 export const PLAN_PRICING = {
@@ -14,6 +16,15 @@ export const PLAN_PRICING = {
     starter: { price: '7', unit: 'per month' },
     standard: { price: '9', unit: 'per month' },
     pro: { price: '15', unit: 'per month' },
+    custom: { price: 'Custom', unit: '' }
+  },
+  EUR: {
+    symbol: '€',
+    code: 'EUR',
+    'free-trial': { price: '0', unit: 'per week' },
+    starter: { price: '6.50', unit: 'per month' },
+    standard: { price: '8.50', unit: 'per month' },
+    pro: { price: '14', unit: 'per month' },
     custom: { price: 'Custom', unit: '' }
   },
   GBP: {
@@ -47,9 +58,9 @@ export const PLAN_PRICING = {
     symbol: '₹',
     code: 'INR',
     'free-trial': { price: '0', unit: 'per week' },
-    starter: { price: '599', unit: 'per month' },
-    standard: { price: '799', unit: 'per month' },
-    pro: { price: '1,299', unit: 'per month' },
+    starter: { price: '999', unit: 'per month' },
+    standard: { price: '1,299', unit: 'per month' },
+    pro: { price: '1,499', unit: 'per month' },
     custom: { price: 'Custom', unit: '' }
   }
 };
@@ -154,6 +165,24 @@ const baseEnglish = {
     btnGetStarted: 'Get Started',
     btnContactSales: 'Contact Sales'
   },
+  apps: {
+    badge: 'Mobile App Available',
+    sectionTitle: 'Manage Your Clinic',
+    sectionGradient: 'Anywhere, Anytime',
+    sectionSubtitle: 'Take PetCare Pro on rounds, home visits, or emergency calls with our fast, offline-ready Android APK and iOS Progressive Web App.',
+    downloadAndroid: 'Download for Android',
+    downloadAndroidSub: 'Direct APK (v1.0.0)',
+    downloadIos: 'Download for iOS',
+    downloadIosSub: 'PWA Web App',
+    feature1Title: 'Works Offline with Cloud Sync',
+    feature1Desc: 'Record patient vitals and consultations even without an active internet connection.',
+    feature2Title: 'Direct WhatsApp Alerts',
+    feature2Desc: 'Send vaccine reminders, appointment updates, and PDF prescriptions on the go.',
+    feature3Title: 'Fast Billing & Wireless POS',
+    feature3Desc: 'Collect payments and print receipts wirelessly from mobile POS thermal printers.',
+    feature4Title: 'Zero Storage Clutter',
+    feature4Desc: 'Ultra-lightweight (< 10 MB APK / < 3 MB PWA) with lightning-fast performance.'
+  },
   footer: {
     tagline: 'Leading next-generation veterinary clinic management and clinical health record software.',
     quickLinks: 'Quick Links',
@@ -165,6 +194,25 @@ const baseEnglish = {
 };
 
 export const TRANSLATIONS = {
+  us: { ...baseEnglish },
+  in: { ...baseEnglish },
+  ae: {
+    ...baseEnglish,
+    footer: {
+      ...baseEnglish.footer,
+      address: 'Business Bay & Internet City, Dubai, United Arab Emirates'
+    }
+  },
+  fr: { ...baseEnglish },
+  es: { ...baseEnglish },
+  de: { ...baseEnglish },
+  gb: {
+    ...baseEnglish,
+    footer: {
+      ...baseEnglish.footer,
+      address: 'Central Tech Hub, London, United Kingdom'
+    }
+  },
   usa: { ...baseEnglish },
   uk: {
     ...baseEnglish,
