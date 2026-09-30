@@ -5,8 +5,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Supported regional editions (7 Regional & Language Editions)
 export const EDITIONS = [
   { code: 'us', short: 'US', label: 'USA ($)', lang: 'en', currency: 'USD', symbol: '$' },
-  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'hi', currency: 'INR', symbol: '₹' },
-  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'ar', currency: 'AED', symbol: 'AED' },
+  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'en', currency: 'INR', symbol: '₹' },
+  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'en', currency: 'AED', symbol: 'AED' },
   { code: 'fr', short: 'FR', label: 'France (€)', lang: 'fr', currency: 'EUR', symbol: '€' },
   { code: 'es', short: 'ES', label: 'Spain ($)', lang: 'es', currency: 'USD', symbol: '$' },
   { code: 'de', short: 'DE', label: 'Germany (€)', lang: 'de', currency: 'EUR', symbol: '€' },

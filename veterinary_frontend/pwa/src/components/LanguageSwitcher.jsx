@@ -4,11 +4,11 @@ import { Globe, ChevronDown, Check } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { EDITIONS } from '../i18n';
 
-// Fallback if not loaded
+// Fallback if not loaded (India and UAE have English language)
 const FALLBACK_EDITIONS = [
   { code: 'us', short: 'US', label: 'USA ($)', lang: 'en', currency: 'USD', symbol: '$' },
-  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'hi', currency: 'INR', symbol: '₹' },
-  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'ar', currency: 'AED', symbol: 'AED' },
+  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'en', currency: 'INR', symbol: '₹' },
+  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'en', currency: 'AED', symbol: 'AED' },
   { code: 'fr', short: 'FR', label: 'France (€)', lang: 'fr', currency: 'EUR', symbol: '€' },
   { code: 'es', short: 'ES', label: 'Spain ($)', lang: 'es', currency: 'USD', symbol: '$' },
   { code: 'de', short: 'DE', label: 'Germany (€)', lang: 'de', currency: 'EUR', symbol: '€' },
@@ -46,6 +46,24 @@ export const LanguageSwitcher = ({
     if (ALL_EDITIONS.some((e) => e.code === fromStored)) return fromStored;
     return 'us';
   });
+
+  const activeObj = ALL_EDITIONS.find((e) => e.code === currentRegion) || ALL_EDITIONS[0];
+
+  // Auto-reset Google Translate if active region language is English
+  useEffect(() => {
+    if (activeObj && activeObj.lang === 'en') {
+      const hasTrans = document.cookie.includes('googtrans=');
+      if (hasTrans) {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname;
+        const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
+        if (masterSelect && masterSelect.value !== '') {
+          masterSelect.value = '';
+          masterSelect.dispatchEvent(new Event("change"));
+        }
+      }
+    }
+  }, [activeObj]);
 
   // Sync with prop if provided
   useEffect(() => {
@@ -113,9 +131,12 @@ export const LanguageSwitcher = ({
       try {
         const domain = window.location.hostname;
         if (reg.lang === 'en') {
+          // Clear translation cookies completely
           document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
           if (domain !== 'localhost') {
             document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${domain}; path=/;`;
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${domain}; path=/;`;
           }
         } else {
           document.cookie = `googtrans=/en/${reg.lang}; path=/;`;
@@ -132,8 +153,21 @@ export const LanguageSwitcher = ({
       const triggerSelect = () => {
         const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
         if (masterSelect) {
-          masterSelect.value = (reg.lang === 'en' && !masterSelect.querySelector('option[value="en"]')) ? '' : reg.lang;
-          masterSelect.dispatchEvent(new Event("change"));
+          if (reg.lang === 'en') {
+            masterSelect.value = '';
+            masterSelect.dispatchEvent(new Event("change"));
+            // If banner frame exists, close it
+            const iframe = document.querySelector('iframe.goog-te-banner-frame');
+            if (iframe) {
+              try {
+                const btn = iframe.contentDocument.querySelector('.goog-close-link');
+                if (btn) btn.click();
+              } catch (e) {}
+            }
+          } else {
+            masterSelect.value = reg.lang;
+            masterSelect.dispatchEvent(new Event("change"));
+          }
           return true;
         }
         return false;
@@ -150,8 +184,6 @@ export const LanguageSwitcher = ({
       }
     }
   };
-
-  const activeObj = ALL_EDITIONS.find((e) => e.code === currentRegion) || ALL_EDITIONS[0];
 
   // Mobile Drawer native-styled accordion
   if (inDrawer) {
