@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, Star, Zap, CheckCircle2, ArrowRight, Phone, Mail, LogOut } from 'lucide-react';
 import './TrialExpired.css';
 import Support from './Support';
+import { Capacitor } from '@capacitor/core';
 
 const PLANS = [
   {
@@ -59,8 +60,14 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState('pro');
   const [showSupport, setShowSupport] = useState(false);
+  const [showNativeNotice, setShowNativeNotice] = useState(false);
+  const isNative = Capacitor.isNativePlatform();
 
   const handleBuyPlan = () => {
+    if (isNative) {
+      setShowNativeNotice(true);
+      return;
+    }
     navigate(`/checkout/${selectedPlan}`);
   };
 
@@ -189,11 +196,11 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
 
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  Renew {PLANS.find((p) => p.id === selectedPlan)?.name} (₹{PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)
+                  {isNative ? 'Manage Subscription Plan' : `Renew ${PLANS.find((p) => p.id === selectedPlan)?.name} (₹${PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)`}
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">
-                  Secure checkout via Razorpay · 256-bit SSL Encrypted
+                  {isNative ? 'Multiplatform SaaS · Manage via Web Portal' : 'Secure checkout via Razorpay · 256-bit SSL Encrypted'}
                 </p>
               </div>
             </div>
@@ -209,21 +216,47 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
               <div className="trial-trust-card">
                 <Shield size={22} style={{ color: '#3b82f6' }} />
                 <div>
-                  <strong>Secure Payment</strong>
-                  <span>Razorpay powered checkout</span>
+                  <strong>Enterprise Security</strong>
+                  <span>{isNative ? 'Cloud Synchronized' : 'Razorpay powered checkout'}</span>
                 </div>
               </div>
               <div className="trial-trust-card">
                 <Zap size={22} style={{ color: '#f59e0b' }} />
                 <div>
                   <strong>Instant Activation</strong>
-                  <span>Immediate access after payment</span>
+                  <span>Immediate access after activation</span>
                 </div>
               </div>
             </div>
           </>
         )}
       </div>
+
+      {showNativeNotice && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(6px)' }}>
+          <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '480px', color: '#f8fafc', position: 'relative', textAlign: 'center' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(20, 184, 166, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto' }}>
+              <Shield size={28} color="#14b8a6" />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: '#fff' }}>Clinic Subscription Portal</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+              PetCare Pro is an enterprise multiplatform veterinary system. To manage, upgrade, or renew your clinic plan, please access your account via any browser:
+            </p>
+            <div style={{ background: '#09090b', padding: '0.75rem', borderRadius: '8px', border: '1px solid #27272a', color: '#2dd4bf', fontWeight: 600, fontSize: '0.85rem', marginBottom: '1.5rem', wordBreak: 'break-all' }}>
+              https://veterinary-saas.kiaantechnology.com
+            </div>
+            <p style={{ color: '#71717a', fontSize: '0.8rem', margin: '0 0 1.5rem 0' }}>
+              All plan renewals sync instantly with this mobile app.
+            </p>
+            <button 
+              onClick={() => setShowNativeNotice(false)}
+              style={{ width: '100%', backgroundColor: '#14b8a6', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.75rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

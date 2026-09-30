@@ -55,3 +55,8 @@ veterinary_frontend/android/build/
 veterinary_mobile/android/.gradle/
 veterinary_mobile/android/app/build/
 veterinary_mobile/android/build/
+*.apk
+*.aab
+*.keystore
+*.jks
+

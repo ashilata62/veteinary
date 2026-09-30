@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { Capacitor } from '@capacitor/core';
 
 const PLANS = {
   'testing':  { name: 'Testing Plan', price: 1,  features: ['Razorpay ₹1 Test', 'Full functionality'] },
@@ -15,13 +16,22 @@ export default function TrialExpiredModal({ user, onClose }) {
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState('standard');
   const [loading, setLoading] = useState(false);
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+    let script = null;
+    if (!isNative) {
+      script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    return () => {
+      if (script && document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, [isNative]);
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -126,19 +136,31 @@ export default function TrialExpiredModal({ user, onClose }) {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onClose} style={{
-            flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '8px', color: '#fff', cursor: 'pointer'
-          }}>Cancel & Logout</button>
-          <button onClick={handleUpgrade} disabled={loading} style={{
-            flex: 2, padding: '12px', background: '#14b8a6', border: 'none',
-            borderRadius: '8px', color: '#fff', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-          }}>
-            {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : 'Upgrade Now via Razorpay'}
-          </button>
-        </div>
+        {isNative ? (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '14px', lineHeight: 1.5 }}>
+              Please visit our web portal at <strong style={{ color: '#14b8a6' }}>https://veterinary-saas.kiaantechnology.com</strong> from any browser to manage or renew your clinic subscription.
+            </p>
+            <button onClick={onClose} style={{
+              width: '100%', padding: '12px', background: '#14b8a6', border: 'none',
+              borderRadius: '8px', color: '#fff', fontWeight: 'bold', cursor: 'pointer'
+            }}>Back to Login</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={onClose} style={{
+              flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px', color: '#fff', cursor: 'pointer'
+            }}>Cancel & Logout</button>
+            <button onClick={handleUpgrade} disabled={loading} style={{
+              flex: 2, padding: '12px', background: '#14b8a6', border: 'none',
+              borderRadius: '8px', color: '#fff', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+            }}>
+              {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : 'Upgrade Now via Razorpay'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

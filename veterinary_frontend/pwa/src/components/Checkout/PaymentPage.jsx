@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, CircleCheck, AlertCircle, Loader2 } from 'lucide-react';
 import './PaymentPage.css';
 import { apiFetch } from '../../utils/api';
+import { Capacitor } from '@capacitor/core';
 
 export default function PaymentPage() {
   const location = useLocation();
@@ -12,14 +13,20 @@ export default function PaymentPage() {
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, success, failed
   const [planDetails, setPlanDetails] = useState({ name: 'Standard Plan', amount: 1299 });
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
-    // Load Razorpay Script
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => setLoading(false);
-    document.body.appendChild(script);
+    let script = null;
+    if (!isNative) {
+      // Load Razorpay Script only on web
+      script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => setLoading(false);
+      document.body.appendChild(script);
+    } else {
+      setLoading(false);
+    }
 
     const PLANS = {
       'starter': { name: 'Starter Plan', amount: 999 },
@@ -178,7 +185,31 @@ export default function PaymentPage() {
               </span>
             </div>
             
-            {planDetails.isCustom ? (
+            {isNative ? (
+              <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.25rem', border: '1px solid #e2e8f0', marginBottom: '1.25rem' }}>
+                  <p style={{ color: '#0f172a', fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.95rem' }}>
+                    SaaS Subscription Management
+                  </p>
+                  <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>
+                    PetCare Pro is a multi-platform clinic management service. To activate or manage your <strong>{planDetails.name}</strong>, please access your billing portal via any browser at:
+                  </p>
+                  <div style={{ margin: '0.75rem 0', padding: '0.6rem', background: '#e0f2fe', borderRadius: '8px', color: '#0369a1', fontWeight: 600, fontSize: '0.85rem', wordBreak: 'break-all' }}>
+                    https://veterinary-saas.kiaantechnology.com
+                  </div>
+                  <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: 0 }}>
+                    Subscriptions managed online automatically sync to this mobile app.
+                  </p>
+                </div>
+                <button 
+                  className="btn-pay" 
+                  onClick={() => navigate('/dashboard')}
+                  style={{ backgroundColor: '#0d9488', borderColor: '#0d9488' }}
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            ) : planDetails.isCustom ? (
               <>
                 <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '1.25rem 0', lineHeight: 1.6, textAlign: 'center' }}>
                   Custom plans include personalized setup for your clinic (personal domain, branding, and custom AI integrations). Please contact our sales team to receive a tailored quote.
