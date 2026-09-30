@@ -4,7 +4,7 @@ import { Globe, ChevronDown, Check } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 import { EDITIONS } from '../i18n';
 
-// Fallback if not loaded (India and UAE have English language)
+// Fallback if not loaded
 const FALLBACK_EDITIONS = [
   { code: 'us', short: 'US', label: 'USA ($)', lang: 'en', currency: 'USD', symbol: '$' },
   { code: 'in', short: 'IN', label: 'India (₹)', lang: 'en', currency: 'INR', symbol: '₹' },
@@ -49,18 +49,24 @@ export const LanguageSwitcher = ({
 
   const activeObj = ALL_EDITIONS.find((e) => e.code === currentRegion) || ALL_EDITIONS[0];
 
-  // Auto-reset Google Translate if active region language is English
+  // Auto-clean any stale foreign translation cookie if active edition is English
   useEffect(() => {
     if (activeObj && activeObj.lang === 'en') {
-      const hasTrans = document.cookie.includes('googtrans=');
-      if (hasTrans) {
+      const cookies = document.cookie;
+      const isStaleTranslated =
+        cookies.includes('googtrans=/en/de') ||
+        cookies.includes('googtrans=/en/fr') ||
+        cookies.includes('googtrans=/en/es') ||
+        cookies.includes('googtrans=/en/hi') ||
+        cookies.includes('googtrans=/en/ar');
+
+      if (isStaleTranslated) {
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname;
-        const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
-        if (masterSelect && masterSelect.value !== '') {
-          masterSelect.value = '';
-          masterSelect.dispatchEvent(new Event("change"));
+        if (window.location.hostname !== 'localhost') {
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.' + window.location.hostname + '; path=/;';
         }
+        window.location.reload();
       }
     }
   }, [activeObj]);
@@ -75,7 +81,7 @@ export const LanguageSwitcher = ({
     }
   }, [selectedRegion]);
 
-  // Sync with custom event
+  // Sync with custom event from outside (e.g. pricing pills)
   useEffect(() => {
     const handleRegionEvent = (e) => {
       if (e.detail) {
@@ -102,6 +108,7 @@ export const LanguageSwitcher = ({
 
   // Handle selection of regional & language edition
   const handleSelect = (reg) => {
+    const prevLang = localStorage.getItem('petcare_lang') || 'en';
     setCurrentRegion(reg.code);
     localStorage.setItem('petcare_region', reg.code);
     setIsOpen(false);
@@ -112,7 +119,7 @@ export const LanguageSwitcher = ({
     }
     window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: reg.code }));
 
-    // 2. Change Currency
+    // 2. Change Currency Globally
     if (reg.currency) {
       try {
         setCurrency(reg.currency);
@@ -131,12 +138,18 @@ export const LanguageSwitcher = ({
       try {
         const domain = window.location.hostname;
         if (reg.lang === 'en') {
-          // Clear translation cookies completely
+          // Clear all translation cookies
           document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
           if (domain !== 'localhost') {
             document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${domain}; path=/;`;
             document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${domain}; path=/;`;
+          }
+
+          // If the page was translated into German/French/etc., reload to restore 100% original English
+          if (prevLang !== 'en' || document.cookie.includes('googtrans=')) {
+            window.location.reload();
+            return;
           }
         } else {
           document.cookie = `googtrans=/en/${reg.lang}; path=/;`;
@@ -156,14 +169,6 @@ export const LanguageSwitcher = ({
           if (reg.lang === 'en') {
             masterSelect.value = '';
             masterSelect.dispatchEvent(new Event("change"));
-            // If banner frame exists, close it
-            const iframe = document.querySelector('iframe.goog-te-banner-frame');
-            if (iframe) {
-              try {
-                const btn = iframe.contentDocument.querySelector('.goog-close-link');
-                if (btn) btn.click();
-              } catch (e) {}
-            }
           } else {
             masterSelect.value = reg.lang;
             masterSelect.dispatchEvent(new Event("change"));
@@ -282,7 +287,7 @@ export const LanguageSwitcher = ({
     );
   }
 
-  // Standard Header Pill Dropdown (matching screenshot)
+  // Standard Header Pill Dropdown (matching screenshot, fully responsive)
   return (
     <div
       className={`vet-edition-dropdown-wrapper notranslate ${className}`}
@@ -308,14 +313,17 @@ export const LanguageSwitcher = ({
           transition: 'all 0.2s ease',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
           userSelect: 'none',
-          outline: 'none'
+          outline: 'none',
+          whiteSpace: 'nowrap'
         }}
       >
-        <Globe size={18} color="#0d9488" strokeWidth={2.2} />
+        <Globe size={17} color="#0d9488" strokeWidth={2.2} />
         <span style={{ fontWeight: 800, color: '#0f172a' }}>{activeObj.short}</span>
-        <span style={{ fontWeight: 700, color: '#0f172a' }}>{activeObj.label}</span>
+        <span className="vet-edition-label-full" style={{ fontWeight: 700, color: '#0f172a' }}>
+          {activeObj.label}
+        </span>
         <ChevronDown
-          size={16}
+          size={15}
           color="#475569"
           strokeWidth={2.5}
           style={{
@@ -337,6 +345,7 @@ export const LanguageSwitcher = ({
             borderRadius: '16px',
             padding: '10px 8px 12px 8px',
             minWidth: '220px',
+            maxWidth: 'min(280px, 92vw)',
             boxShadow: '0 16px 36px -4px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.08)',
             zIndex: 99999,
             display: 'flex',

@@ -1,15 +1,11 @@
 export const LANGUAGES = [
-  { id: 'us', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$' },
-  { id: 'in', label: 'India (₹)', short: 'IN', lang: 'en', currency: 'INR', symbol: '₹' },
-  { id: 'ae', label: 'UAE (AED)', short: 'AE', lang: 'en', currency: 'AED', symbol: 'AED' },
-  { id: 'fr', label: 'France (€)', short: 'FR', lang: 'fr', currency: 'EUR', symbol: '€' },
-  { id: 'es', label: 'Spain ($)', short: 'ES', lang: 'es', currency: 'USD', symbol: '$' },
-  { id: 'de', label: 'Germany (€)', short: 'DE', lang: 'de', currency: 'EUR', symbol: '€' },
-  { id: 'gb', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£' },
-  { id: 'usa', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$' },
-  { id: 'uk', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£' },
-  { id: 'uae', label: 'UAE (AED)', short: 'AE', lang: 'en', currency: 'AED', symbol: 'AED' },
-  { id: 'en', label: 'India (₹)', short: 'IN', lang: 'en', currency: 'INR', symbol: '₹' }
+  { id: 'us', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$', flag: '🇺🇸' },
+  { id: 'in', label: 'India (₹)', short: 'IN', lang: 'en', currency: 'INR', symbol: '₹', flag: '🇮🇳' },
+  { id: 'ae', label: 'UAE (AED)', short: 'AE', lang: 'en', currency: 'AED', symbol: 'AED', flag: '🇦🇪' },
+  { id: 'fr', label: 'France (€)', short: 'FR', lang: 'fr', currency: 'EUR', symbol: '€', flag: '🇫🇷' },
+  { id: 'es', label: 'Spain ($)', short: 'ES', lang: 'es', currency: 'USD', symbol: '$', flag: '🇪🇸' },
+  { id: 'de', label: 'Germany (€)', short: 'DE', lang: 'de', currency: 'EUR', symbol: '€', flag: '🇩🇪' },
+  { id: 'gb', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£', flag: '🇬🇧' }
 ];
 
 export const PLAN_PRICING = {

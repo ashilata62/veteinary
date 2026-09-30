@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import RegisterModal from './RegisterModal';
 import LegalModal from './LegalModal';
 import {
@@ -35,15 +35,41 @@ import './LandingPage.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('free-trial');
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
 
+  // Auto-scroll when visiting /contact, /features, /pricing, /benefits, /testimonials
+  useEffect(() => {
+    const rawPath = location.pathname.toLowerCase().replace(/^\//, '');
+    if (['features', 'benefits', 'testimonials', 'pricing', 'contact', 'home'].includes(rawPath)) {
+      const targetId = rawPath === 'home' ? 'home' : rawPath;
+      const el = document.getElementById(targetId);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
+  }, [location.pathname]);
+
   const [selectedRegionId, setSelectedRegionId] = useState(() => {
     return localStorage.getItem('petcare_region') || 'us';
   });
+
+  useEffect(() => {
+    const handleRegionEvent = (e) => {
+      if (e.detail && e.detail !== selectedRegionId) {
+        setSelectedRegionId(e.detail);
+      }
+    };
+    window.addEventListener('petcare_region_changed', handleRegionEvent);
+    return () => window.removeEventListener('petcare_region_changed', handleRegionEvent);
+  }, [selectedRegionId]);
+
   const activeRegion = LANGUAGES.find((l) => l.id === selectedRegionId || l.short?.toLowerCase() === selectedRegionId?.toLowerCase()) || LANGUAGES[0];
   const pricing = PLAN_PRICING[activeRegion.currency] || PLAN_PRICING.USD;
   const tData = TRANSLATIONS[selectedRegionId] || TRANSLATIONS[activeRegion.id] || TRANSLATIONS.en || TRANSLATIONS.usa;
@@ -79,6 +105,10 @@ export default function LandingPage() {
 
   const scrollToSection = (id) => {
     setMobileMenuOpen(false);
+    const targetPath = id === 'home' ? '/' : `/${id}`;
+    if (location.pathname !== targetPath) {
+      navigate(targetPath);
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -100,13 +130,13 @@ export default function LandingPage() {
 
           {/* Center Links (Desktop) */}
           <ul className="vet-nav-links">
-            <li><a href="#home" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{t('nav.home')}</a></li>
-            <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
-            <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
-            <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
-            <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
-            <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>{t('nav.contact')}</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
+            <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
+            <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+            <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+            <li><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
+            <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
+            <li><a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}>{t('nav.contact')}</a></li>
+            <li><a href="/brochure" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
           </ul>
 
           {/* Right Actions */}
@@ -154,13 +184,15 @@ export default function LandingPage() {
             Navigation
           </div>
           <ul className="vet-drawer-nav-list">
-            <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
-            <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
-            <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
-            <li><a href="#testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
-            <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
-            <li><a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>{t('nav.contact')}</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')} 📄</a></li>
+            <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
+            <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+            <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+            <li><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
+            <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
+            <li><a href="/contact" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/contact'); }}>{t('nav.contact')}</a></li>
+            <li><a href="/brochure" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')} 📄</a></li>
+            <li><a href="/privacy-policy" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/privacy-policy'); }}>Privacy Policy 🛡️</a></li>
+            <li><a href="/terms" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); navigate('/terms'); }}>Terms & Conditions 📜</a></li>
           </ul>
         </div>
 
@@ -477,11 +509,18 @@ export default function LandingPage() {
                     key={region.id}
                     type="button"
                     className={`vet-currency-pill ${isSelected ? 'active' : ''}`}
-                    onClick={() => setSelectedRegionId(region.id)}
+                    onClick={() => {
+                      setSelectedRegionId(region.id);
+                      localStorage.setItem('petcare_region', region.id);
+                      window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: region.id }));
+                      if (region.currency) {
+                        localStorage.setItem('petcare_currency', region.currency);
+                        window.dispatchEvent(new CustomEvent('petcare_currency_changed', { detail: region.currency }));
+                      }
+                    }}
                   >
                     <span className="vet-currency-pill-flag">{region.flag}</span>
                     <span className="vet-currency-pill-name">{region.label}</span>
-                    <span className="vet-currency-pill-symbol">({region.symbol.trim() || region.currency})</span>
                   </button>
                 );
               })}
@@ -648,12 +687,12 @@ export default function LandingPage() {
             <div>
               <h4 className="vet-footer-col-title">Clinical Modules</h4>
               <ul className="vet-footer-links">
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Smart Appointments & Queue</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Electronic Medical Records (EMR)</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Pharmacy & POS Billing</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Automated WhatsApp Alerts</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Hospitalization & IPD Ward</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>Multi-Branch Reports</a></li>
+                <li><a href="/smart-appointments" onClick={(e) => { e.preventDefault(); navigate('/smart-appointments'); }}>Smart Appointments & Queue</a></li>
+                <li><a href="/electronic-medical-records" onClick={(e) => { e.preventDefault(); navigate('/electronic-medical-records'); }}>Electronic Medical Records (EMR)</a></li>
+                <li><a href="/pharmacy-pos-billing" onClick={(e) => { e.preventDefault(); navigate('/pharmacy-pos-billing'); }}>Pharmacy & POS Billing</a></li>
+                <li><a href="/automated-whatsapp-alerts" onClick={(e) => { e.preventDefault(); navigate('/automated-whatsapp-alerts'); }}>Automated WhatsApp Alerts</a></li>
+                <li><a href="/hospitalization-ipd" onClick={(e) => { e.preventDefault(); navigate('/hospitalization-ipd'); }}>Hospitalization & IPD Ward</a></li>
+                <li><a href="/multi-branch-reports" onClick={(e) => { e.preventDefault(); navigate('/multi-branch-reports'); }}>Multi-Branch Reports</a></li>
               </ul>
             </div>
 
@@ -661,10 +700,10 @@ export default function LandingPage() {
             <div>
               <h4 className="vet-footer-col-title">{t('footer.quickLinks')}</h4>
               <ul className="vet-footer-links">
-                <li><a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
-                <li><a href="#features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
-                <li><a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
-                <li><a href="#benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+                <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
+                <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
+                <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
+                <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
                 <li><a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Clinic Admin Login</a></li>
                 <li><a href="/register?plan=starter" onClick={(e) => { e.preventDefault(); navigate('/register?plan=starter'); }}>Start 7-Day Free Trial</a></li>
               </ul>
@@ -696,9 +735,9 @@ export default function LandingPage() {
               © 2026 <strong>Kiaan Tech Craft Pvt. Ltd.</strong> All rights reserved. PetCare Pro SaaS Platform.
             </div>
             <div className="vet-bottom-links">
-              <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalType('privacy'); setShowLegalModal(true); }}>Privacy Policy</a>
+              <a href="/privacy-policy" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>Privacy Policy</a>
               <span className="vet-bottom-divider">•</span>
-              <a href="#terms" onClick={(e) => { e.preventDefault(); setLegalType('terms'); setShowLegalModal(true); }}>Terms & Conditions</a>
+              <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>Terms & Conditions</a>
             </div>
           </div>
         </div>

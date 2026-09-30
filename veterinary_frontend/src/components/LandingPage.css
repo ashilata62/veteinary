@@ -1599,3 +1599,24 @@
   }
 }
 
+/* Regional Editions Responsive Styling */
+@media (max-width: 768px) {
+  .vet-edition-btn {
+    padding: 5px 10px !important;
+    font-size: 0.8rem !important;
+    gap: 6px !important;
+  }
+
+  .vet-edition-dropdown-menu {
+    right: 0 !important;
+    max-width: min(280px, calc(100vw - 20px)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .vet-edition-label-full {
+    display: none !important;
+  }
+}
+
+

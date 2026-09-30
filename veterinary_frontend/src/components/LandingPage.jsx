@@ -59,6 +59,17 @@ export default function LandingPage() {
   const [selectedRegionId, setSelectedRegionId] = useState(() => {
     return localStorage.getItem('petcare_region') || 'us';
   });
+
+  useEffect(() => {
+    const handleRegionEvent = (e) => {
+      if (e.detail && e.detail !== selectedRegionId) {
+        setSelectedRegionId(e.detail);
+      }
+    };
+    window.addEventListener('petcare_region_changed', handleRegionEvent);
+    return () => window.removeEventListener('petcare_region_changed', handleRegionEvent);
+  }, [selectedRegionId]);
+
   const activeRegion = LANGUAGES.find((l) => l.id === selectedRegionId || l.short?.toLowerCase() === selectedRegionId?.toLowerCase()) || LANGUAGES[0];
   const pricing = PLAN_PRICING[activeRegion.currency] || PLAN_PRICING.USD;
   const tData = TRANSLATIONS[selectedRegionId] || TRANSLATIONS[activeRegion.id] || TRANSLATIONS.en || TRANSLATIONS.usa;
@@ -498,11 +509,18 @@ export default function LandingPage() {
                     key={region.id}
                     type="button"
                     className={`vet-currency-pill ${isSelected ? 'active' : ''}`}
-                    onClick={() => setSelectedRegionId(region.id)}
+                    onClick={() => {
+                      setSelectedRegionId(region.id);
+                      localStorage.setItem('petcare_region', region.id);
+                      window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: region.id }));
+                      if (region.currency) {
+                        localStorage.setItem('petcare_currency', region.currency);
+                        window.dispatchEvent(new CustomEvent('petcare_currency_changed', { detail: region.currency }));
+                      }
+                    }}
                   >
                     <span className="vet-currency-pill-flag">{region.flag}</span>
                     <span className="vet-currency-pill-name">{region.label}</span>
-                    <span className="vet-currency-pill-symbol">({region.symbol.trim() || region.currency})</span>
                   </button>
                 );
               })}
