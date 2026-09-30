@@ -248,7 +248,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
 
             <div className="login-mobile-brand">
               <img src="/kt-logo.png" alt="Logo" className="login-brand-logo-mobile" />
-              <span>
+              <span className="login-mobile-brand-title">
                 PetCare <span className="text-gradient">Pro</span>
               </span>
             </div>
@@ -391,6 +391,34 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
               <div className="trust-item"><ShieldCheck size={14} /> SSL Secured</div>
               <div className="trust-item"><CheckCircle size={14} /> ISO Certified</div>
               <div className="trust-item"><Shield size={14} /> HIPAA Ready</div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.8rem', color: '#64748b' }}>
+              <a 
+                href="/privacy-policy" 
+                onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}
+                style={{ color: '#0d9488', fontWeight: 600, textDecoration: 'underline' }}
+              >
+                Privacy Policy
+              </a>
+              <span style={{ margin: '0 8px' }}>•</span>
+              <a 
+                href="/terms" 
+                onClick={(e) => { e.preventDefault(); navigate('/terms'); }}
+                style={{ color: '#0d9488', fontWeight: 600, textDecoration: 'underline' }}
+              >
+                Terms
+              </a>
+              <span style={{ margin: '0 8px' }}>•</span>
+              <a 
+                href="/contact" 
+                onClick={(e) => { e.preventDefault(); navigate('/contact'); }}
+                style={{ color: '#0d9488', fontWeight: 600, textDecoration: 'underline' }}
+              >
+                Contact
+              </a>
+              <span style={{ margin: '0 8px' }}>•</span>
+              <span>© {new Date().getFullYear()} PetCare Pro</span>
             </div>
 
           </div>

@@ -248,7 +248,7 @@ export default function Login({ setIsAuthenticated, setCurrentRole, setIsSuperAd
 
             <div className="login-mobile-brand">
               <img src="/kt-logo.png" alt="Logo" className="login-brand-logo-mobile" />
-              <span>
+              <span className="login-mobile-brand-title">
                 PetCare <span className="text-gradient">Pro</span>
               </span>
             </div>
