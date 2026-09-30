@@ -2,16 +2,13 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Supported language keys
+// Supported language keys (Original 5 Languages)
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', native: 'English', flag: '🇬🇧' },
-  { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' },
-  { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸' },
   { code: 'hi', name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇦🇪', rtl: true },
-  { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪' },
-  { code: 'ru', name: 'Russian', native: 'Русский', flag: '🇷🇺' },
-  { code: 'pt', name: 'Portuguese', native: 'Português', flag: '🇵🇹' }
+  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી', flag: '🇮🇳' },
+  { code: 'mr', name: 'Marathi', native: 'मराठी', flag: '🇮🇳' },
+  { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' }
 ];
 
 i18n
@@ -25,13 +22,10 @@ i18n
     },
     resources: {
       en: { translation: {} },
-      fr: { translation: {} },
-      es: { translation: {} },
       hi: { translation: {} },
-      ar: { translation: {} },
-      de: { translation: {} },
-      ru: { translation: {} },
-      pt: { translation: {} }
+      gu: { translation: {} },
+      mr: { translation: {} },
+      fr: { translation: {} }
     },
     fallbackLng: 'en',
     interpolation: {
