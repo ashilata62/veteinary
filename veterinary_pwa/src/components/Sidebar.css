@@ -2,6 +2,7 @@
   background: #0B1120;
   border-right: 1px solid rgba(255,255,255,0.05);
   height: 100vh;
+  height: 100dvh;
   position: fixed;
   top: 0;
   left: 0;
@@ -10,6 +11,9 @@
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 70px));
+  box-sizing: border-box;
 }
 
 .sidebar-brand-container {

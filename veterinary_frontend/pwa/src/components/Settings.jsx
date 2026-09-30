@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight, MessageSquare, Send, Smartphone, Check, Coins, DollarSign, Globe, Building2, Trash2, UserX } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight, MessageSquare, Send, Smartphone, Check, Coins, DollarSign, Globe, Building2, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { CLINIC_SETTINGS } from '../data/mockData';
 
 export const CURRENCY_OPTIONS = [
@@ -20,6 +20,35 @@ export const CURRENCY_OPTIONS = [
 
 export default function SettingsPage({ currentRole }) {
   const [activeTab, setActiveTab] = useState('profile');
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const settingsTabsRef = React.useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (settingsTabsRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = settingsTabsRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, []);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setMobileDropdownOpen(false);
+    setTimeout(() => {
+      const btn = document.getElementById(`settings-tab-btn-${tabId}`);
+      if (btn) {
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }, 50);
+  };
 
   const [clinicName, setClinicName] = useState(CLINIC_SETTINGS.name);
   const [email, setEmail] = useState(CLINIC_SETTINGS.email);
@@ -598,59 +627,14 @@ export default function SettingsPage({ currentRole }) {
     }
   };
 
-  // Delete Account States & Handler (Google Play Compliant)
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteReason, setDeleteReason] = useState('');
-  const [deletingAccount, setDeletingAccount] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
-
-  const handleDeleteAccount = async (e) => {
-    e.preventDefault();
-    if (!deletePassword) {
-      setDeleteError("Password is required to confirm account deletion.");
-      return;
-    }
-    setDeletingAccount(true);
-    setDeleteError('');
-    try {
-      const token = localStorage.getItem('token');
-      const response = await apiFetch('/api/v1/users/delete-my-account', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          password: deletePassword,
-          reason: deleteReason
-        })
-      });
-      const data = await response.json();
-      if (response.ok && data.status === 'success') {
-        alert("Your account has been deleted successfully.");
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = '/login';
-      } else {
-        setDeleteError(data.message || 'Failed to delete account. Please verify your password.');
-      }
-    } catch (err) {
-      console.error(err);
-      setDeleteError('Network error while processing account deletion.');
-    } finally {
-      setDeletingAccount(false);
-    }
-  };
-
   const tabs = [
-    { id: 'profile', label: 'Personal Profile', icon: User },
-    { id: 'clinic', label: 'Hospital & Currency Settings', icon: Settings },
-    { id: 'billing', label: 'Subscription & Invoices', icon: CreditCard },
-    { id: 'notifications', label: 'WhatsApp & SMS Alerts', icon: MessageSquare },
-    { id: 'branding', label: 'Visual Branding & Themes', icon: Palette },
-    { id: 'backup', label: 'Database Backup', icon: Database },
-    { id: 'storage', label: 'Storage & S3 Cloud', icon: Cloud }
+    { id: 'profile', label: 'Personal Profile', shortLabel: 'Profile', icon: User },
+    { id: 'clinic', label: 'Hospital & Currency Settings', shortLabel: 'Hospital', icon: Settings },
+    { id: 'billing', label: 'Subscription & Invoices', shortLabel: 'Subscription', icon: CreditCard },
+    { id: 'notifications', label: 'WhatsApp & SMS Alerts', shortLabel: 'Alerts', icon: MessageSquare },
+    { id: 'branding', label: 'Visual Branding & Themes', shortLabel: 'Themes', icon: Palette },
+    { id: 'backup', label: 'Database Backup', shortLabel: 'Backup', icon: Database },
+    { id: 'storage', label: 'Storage & S3 Cloud', shortLabel: 'Storage', icon: Cloud }
   ];
 
   const renderProfileForm = () => (
@@ -740,141 +724,6 @@ export default function SettingsPage({ currentRole }) {
         )}
       </div>
 
-      {/* Legal & Compliance Links (Google Play Required) */}
-      <div className="card animate-fade-in" style={{ margin: 0, padding: '1.25rem' }}>
-        <h3 className="font-bold text-base mb-4" style={{ display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-          <FileText size={18} style={{ color: 'var(--primary-teal)' }} />
-          Legal & Privacy Policies
-        </h3>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-          Review our customer data protection terms, privacy policy, and public platform compliance details.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <a
-            href="/privacy-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
-          >
-            <ShieldCheck size={14} /> Privacy Policy <ExternalLink size={12} />
-          </a>
-          <a
-            href="/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
-          >
-            <FileText size={14} /> Terms & Conditions <ExternalLink size={12} />
-          </a>
-          <a
-            href="/delete-account"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
-          >
-            <UserX size={14} /> Account Deletion Policy <ExternalLink size={12} />
-          </a>
-        </div>
-      </div>
-
-      {/* Danger Zone: Delete Account Card (Google Play & Apple Compliant) */}
-      <div className="card animate-fade-in" style={{ margin: 0, padding: '1.25rem', border: '1px solid #fee2e2', backgroundColor: '#fff5f5' }}>
-        <h3 className="font-bold text-base mb-2" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626' }}>
-          <AlertTriangle size={18} />
-          Danger Zone &mdash; Account Deletion
-        </h3>
-        <p style={{ fontSize: '0.8rem', color: '#7f1d1d', marginBottom: '1rem', lineHeight: '1.5' }}>
-          Permanently delete your profile and personal account data from PetCare Pro. This action cannot be reversed.
-        </p>
-        <button
-          type="button"
-          className="btn btn-sm"
-          onClick={() => { setShowDeleteModal(true); setDeleteError(''); setDeletePassword(''); }}
-          style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: '0.5rem 1rem', cursor: 'pointer' }}
-        >
-          <Trash2 size={15} /> Delete My Account
-        </button>
-      </div>
-
-      {/* Delete Account Confirmation Modal */}
-      {showDeleteModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '450px', width: '100%', padding: '1.75rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', border: '1px solid #fee2e2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#dc2626', marginBottom: '1rem' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <AlertTriangle size={22} />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#991b1b' }}>Confirm Account Deletion</h3>
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Irreversible Action</span>
-              </div>
-            </div>
-
-            <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: '1.5', marginBottom: '1rem' }}>
-              Are you sure you want to delete your account? Your personal login, staff profile, and session data will be permanently removed.
-            </p>
-
-            {deleteError && (
-              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '0.6rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '1rem' }}>
-                {deleteError}
-              </div>
-            )}
-
-            <form onSubmit={handleDeleteAccount}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Confirm Your Current Password <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Enter current password"
-                  className="form-control"
-                  style={{ width: '100%', padding: '0.5rem 0.75rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Reason (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={deleteReason}
-                  onChange={(e) => setDeleteReason(e.target.value)}
-                  placeholder="Brief reason for leaving..."
-                  className="form-control"
-                  style={{ width: '100%', padding: '0.5rem 0.75rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowDeleteModal(false)}
-                  disabled={deletingAccount}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-sm"
-                  disabled={deletingAccount}
-                  style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', cursor: deletingAccount ? 'not-allowed' : 'pointer' }}
-                >
-                  {deletingAccount ? 'Deleting...' : 'Permanently Delete'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 
@@ -911,26 +760,106 @@ export default function SettingsPage({ currentRole }) {
       {currentRole === 'Admin' ? (
         <div className="settings-admin-layout">
           
-          {/* Inner Sidebar Menu (Admin Only) */}
-          <div className="settings-admin-sidebar">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+          {/* Mobile Quick Dropdown Selector (< 992px) */}
+          <div className="settings-mobile-picker-wrap">
+            <div className="settings-mobile-picker-header">
+              <span className="settings-mobile-picker-title">Settings Section</span>
+              <span className="settings-mobile-picker-count">
+                {tabs.findIndex(t => t.id === activeTab) + 1} of {tabs.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="settings-mobile-picker-btn"
+              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {(() => {
+                  const CurrentIcon = tabs.find(t => t.id === activeTab)?.icon || Settings;
+                  return <CurrentIcon size={18} style={{ color: 'var(--primary-teal)' }} />;
+                })()}
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                  {tabs.find(t => t.id === activeTab)?.label}
+                </span>
+              </div>
+              <ChevronDown
+                size={18}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
-                  backgroundColor: activeTab === tab.id ? 'var(--primary-teal)' : 'transparent',
-                  color: activeTab === tab.id ? '#fff' : 'var(--text-secondary)',
-                  border: 'none',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer', textAlign: 'left', fontWeight: activeTab === tab.id ? 600 : 500,
-                  transition: 'all 0.2s ease',
+                  transform: mobileDropdownOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s ease',
+                  color: 'var(--text-secondary)'
                 }}
+              />
+            </button>
+
+            {mobileDropdownOpen && (
+              <div className="settings-mobile-picker-menu">
+                {tabs.map((tab) => {
+                  const isAct = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`settings-mobile-picker-item ${isAct ? 'active' : ''}`}
+                      onClick={() => handleTabChange(tab.id)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <tab.icon size={18} style={{ color: isAct ? 'var(--primary-teal)' : 'var(--text-muted)' }} />
+                        <span style={{ fontWeight: isAct ? 700 : 500 }}>{tab.label}</span>
+                      </div>
+                      {isAct && <Check size={16} color="var(--primary-teal)" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Horizontally Scrollable Pills (with Left & Right Arrow buttons on mobile) */}
+          <div className="settings-tab-scroll-wrapper">
+            {canScrollLeft && (
+              <button
+                type="button"
+                className="settings-tab-scroll-btn scroll-left"
+                onClick={() => settingsTabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
+                aria-label="Scroll left"
               >
-                <tab.icon size={18} style={{ color: activeTab === tab.id ? '#fff' : 'var(--text-muted)' }} />
-                {tab.label}
+                <ChevronLeft size={16} />
               </button>
-            ))}
+            )}
+
+            <div
+              className="settings-admin-sidebar"
+              ref={settingsTabsRef}
+              onScroll={checkScroll}
+            >
+              {tabs.map((tab) => {
+                const isAct = activeTab === tab.id;
+                return (
+                  <button
+                    id={`settings-tab-btn-${tab.id}`}
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`settings-tab-btn ${isAct ? 'active' : ''}`}
+                  >
+                    <tab.icon size={17} className="settings-tab-icon" />
+                    <span className="settings-tab-label-desktop">{tab.label}</span>
+                    <span className="settings-tab-label-mobile">{tab.shortLabel || tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {canScrollRight && (
+              <button
+                type="button"
+                className="settings-tab-scroll-btn scroll-right"
+                onClick={() => settingsTabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={16} />
+              </button>
+            )}
           </div>
 
           {/* Tab Content Area (Admin Only) */}
@@ -2139,7 +2068,7 @@ export default function SettingsPage({ currentRole }) {
                             </td>
                             <td style={{ padding: '10px 14px', textAlign: 'right' }}>
                               <a
-                                href={`${(import.meta.env.VITE_API_URL || 'https://api.veterinary-saas.kiaantechnology.com').replace(/\/+$/, '')}/api/payment/invoice/${inv.invoice_number || inv.id}/html`}
+                                href={`http://localhost:5002/api/payment/invoice/${inv.invoice_number || inv.id}/html`}
                                 target="_blank"
                                 rel="noreferrer"
                                 style={{
