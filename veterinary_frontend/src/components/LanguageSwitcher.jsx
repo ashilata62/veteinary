@@ -1,254 +1,140 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Globe, ChevronDown, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import clsx from 'clsx';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
-export const EDITIONS = [
-  { code: 'usa', label: 'USA ($)', short: 'USA', flag: '🇺🇸', currency: 'USD', symbol: '$' },
-  { code: 'uk', label: 'UK (£)', short: 'UK', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
-  { code: 'uae', label: 'UAE (AED)', short: 'UAE', flag: '🇦🇪', currency: 'AED', symbol: 'AED' },
-  { code: 'au', label: 'Australia (A$)', short: 'AUS', flag: '🇦🇺', currency: 'AUD', symbol: 'A$' },
-  { code: 'en', label: 'India / Global (₹)', short: 'GLB', flag: '🌐', currency: 'INR', symbol: '₹' },
-];
-
-export default function LanguageSwitcher({ selectedRegion, onRegionChange, inDrawer = false }) {
-  const [currentRegion, setCurrentRegion] = useState(() => {
-    if (selectedRegion) return selectedRegion;
-    const stored = localStorage.getItem('petcare_region');
-    return stored && EDITIONS.some(e => e.code === stored) ? stored : 'usa';
+export const LanguageSwitcher = ({ variant = 'buttons', className = '' }) => {
+  const { i18n } = useTranslation();
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem('petcare_lang') || i18n.language?.split('-')[0] || 'en';
   });
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
-  // Sync with prop if provided
+  // SYNC REACT STATE IF GOOGLE TRANSLATE CHANGES
   useEffect(() => {
-    if (selectedRegion && selectedRegion !== currentRegion) {
-      setCurrentRegion(selectedRegion);
-    }
-  }, [selectedRegion]);
-
-  // Listen to global region change events
-  useEffect(() => {
-    const handleGlobalChange = (e) => {
-      if (e.detail && e.detail !== currentRegion) {
-        setCurrentRegion(e.detail);
+    const syncWithGoogle = () => {
+      const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
+      if (masterSelect && masterSelect.value && masterSelect.value !== currentLang) {
+        setCurrentLang(masterSelect.value);
+        i18n.changeLanguage(masterSelect.value);
+        localStorage.setItem('petcare_lang', masterSelect.value);
       }
     };
-    window.addEventListener('petcare_region_changed', handleGlobalChange);
-    return () => window.removeEventListener('petcare_region_changed', handleGlobalChange);
-  }, [currentRegion]);
+    const interval = setInterval(syncWithGoogle, 1000);
+    return () => clearInterval(interval);
+  }, [currentLang, i18n]);
 
-  // Click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
+  // TRIGGER GOOGLE TRANSLATE WHEN CUSTOM BUTTON IS CLICKED
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+    setCurrentLang(lang);
+    localStorage.setItem('petcare_lang', lang);
+
+    // Set cookie for Google translate persistence
+    try {
+      const domain = window.location.hostname;
+      document.cookie = `googtrans=/en/${lang}; path=/;`;
+      document.cookie = `googtrans=/auto/${lang}; path=/;`;
+      if (domain !== 'localhost') {
+        document.cookie = `googtrans=/en/${lang}; domain=.${domain}; path=/;`;
+        document.cookie = `googtrans=/auto/${lang}; domain=.${domain}; path=/;`;
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelect = (regionCode) => {
-    setCurrentRegion(regionCode);
-    localStorage.setItem('petcare_region', regionCode);
-    setIsOpen(false);
-    if (onRegionChange) {
-      onRegionChange(regionCode);
+    } catch (e) {
+      console.error('Error setting translation cookie', e);
     }
-    window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: regionCode }));
+
+    const triggerSelect = () => {
+      const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
+      if (masterSelect) {
+        masterSelect.value = lang;
+        masterSelect.dispatchEvent(new Event("change"));
+        return true;
+      }
+      return false;
+    };
+
+    if (!triggerSelect()) {
+      // Retry for up to 4 seconds if script is still initializing
+      let attempts = 0;
+      const retry = setInterval(() => {
+        attempts++;
+        if (triggerSelect() || attempts > 20) {
+          clearInterval(retry);
+        }
+      }, 200);
+    }
   };
 
-  const activeObj = EDITIONS.find(e => e.code === currentRegion) || EDITIONS[0];
-
-  // 1. In-Drawer Layout (Sleek Dark Full-Width Expandable Accordion)
-  if (inDrawer) {
+  if (variant === 'select') {
     return (
-      <div className="notranslate" ref={dropdownRef} style={{ width: '100%', boxSizing: 'border-box' }}>
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            padding: '10px 14px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '10px',
-            color: '#f8fafc',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            boxSizing: 'border-box'
-          }}
-          title="Select Country & Currency Edition"
+      <div className={clsx("relative inline-block notranslate", className)}>
+        <select
+          value={currentLang}
+          onChange={(e) => handleLanguageChange(e.target.value)}
+          className="bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer shadow-sm"
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Globe size={18} style={{ color: '#14b8a6', flexShrink: 0 }} />
-            <span>{activeObj.flag} {activeObj.label}</span>
-          </span>
-          <ChevronDown
-            size={16}
-            style={{
-              color: '#94a3b8',
-              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-              flexShrink: 0
-            }}
-          />
-        </button>
-
-        {isOpen && (
-          <div style={{
-            position: 'static',
-            width: '100%',
-            marginTop: '8px',
-            backgroundColor: '#0f172a',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '10px',
-            padding: '6px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '3px',
-            boxSizing: 'border-box'
-          }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', padding: '6px 8px', letterSpacing: '0.06em' }}>
-              5 Regional Editions
-            </div>
-
-            {EDITIONS.map((reg) => {
-              const isSelected = reg.code === currentRegion;
-              return (
-                <button
-                  key={reg.code}
-                  type="button"
-                  onClick={() => handleSelect(reg.code)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: isSelected ? 'rgba(20, 184, 166, 0.18)' : 'transparent',
-                    color: isSelected ? '#2dd4bf' : '#cbd5e1',
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: '0.86rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '1.15rem' }}>{reg.flag}</span>
-                    <span>{reg.label}</span>
-                  </span>
-                  {isSelected && <Check size={16} style={{ color: '#2dd4bf' }} />}
-                </button>
-              );
-            })}
-          </div>
-        )}
+          {SUPPORTED_LANGUAGES.map((l) => (
+            <option key={l.code} value={l.code}>
+              {l.flag} {l.name} ({l.code.toUpperCase()})
+            </option>
+          ))}
+        </select>
       </div>
     );
   }
 
-  // 2. Standard Header Layout (Top Navbar)
   return (
-    <div className="notranslate" ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
-      {/* Toggle Button */}
+    /* 'notranslate' class prevents Google from translating EN to French or other languages */
+    <div className={clsx("flex items-center bg-slate-50 border border-slate-200 rounded-lg p-1 h-10 notranslate", className)}>
       <button
         type="button"
-        className="vet-lang-switcher-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: '#ffffff',
-          border: '1px solid #cbd5e1',
-          borderRadius: '8px',
-          padding: '6px 10px',
-          fontSize: '0.82rem',
-          fontWeight: 700,
-          color: '#1e293b',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#14b8a6'; e.currentTarget.style.backgroundColor = '#f0fdfa'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
-        title="Select Country & Currency Edition"
+        onClick={() => handleLanguageChange('en')}
+        className={clsx(
+          "px-3 h-full text-[11px] font-black rounded-md transition-all uppercase tracking-wider",
+          currentLang === 'en'
+            ? "bg-white text-blue-600 shadow-sm border border-slate-100"
+            : "text-slate-400 hover:text-slate-600"
+        )}
       >
-        <Globe size={15} style={{ color: '#14b8a6', flexShrink: 0 }} />
-        <span className="lang-text-full">{activeObj.flag} {activeObj.short} ({activeObj.symbol})</span>
-        <span className="lang-text-mobile">{activeObj.flag} {activeObj.short}</span>
-        <ChevronDown size={14} style={{ color: '#64748b', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }} />
+        EN
       </button>
-
-      {/* Region & Currency Selection Menu */}
-      {isOpen && (
-        <div style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '6px',
-          width: '190px',
-          maxWidth: 'calc(100vw - 24px)',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2px'
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', padding: '6px 8px', letterSpacing: '0.06em' }}>
-            5 Regional Editions
-          </div>
-
-          {EDITIONS.map((reg) => {
-            const isSelected = reg.code === currentRegion;
-            return (
-              <button
-                key={reg.code}
-                type="button"
-                onClick={() => handleSelect(reg.code)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: isSelected ? '#f0fdfa' : 'transparent',
-                  color: isSelected ? '#0f766e' : '#334155',
-                  fontWeight: isSelected ? 700 : 500,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background 0.15s ease'
-                }}
-                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.05rem' }}>{reg.flag}</span>
-                  <span>{reg.label}</span>
-                </span>
-                {isSelected && <Check size={14} style={{ color: '#14b8a6' }} />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={() => handleLanguageChange('fr')}
+        className={clsx(
+          "px-3 h-full text-[11px] font-black rounded-md transition-all uppercase tracking-wider",
+          currentLang === 'fr'
+            ? "bg-white text-blue-600 shadow-sm border border-slate-100"
+            : "text-slate-400 hover:text-slate-600"
+        )}
+      >
+        FR
+      </button>
+      <button
+        type="button"
+        onClick={() => handleLanguageChange('hi')}
+        className={clsx(
+          "px-3 h-full text-[11px] font-black rounded-md transition-all uppercase tracking-wider",
+          currentLang === 'hi'
+            ? "bg-white text-blue-600 shadow-sm border border-slate-100"
+            : "text-slate-400 hover:text-slate-600"
+        )}
+      >
+        HI
+      </button>
+      <button
+        type="button"
+        onClick={() => handleLanguageChange('es')}
+        className={clsx(
+          "px-3 h-full text-[11px] font-black rounded-md transition-all uppercase tracking-wider",
+          currentLang === 'es'
+            ? "bg-white text-blue-600 shadow-sm border border-slate-100"
+            : "text-slate-400 hover:text-slate-600"
+        )}
+      >
+        ES
+      </button>
     </div>
   );
-}
+};
+
+export default LanguageSwitcher;

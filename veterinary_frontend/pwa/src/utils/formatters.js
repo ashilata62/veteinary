@@ -1,21 +1,51 @@
 // Centralized currency and formatting utilities for PetCare Pro
+import { CURRENCIES } from '../context/CurrencyContext';
 
 /**
- * Formats a numeric value into currency string with 'Rs' prefix.
- * Example: 1750 -> 'Rs 1,750', 250.5 -> 'Rs 250.50'
+ * Returns the currently active currency configuration
+ */
+export const getActiveCurrency = () => {
+  try {
+    const code = (typeof window !== 'undefined' && localStorage.getItem('petcare_currency')) || 'INR';
+    return CURRENCIES[code] || CURRENCIES.INR;
+  } catch (e) {
+    return CURRENCIES.INR;
+  }
+};
+
+/**
+ * Returns the current currency symbol (e.g. ₹, $, €, £)
+ */
+export const getCurrencySymbol = () => {
+  return getActiveCurrency().symbol;
+};
+
+/**
+ * Formats a numeric value into currency string using the global currency setting.
+ * Supports automatic exchange rate conversion from base (INR) to selected currency.
+ * 
+ * Example: 1750 (INR) -> '₹1,750' or in USD -> '$21.00'
  * @param {number|string} amount 
+ * @param {object} [options] { convert: boolean, raw: boolean, forceSymbol: string }
  * @returns {string} Formatted currency string
  */
-export const formatCurrency = (amount) => {
-  if (amount === undefined || amount === null || amount === '') return 'Rs 0';
+export const formatCurrency = (amount, options = {}) => {
+  const cur = getActiveCurrency();
+  if (amount === undefined || amount === null || amount === '') return `${options.forceSymbol || cur.symbol}0`;
   const num = typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.-]+/g, ''));
-  if (isNaN(num)) return 'Rs 0';
+  if (isNaN(num)) return `${options.forceSymbol || cur.symbol}0`;
   
-  const hasDecimals = num % 1 !== 0;
-  return `Rs ${num.toLocaleString('en-US', {
-    minimumFractionDigits: hasDecimals ? 2 : 0,
+  const shouldConvert = options.convert !== false && !options.raw;
+  const finalVal = shouldConvert ? num * cur.rateFromINR : num;
+  const hasDecimals = cur.decimals > 0 || (finalVal % 1 !== 0);
+
+  const formattedNum = finalVal.toLocaleString('en-US', {
+    minimumFractionDigits: hasDecimals ? (cur.decimals || 2) : 0,
     maximumFractionDigits: 2
-  })}`;
+  });
+
+  const sym = options.forceSymbol || cur.symbol;
+  return `${sym}${formattedNum}`;
 };
 
 /**

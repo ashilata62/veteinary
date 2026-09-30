@@ -49,17 +49,19 @@
       #goog-gt-voting { display: none !important; }
     </style>
 
-    <!-- 2. INITIALIZE TRANSLATE LOGIC (5 Languages: en, hi, gu, mr, fr) -->
+    <!-- 2. INITIALIZE TRANSLATE LOGIC -->
     <script type="text/javascript">
       window.googleTranslateElementInit = function () {
-        new google.translate.TranslateElement({
-          pageLanguage: 'en',
-          includedLanguages: 'en,hi,gu,mr,fr',
-          autoDisplay: false
-        }, 'google_translate_master_container');
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,fr,es,hi,ar,de,ru,pt,zh-CN,ja,it',
+            autoDisplay: false
+          }, 'google_translate_master_container');
+        }
       };
     </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
   </head>
   <body>
     <div id="root"></div>

@@ -5,6 +5,7 @@ import App from './App.jsx'
 import './index.css'
 import './i18n'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { CurrencyProvider } from './context/CurrencyContext'
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
@@ -23,9 +24,11 @@ if ('serviceWorker' in navigator) {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <CurrencyProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </CurrencyProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 )

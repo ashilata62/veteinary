@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu, ShieldCheck, AlertTriangle, CheckCircle, Info, X, LogOut, User, Settings, Download } from 'lucide-react';
 import { USERS } from '../data/mockData';
 import LanguageSwitcher from './LanguageSwitcher';
+import GlobalLocaleSelector from './GlobalLocaleSelector';
 
 export default function Navbar({
   sidebarOpen,
@@ -258,7 +259,7 @@ export default function Navbar({
           </button>
         </div>
 
-        <LanguageSwitcher />
+        <GlobalLocaleSelector />
 
         {showNotifications && (
           <>
