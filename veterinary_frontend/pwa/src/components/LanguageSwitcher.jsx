@@ -301,14 +301,10 @@ export const LanguageSwitcher = ({
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px',
           backgroundColor: '#ffffff',
           color: '#0f172a',
           border: '1.5px solid #0f172a',
           borderRadius: '9999px',
-          padding: '6px 14px',
-          fontSize: '0.88rem',
-          fontWeight: 700,
           cursor: 'pointer',
           transition: 'all 0.2s ease',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
@@ -317,18 +313,22 @@ export const LanguageSwitcher = ({
           whiteSpace: 'nowrap'
         }}
       >
-        <Globe size={17} color="#0d9488" strokeWidth={2.2} />
-        <span style={{ fontWeight: 800, color: '#0f172a' }}>{activeObj.short}</span>
+        <Globe size={16} color="#0d9488" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+        <span className="vet-edition-short" style={{ fontWeight: 800, color: '#0f172a' }}>{activeObj.short}</span>
         <span className="vet-edition-label-full" style={{ fontWeight: 700, color: '#0f172a' }}>
           {activeObj.label}
         </span>
+        <span className="vet-edition-symbol-mobile" style={{ fontWeight: 700, color: '#0f172a' }}>
+          ({activeObj.symbol})
+        </span>
         <ChevronDown
-          size={15}
+          size={14}
           color="#475569"
           strokeWidth={2.5}
           style={{
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease'
+            transition: 'transform 0.2s ease',
+            flexShrink: 0
           }}
         />
       </button>
