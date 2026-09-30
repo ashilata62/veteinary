@@ -87,13 +87,35 @@ async function generateSplash(width, height, outputPath) {
   console.log(`Generated Splash: ${width}x${height} -> ${outputPath}`);
 }
 
-// 2. Generate Square Icon
-async function generateSquareIcon(size, outputPath) {
+// Extract clean alpha-keyed transparent KT logo buffer
+async function getTransparentLogoBuffer() {
+  const { data, info } = await sharp(LOGO_SRC).raw().toBuffer({ resolveWithObject: true });
+  const outBuf = Buffer.alloc(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i+1], b = data[i+2];
+    const lum = Math.max(r, g, b);
+    outBuf[i] = r;
+    outBuf[i+1] = g;
+    outBuf[i+2] = b;
+    // If lum < 15: transparent; if lum > 60: fully opaque; smooth blend in-between
+    if (lum <= 15) {
+      outBuf[i+3] = 0;
+    } else if (lum >= 60) {
+      outBuf[i+3] = 255;
+    } else {
+      outBuf[i+3] = Math.round(((lum - 15) / 45) * 255);
+    }
+  }
+  return sharp(outBuf, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
+}
+
+// 2. Generate Square Icon (Black background with centered KT logo)
+async function generateSquareIcon(size, outputPath, transparentLogoBuf) {
   ensureDir(path.dirname(outputPath));
 
-  const logoSize = Math.round(size * 0.75);
-  const resizedLogo = await sharp(LOGO_SRC)
-    .resize({ width: logoSize, height: logoSize, fit: 'inside' })
+  const targetWidth = Math.round(size * 0.85);
+  const resizedLogo = await sharp(transparentLogoBuf)
+    .resize({ width: targetWidth, fit: 'inside' })
     .toBuffer();
 
   const logoMeta = await sharp(resizedLogo).metadata();
@@ -103,7 +125,7 @@ async function generateSquareIcon(size, outputPath) {
       width: size,
       height: size,
       channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 1 }
+      background: { r: 0, g: 0, b: 0, alpha: 1 } // Solid deep black
     }
   })
   .composite([
@@ -116,16 +138,16 @@ async function generateSquareIcon(size, outputPath) {
   .png()
   .toFile(outputPath);
 
-  console.log(`Generated Icon: ${size}x${size} -> ${outputPath}`);
+  console.log(`Generated Square Icon: ${size}x${size} -> ${outputPath}`);
 }
 
-// 3. Generate Round Icon (clipped with circle)
-async function generateRoundIcon(size, outputPath) {
+// 3. Generate Round Icon (Clipped to circular mask with centered KT logo)
+async function generateRoundIcon(size, outputPath, transparentLogoBuf) {
   ensureDir(path.dirname(outputPath));
 
-  const logoSize = Math.round(size * 0.70);
-  const resizedLogo = await sharp(LOGO_SRC)
-    .resize({ width: logoSize, height: logoSize, fit: 'inside' })
+  const targetWidth = Math.round(size * 0.72);
+  const resizedLogo = await sharp(transparentLogoBuf)
+    .resize({ width: targetWidth, fit: 'inside' })
     .toBuffer();
 
   const logoMeta = await sharp(resizedLogo).metadata();
@@ -170,13 +192,13 @@ async function generateRoundIcon(size, outputPath) {
 }
 
 // 4. Generate Adaptive Foreground Icon (Transparent background with logo in safe zone)
-async function generateForegroundIcon(size, outputPath) {
+async function generateForegroundIcon(size, outputPath, transparentLogoBuf) {
   ensureDir(path.dirname(outputPath));
 
-  // Android adaptive safe zone is center 66% (or ~60% for safety)
-  const safeZone = Math.round(size * 0.58);
-  const resizedLogo = await sharp(LOGO_SRC)
-    .resize({ width: safeZone, height: safeZone, fit: 'inside' })
+  // Android adaptive safe zone is center 66% (radius 36dp out of 54dp)
+  const targetWidth = Math.round(size * 0.62);
+  const resizedLogo = await sharp(transparentLogoBuf)
+    .resize({ width: targetWidth, fit: 'inside' })
     .toBuffer();
 
   const logoMeta = await sharp(resizedLogo).metadata();
@@ -186,7 +208,7 @@ async function generateForegroundIcon(size, outputPath) {
       width: size,
       height: size,
       channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 } // transparent
+      background: { r: 0, g: 0, b: 0, alpha: 0 } // Transparent canvas
     }
   })
   .composite([
@@ -199,7 +221,7 @@ async function generateForegroundIcon(size, outputPath) {
   .png()
   .toFile(outputPath);
 
-  console.log(`Generated Foreground Icon: ${size}x${size} -> ${outputPath}`);
+  console.log(`Generated Adaptive Foreground Icon: ${size}x${size} -> ${outputPath}`);
 }
 
 async function run() {
@@ -221,6 +243,9 @@ async function run() {
   await generateSplash(1600, 960, `${RES_DIR}/drawable-land-xxhdpi/splash.png`);
   await generateSplash(1920, 1280, `${RES_DIR}/drawable-land-xxxhdpi/splash.png`);
 
+  console.log('\n--- Extracting Transparent KT Logo ---');
+  const transparentLogoBuf = await getTransparentLogoBuffer();
+
   console.log('\n--- Generating Mipmap Icons ---');
   const iconSizes = [
     { dir: 'mipmap-mdpi', icon: 48, fg: 108 },
@@ -231,21 +256,21 @@ async function run() {
   ];
 
   for (const { dir, icon, fg } of iconSizes) {
-    await generateSquareIcon(icon, `${RES_DIR}/${dir}/ic_launcher.png`);
-    await generateRoundIcon(icon, `${RES_DIR}/${dir}/ic_launcher_round.png`);
-    await generateForegroundIcon(fg, `${RES_DIR}/${dir}/ic_launcher_foreground.png`);
+    await generateSquareIcon(icon, `${RES_DIR}/${dir}/ic_launcher.png`, transparentLogoBuf);
+    await generateRoundIcon(icon, `${RES_DIR}/${dir}/ic_launcher_round.png`, transparentLogoBuf);
+    await generateForegroundIcon(fg, `${RES_DIR}/${dir}/ic_launcher_foreground.png`, transparentLogoBuf);
   }
 
   console.log('\n--- Updating PWA Icons & Favicon ---');
-  await generateSquareIcon(512, 'public/pwa-512.png');
-  await generateSquareIcon(192, 'public/pwa-192.png');
-  await generateSquareIcon(64, 'public/favicon.ico');
+  await generateSquareIcon(512, 'public/pwa-512.png', transparentLogoBuf);
+  await generateSquareIcon(192, 'public/pwa-192.png', transparentLogoBuf);
+  await generateSquareIcon(64, 'public/favicon.ico', transparentLogoBuf);
 
   // Also sync to ../public if it exists
   if (fs.existsSync('../public')) {
-    await generateSquareIcon(512, '../public/pwa-512.png');
-    await generateSquareIcon(192, '../public/pwa-192.png');
-    await generateSquareIcon(64, '../public/favicon.ico');
+    await generateSquareIcon(512, '../public/pwa-512.png', transparentLogoBuf);
+    await generateSquareIcon(192, '../public/pwa-192.png', transparentLogoBuf);
+    await generateSquareIcon(64, '../public/favicon.ico', transparentLogoBuf);
   }
 
   console.log('\nAll assets generated successfully!');
