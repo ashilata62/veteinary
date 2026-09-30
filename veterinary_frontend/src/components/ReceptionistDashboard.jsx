@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Users, CreditCard, AlertCircle, ArrowRight, UserPlus, FilePlus, PackageSearch, LayoutDashboard, Clock, CheckCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { PET_OWNERS } from '../data/mockData';
+import { formatCurrency } from '../utils/formatters';
 
 export default function ReceptionistDashboard({ setCurrentTab, attendanceStatus }) {
   const [appointments, setAppointments] = useState([]);
@@ -84,7 +85,7 @@ export default function ReceptionistDashboard({ setCurrentTab, attendanceStatus 
     { label: "Today's Appointments", value: todaysApts, sub: 'Scheduled visits', subColor: 'var(--text-secondary)', icon: Calendar, iconBg: 'var(--primary-teal-light)', iconColor: 'var(--primary-teal)' },
     { label: 'Home Visits', value: homeVisits, sub: 'Assigned today', subColor: 'var(--secondary-blue)', icon: Calendar, iconBg: 'var(--secondary-blue-light)', iconColor: 'var(--secondary-blue)' },
     { label: 'Walk-In Patients', value: walkInPatients, sub: 'Waiting in lobby', subColor: 'var(--warning)', icon: Users, iconBg: 'var(--warning-light)', iconColor: 'var(--warning)' },
-    { label: 'Daily Revenue', value: `LKR ${dailyRevenue.toLocaleString()}`, sub: 'Today only', subColor: 'var(--success)', icon: CreditCard, iconBg: 'rgba(34, 197, 94, 0.15)', iconColor: 'var(--success)' },
+    { label: 'Daily Revenue', value: formatCurrency(dailyRevenue), sub: 'Today only', subColor: 'var(--success)', icon: CreditCard, iconBg: 'rgba(34, 197, 94, 0.15)', iconColor: 'var(--success)' },
     { label: 'Pending Bills', value: pendingBills, sub: 'Needs clearance', subColor: 'var(--danger)', icon: CreditCard, iconBg: 'var(--danger-light)', iconColor: 'var(--danger)' },
     { label: 'Low Stock Alerts', value: lowStockItems, sub: 'Action required', subColor: 'var(--warning)', icon: AlertCircle, iconBg: '#fef3c7', iconColor: '#d97706' },
   ];

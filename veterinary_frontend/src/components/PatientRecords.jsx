@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import FormSelect from './FormSelect';
 import toast from 'react-hot-toast';
+import { formatCurrency, getCurrencySymbol } from '../utils/formatters';
 
 export default function PatientRecords({
   currentRole,
@@ -1216,7 +1217,7 @@ export default function PatientRecords({
                       <tr>
                         <th>Invoice ID</th>
                         <th>Date Billed</th>
-                        <th>Total Amount (LKR)</th>
+                        <th>Total Amount ({getCurrencySymbol().trim()})</th>
                         <th>Status</th>
                       </tr>
                     </thead>
@@ -1230,7 +1231,7 @@ export default function PatientRecords({
                             <tr key={index}>
                               <td className="font-bold" style={{ color: 'var(--primary-teal)' }}>{bill.id}</td>
                               <td>{displayDate}</td>
-                              <td className="font-bold">LKR {Number(displayAmount).toLocaleString()}</td>
+                              <td className="font-bold">{formatCurrency(displayAmount)}</td>
                               <td>
                                 <span className={`badge ${isPaid ? 'badge-success' : 'badge-warning'}`}>
                                   {bill.status || 'Pending'}

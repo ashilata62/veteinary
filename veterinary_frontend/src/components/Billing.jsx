@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus, Eye, Printer, Download, Trash2, ShieldCheck, Loader } from 'lucide-react';
 import FormSelect from './FormSelect';
 import toast from 'react-hot-toast';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, getCurrencySymbol } from '../utils/formatters';
 
 function InvoiceLineItems({ invoice }) {
   const items = invoice.lineItems || [];
@@ -41,9 +41,9 @@ function InvoiceLineItems({ invoice }) {
             <div className="invoice-mobile-item-name">{item.name || 'Service/Item'} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>({item.category || 'Medicine'})</span></div>
             <div className="invoice-mobile-item-row">
               <span>Qty: {item.quantity}</span>
-              <span>Unit: LKR {parseFloat(item.unit_price).toLocaleString()}</span>
+              <span>Unit: {formatCurrency(item.unit_price)}</span>
             </div>
-            <div className="invoice-mobile-item-total">Total: LKR {parseFloat(item.total).toLocaleString()}</div>
+            <div className="invoice-mobile-item-total">Total: {formatCurrency(item.total)}</div>
           </div>
         ))}
       </div>
@@ -423,7 +423,7 @@ export default function Billing({ currentRole }) {
                 {unbilled.homeVisits?.map((hv) => (
                   <div key={hv.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', padding: '0.5rem', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid var(--border)' }}>
                     <div>
-                      <strong>Home Visit: {hv.petName}</strong> ({hv.ownerName}) - Travel Fee: LKR {hv.travel_fee}
+                      <strong>Home Visit: {hv.petName}</strong> ({hv.ownerName}) - Travel Fee: {formatCurrency(hv.travel_fee)}
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Address: {hv.address} | Doctor: {hv.doctorName}</div>
                     </div>
                     <button type="button" onClick={() => handleSelectUnbilled(hv, 'home_visit')} className="btn btn-secondary btn-sm" style={{ padding: '2px 8px', fontSize: '0.75rem' }}>
@@ -494,7 +494,7 @@ export default function Billing({ currentRole }) {
 
             <div className="form-row" style={{ alignItems: 'center' }}>
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Consultation & Treatment Fee (LKR)</label>
+                <label className="form-label">Consultation & Treatment Fee ({getCurrencySymbol().trim()})</label>
                 <input
                   type="number"
                   className="form-control"
@@ -594,19 +594,19 @@ export default function Billing({ currentRole }) {
             <div className="invoice-totals">
               <div className="invoice-totals-row">
                 <span style={{ color: 'var(--text-secondary)' }}>Taxable Subtotal:</span>
-                <span>LKR {taxableSubtotal.toLocaleString()}</span>
+                <span>{formatCurrency(taxableSubtotal)}</span>
               </div>
               <div className="invoice-totals-row">
                 <span style={{ color: 'var(--text-secondary)' }}>Non-Taxable Subtotal:</span>
-                <span>LKR {nonTaxableSubtotal.toLocaleString()}</span>
+                <span>{formatCurrency(nonTaxableSubtotal)}</span>
               </div>
               <div className="invoice-totals-row">
                 <span style={{ color: 'var(--text-secondary)' }}>TAX / GST (8%):</span>
-                <span>LKR {calculatedTax.toLocaleString()}</span>
+                <span>{formatCurrency(calculatedTax)}</span>
               </div>
               <div className="invoice-totals-row" style={{ borderTop: '2px double var(--border)', paddingTop: '0.5rem', fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-teal)' }}>
                 <span>Grand Total:</span>
-                <span>LKR {calculatedGrandTotal.toLocaleString()}</span>
+                <span>{formatCurrency(calculatedGrandTotal)}</span>
               </div>
             </div>
 
@@ -667,15 +667,15 @@ export default function Billing({ currentRole }) {
           <div className="invoice-totals">
             <div className="invoice-totals-row">
               <span style={{ color: 'var(--text-secondary)' }}>Invoice Subtotal:</span>
-              <span>LKR {parseFloat(viewingInvoice.subtotal).toLocaleString()}</span>
+              <span>{formatCurrency(viewingInvoice.subtotal)}</span>
             </div>
             <div className="invoice-totals-row">
               <span style={{ color: 'var(--text-secondary)' }}>TAX / GST (8%):</span>
-              <span>LKR {parseFloat(viewingInvoice.tax_amount).toLocaleString()}</span>
+              <span>{formatCurrency(viewingInvoice.tax_amount)}</span>
             </div>
             <div className="invoice-totals-row" style={{ borderTop: '2px double var(--border)', paddingTop: '0.5rem', fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-teal)' }}>
               <span>Grand Total:</span>
-              <span>LKR {parseFloat(viewingInvoice.grand_total).toLocaleString()}</span>
+              <span>{formatCurrency(viewingInvoice.grand_total)}</span>
             </div>
           </div>
 
@@ -725,8 +725,8 @@ export default function Billing({ currentRole }) {
                       <span className="font-semibold" style={{ display: 'block' }}>{inv.ownerName}</span>
                       <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Patient: {inv.petName}</span>
                     </td>
-                    <td>LKR {parseFloat(inv.subtotal).toLocaleString()}</td>
-                    <td className="font-bold">LKR {parseFloat(inv.grand_total).toLocaleString()}</td>
+                    <td>{formatCurrency(inv.subtotal)}</td>
+                    <td className="font-bold">{formatCurrency(inv.grand_total)}</td>
                     <td>
                       <span className={`badge ${inv.status === 'Paid' ? 'badge-success' : inv.status === 'Cancelled' ? 'badge-danger' : 'badge-warning'}`}>
                         {inv.status}
@@ -763,7 +763,7 @@ export default function Billing({ currentRole }) {
                 <p className="font-semibold text-sm" style={{ marginBottom: '4px' }}>{inv.ownerName}</p>
                 <p className="text-xs" style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Patient: {inv.petName}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span className="font-bold" style={{ color: 'var(--primary-teal)' }}>LKR {parseFloat(inv.grand_total).toLocaleString()}</span>
+                  <span className="font-bold" style={{ color: 'var(--primary-teal)' }}>{formatCurrency(inv.grand_total)}</span>
                   <button onClick={async () => {
                     const token = localStorage.getItem('token');
                     const res = await apiFetch(`http://localhost:5000/api/v1/invoices/${inv.id}`);

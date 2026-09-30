@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, Star, Zap, CheckCircle2, ArrowRight, Phone, Mail, LogOut, Lock, AlertTriangle } from 'lucide-react';
 import './TrialExpired.css';
 import Support from './Support';
+import { formatCurrency } from '../utils/formatters';
 
 const PLANS = [
   {
@@ -264,8 +265,7 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
                       </div>
 
                       <div className="trial-plan-price">
-                        <span className="trial-plan-currency">₹</span>
-                        <span className="trial-plan-amount">{planItem.price.toLocaleString()}</span>
+                        <span className="trial-plan-amount">{formatCurrency(planItem.price)}</span>
                         <span className="trial-plan-period">/{planItem.period}</span>
                       </div>
 
@@ -294,7 +294,7 @@ export default function SubscriptionExpired({ onLogout, clinicName, plan, expiry
 
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  Renew {PLANS.find((p) => p.id === selectedPlan)?.name} (₹{PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)
+                  Renew {PLANS.find((p) => p.id === selectedPlan)?.name} ({formatCurrency(PLANS.find((p) => p.id === selectedPlan)?.price || 0)}/mo)
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">

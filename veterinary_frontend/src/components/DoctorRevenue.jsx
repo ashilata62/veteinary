@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IndianRupee, TrendingUp, Calendar, Home, Activity, CheckCircle, Loader } from 'lucide-react';
 import { apiFetch } from '../utils/api';
+import { formatCurrency } from '../utils/formatters';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar
@@ -45,7 +46,7 @@ export default function DoctorRevenue() {
   const metrics = data ? [
     { 
       label: 'My Revenue (Total)', 
-      value: `₹${data.metrics.revenue.toLocaleString('en-IN')}`, 
+      value: formatCurrency(data.metrics.revenue), 
       sub: 'Paid clinical transactions', 
       icon: IndianRupee, 
       iconBg: 'rgba(20, 184, 166, 0.15)', 
@@ -134,10 +135,10 @@ export default function DoctorRevenue() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} tickFormatter={(val) => `₹${val}`} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} tickFormatter={(val) => formatCurrency(val)} />
                   <RechartsTooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    formatter={(value) => [`₹${value}`, 'Revenue']}
+                    formatter={(value) => [formatCurrency(value), 'Revenue']}
                   />
                   <Area type="monotone" dataKey="revenue" stroke="#14b8a6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
                 </AreaChart>

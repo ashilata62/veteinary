@@ -2,6 +2,7 @@ import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu, ShieldCheck, AlertTriangle, CheckCircle, Info, X, LogOut, User, Settings } from 'lucide-react';
 import { USERS } from '../data/mockData';
+import GlobalLocaleSelector from './GlobalLocaleSelector';
 
 export default function Navbar({
   sidebarOpen,
@@ -168,6 +169,10 @@ export default function Navbar({
       </div>
 
       <div className="app-navbar__right">
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: '0.5rem' }}>
+          <GlobalLocaleSelector />
+        </div>
+
         <button
           type="button"
           className="app-navbar__icon-btn app-navbar__search-mobile"

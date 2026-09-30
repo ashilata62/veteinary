@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Home, Plus, Check, XCircle, MapPin, User, Clock, AlertCircle, FileText, Calendar, Navigation, Navigation2, Loader, Activity, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FormSelect from './FormSelect';
+import { formatCurrency, getCurrencySymbol } from '../utils/formatters';
 
 export default function HomeVisits({ currentRole }) {
   const [appointments, setAppointments] = useState([]);
@@ -402,7 +403,7 @@ export default function HomeVisits({ currentRole }) {
                       </td>
                       <td>{apt.doctorName}</td>
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                        LKR {apt.travelFee.toLocaleString()}
+                        {formatCurrency(apt.travelFee)}
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <span className={`badge ${getStatusBadgeClass(apt.status)}`} style={{ fontSize: '0.7rem' }}>{apt.status}</span>
@@ -462,7 +463,7 @@ export default function HomeVisits({ currentRole }) {
                         </div>
                       </td>
                       <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--success)', padding: '1rem' }}>
-                        LKR {(apt.travelFee || 0).toLocaleString()}
+                        {formatCurrency(apt.travelFee || 0)}
                       </td>
                       <td style={{ textAlign: 'center', padding: '1rem' }}>
                         <span className={`badge ${getStatusBadgeClass(apt.status)}`} style={{ fontSize: '0.7rem' }}>{apt.status}</span>
@@ -516,7 +517,7 @@ export default function HomeVisits({ currentRole }) {
                   <FormSelect value={doctorId} onChange={setDoctorId} options={[{ value: '', label: '-- Select Doctor --' }, ...doctors.map(doc => ({ value: doc.id, label: doc.name }))] } />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Travel Charges (LKR)</label>
+                  <label className="form-label">Travel Charges ({getCurrencySymbol().trim()})</label>
                   <input type="number" className="form-control" value={travelFee} onChange={(e) => setTravelFee(e.target.value)} placeholder="e.g. 1500" />
                 </div>
               </div>
@@ -592,7 +593,7 @@ export default function HomeVisits({ currentRole }) {
                 <FormSelect value={travelAptId} onChange={setTravelAptId} required options={[{ value: '', label: '-- Choose Visit --' }, ...todaysVisits.map(v => ({ value: v.id, label: `${v.petName} (${v.address})` }))] } />
               </div>
               <div className="form-group">
-                <label className="form-label">New Travel Fee (LKR) *</label>
+                <label className="form-label">New Travel Fee ({getCurrencySymbol().trim()}) *</label>
                 <input type="number" className="form-control" value={newTravelFee} onChange={(e) => setNewTravelFee(e.target.value)} placeholder="e.g. 2000" required />
               </div>
               <div className="modal-actions" style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' }}>

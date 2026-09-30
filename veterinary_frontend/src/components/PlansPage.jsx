@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Check, ArrowLeft, X, Mail, Phone, Building, Send, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '../utils/api';
-import '../components/LandingPage.css'; // Reuse landing page CSS
+import { useCurrency } from '../context/CurrencyContext';
+import { PLAN_PRICING } from '../data/landingTranslations';
+import GlobalLocaleSelector from './GlobalLocaleSelector';
+import '../components/LandingPage.css';
 
 export default function PlansPage() {
   const navigate = useNavigate();
+  const { currency } = useCurrency();
+  const pricing = PLAN_PRICING[currency] || PLAN_PRICING.INR;
   const [showContactModal, setShowContactModal] = useState(false);
   const [inquiryData, setInquiryData] = useState(() => {
     let defaultEmail = '';
@@ -61,6 +66,11 @@ export default function PlansPage() {
       >
         <ArrowLeft size={18} /> Back to Dashboard
       </button>
+
+      <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 10 }}>
+        <GlobalLocaleSelector />
+      </div>
+
       <section id="pricing" className="vet-section-container" style={{ width: '100%' }}>
         <div className="vet-section-header">
           <div className="vet-badge" style={{ margin: '0 auto 1rem auto', display: 'inline-flex' }}>
@@ -80,7 +90,7 @@ export default function PlansPage() {
             <div>
               <div className="vet-plan-name">Starter</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price">₹999</span>
+                <span className="vet-plan-price">{pricing.symbol}{pricing.starter?.price || '999'}</span>
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
@@ -99,7 +109,7 @@ export default function PlansPage() {
             <div>
               <div className="vet-plan-name" style={{ color: '#ea580c' }}>Standard</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,299</span>
+                <span className="vet-plan-price" style={{ color: '#ea580c' }}>{pricing.symbol}{pricing.standard?.price || '1,299'}</span>
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">
@@ -117,7 +127,7 @@ export default function PlansPage() {
             <div>
               <div className="vet-plan-name">Pro</div>
               <div className="vet-plan-price-row">
-                <span className="vet-plan-price" style={{ color: '#ea580c' }}>₹1,499</span>
+                <span className="vet-plan-price" style={{ color: '#ea580c' }}>{pricing.symbol}{pricing.pro?.price || '1,499'}</span>
                 <span className="vet-plan-unit">per month</span>
               </div>
               <ul className="vet-plan-features">

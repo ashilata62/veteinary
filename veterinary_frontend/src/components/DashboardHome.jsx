@@ -4,6 +4,7 @@ import { Users, DollarSign, Calendar, AlertTriangle, TrendingUp, Clock, ArrowRig
 import TrialBanner from './TrialBanner';
 import TrialPopup from './TrialPopup';
 import OnboardingChecklist from './OnboardingChecklist';
+import { formatCurrency, getCurrencySymbol } from '../utils/formatters';
 
 // Reusable chart card with zoom + fullscreen (only for charts)
 function ChartCard({ title, badge, badgeClass, children }) {
@@ -140,7 +141,7 @@ function RevenueChart({ data = [] }) {
           transform: 'scale(1.05)'
         }}>
           <span>{points[hov].month} Revenue</span>
-          <span style={{ color: 'var(--primary-teal)' }}>LKR {(points[hov].val / 1000).toFixed(0)}k</span>
+          <span style={{ color: 'var(--primary-teal)' }}>{formatCurrency(points[hov].val)}</span>
           <div style={{ position: 'absolute', top: '-5px', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: '6px solid #0f172a' }}></div>
         </div>
       )}
@@ -392,7 +393,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
   }, []);
 
   const latestMonthData = revenueData.length > 0 ? revenueData[revenueData.length - 1] : null;
-  const monthlyRevenueVal = latestMonthData ? `LKR ${(latestMonthData.revenue / 1000).toFixed(0)}k` : 'LKR 0';
+  const monthlyRevenueVal = latestMonthData ? formatCurrency(latestMonthData.revenue) : formatCurrency(0);
 
   let trendText = 'Gross billing logged';
   let isTrendUp = true;
@@ -513,7 +514,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
       {/* 3 Interactive Charts */}
       <div className="dashboard-charts-grid">
         <div className="chart-card-revenue">
-          <ChartCard title="Revenue Analytics Trend (LKR)" badge="Live Growth" badgeClass="badge-success">
+          <ChartCard title={`Revenue Analytics Trend (${getCurrencySymbol().trim()})`} badge="Live Growth" badgeClass="badge-success">
             <RevenueChart data={revenueData} />
           </ChartCard>
         </div>
@@ -551,7 +552,7 @@ export default function DashboardHome({ setCurrentTab, setSelectedPetId, current
                     <td>{doc.consultations}</td>
                     <td>{doc.home_visits}</td>
                     <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--success)' }}>
-                      LKR {(doc.revenue).toLocaleString()}
+                      {formatCurrency(doc.revenue)}
                     </td>
                   </tr>
                 ))}

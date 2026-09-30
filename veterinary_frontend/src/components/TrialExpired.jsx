@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import './TrialExpired.css';
 import Support from './Support';
+import { formatCurrency } from '../utils/formatters';
 
 const PLANS = [
   {
@@ -373,8 +374,7 @@ export default function TrialExpired({ onLogout }) {
                       </div>
 
                       <div className="trial-plan-price">
-                        <span className="trial-plan-currency">₹</span>
-                        <span className="trial-plan-amount">{plan.price.toLocaleString()}</span>
+                        <span className="trial-plan-amount">{formatCurrency(plan.price)}</span>
                         <span className="trial-plan-period">/{plan.period}</span>
                       </div>
 
@@ -407,7 +407,7 @@ export default function TrialExpired({ onLogout }) {
               {/* CTA Button */}
               <div className="trial-cta-section">
                 <button className="trial-cta-btn" onClick={handleBuyPlan}>
-                  Subscribe to {PLANS.find((p) => p.id === selectedPlan)?.name} (₹{PLANS.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/mo)
+                  Subscribe to {PLANS.find((p) => p.id === selectedPlan)?.name} ({formatCurrency(PLANS.find((p) => p.id === selectedPlan)?.price || 0)}/mo)
                   <ArrowRight size={20} />
                 </button>
                 <p className="trial-cta-note">

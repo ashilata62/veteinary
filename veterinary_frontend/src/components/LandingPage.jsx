@@ -30,10 +30,12 @@ import {
   Globe
 } from 'lucide-react';
 import { LANGUAGES, PLAN_PRICING, TRANSLATIONS } from '../data/landingTranslations';
+import { useCurrency } from '../context/CurrencyContext';
 import './LandingPage.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { setCurrency } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('free-trial');
@@ -74,6 +76,23 @@ export default function LandingPage() {
   const handleLanguageChange = (langId) => {
     setCurrentLang(langId);
     localStorage.setItem('petcare_lang', langId);
+    const langObj = LANGUAGES.find((l) => l.id === langId);
+    if (langObj && langObj.currency) {
+      setCurrency(langObj.currency);
+    }
+    // Sync with Google Translate
+    try {
+      const gLang = langId === 'usa' || langId === 'uk' || langId === 'au' ? 'en' : (langId === 'uae' ? 'ar' : langId);
+      document.cookie = `googtrans=/en/${gLang}; path=/;`;
+      document.cookie = `googtrans=/auto/${gLang}; path=/;`;
+      const select = document.querySelector("#google_translate_master_container select.goog-te-combo");
+      if (select) {
+        select.value = gLang;
+        select.dispatchEvent(new Event("change"));
+      }
+    } catch (e) {
+      console.error(e);
+    }
     setLangMenuOpen(false);
   };
 

@@ -8,9 +8,72 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <title>PetCare Pro — Clinic Management System</title>
+
+    <!-- 1. HIDE GOOGLE BRANDING & POPUPS -->
+    <style>
+      .goog-te-banner-frame.skiptranslate,
+      .goog-te-banner-frame,
+      #goog-gt-tt,
+      .goog-te-balloon-frame,
+      .goog-te-gadget-icon,
+      .goog-logo-link,
+      .goog-te-spinner-pos,
+      .goog-te-spinner,
+      .goog-te-spinner *,
+      .goog-te-gadget img,
+      .goog-te-menu-value img,
+      iframe.skiptranslate,
+      .goog-te-banner-frame {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+      body {
+        top: 0px !important;
+        position: static !important;
+      }
+      .goog-te-gadget {
+        color: transparent !important;
+        font-size: 0 !important;
+      }
+      .goog-te-gadget span {
+        display: none !important;
+      }
+      .goog-text-highlight {
+        background: none !important;
+        box-shadow: none !important;
+      }
+      #google_translate_master_container {
+        display: none !important;
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+    </style>
+
+    <!-- 2. INITIALIZE TRANSLATE LOGIC -->
+    <script type="text/javascript">
+      window.googleTranslateElementInit = function () {
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,fr,es,hi,ar,de,ru,pt,zh-CN,ja,it',
+            autoDisplay: false
+          }, 'google_translate_master_container');
+        }
+      };
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- 3. INVISIBLE GOOGLE CONTAINER -->
+    <div id="google_translate_master_container" style="display:none !important"></div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
