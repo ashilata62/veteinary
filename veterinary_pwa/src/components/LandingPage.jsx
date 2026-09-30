@@ -41,16 +41,10 @@ export default function LandingPage() {
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
 
-  const pricing = PLAN_PRICING.INR || {
-    symbol: '₹',
-    code: 'INR',
-    'free-trial': { price: '0', unit: 'per week' },
-    starter: { price: '999', unit: 'per month' },
-    standard: { price: '1,299', unit: 'per month' },
-    pro: { price: '1,499', unit: 'per month' },
-    custom: { price: 'Custom', unit: '' }
-  };
-  const tData = TRANSLATIONS.en;
+  const [selectedRegionId, setSelectedRegionId] = useState('usa');
+  const activeRegion = LANGUAGES.find((l) => l.id === selectedRegionId) || LANGUAGES[0];
+  const pricing = PLAN_PRICING[activeRegion.currency] || PLAN_PRICING.USD;
+  const tData = TRANSLATIONS[selectedRegionId] || TRANSLATIONS.en || TRANSLATIONS.usa;
 
   // Translation helper
   const t = (path) => {
@@ -115,7 +109,7 @@ export default function LandingPage() {
 
           {/* Right Actions */}
           <div className="vet-header-actions">
-            <LanguageSwitcher />
+            <LanguageSwitcher selectedRegion={selectedRegionId} onRegionChange={setSelectedRegionId} />
 
             <button className="vet-btn-outline vet-header-login-btn" onClick={handleAdminLogin}>
               {t('nav.adminLogin')}
@@ -149,7 +143,7 @@ export default function LandingPage() {
 
         {/* Mobile Language Selector */}
         <div style={{ padding: '0.5rem 0' }}>
-          <LanguageSwitcher />
+          <LanguageSwitcher selectedRegion={selectedRegionId} onRegionChange={setSelectedRegionId} />
         </div>
 
         {/* Mobile Nav Links */}
@@ -469,6 +463,28 @@ export default function LandingPage() {
           <p className="vet-section-subtitle">
             {t('pricing.subtitle')}
           </p>
+
+          {/* 5 Country / Currency Switcher Bar */}
+          <div className="vet-currency-toggle-container">
+            <span className="vet-currency-toggle-label">Select Country / Currency:</span>
+            <div className="vet-currency-pills">
+              {LANGUAGES.map((region) => {
+                const isSelected = region.id === selectedRegionId;
+                return (
+                  <button
+                    key={region.id}
+                    type="button"
+                    className={`vet-currency-pill ${isSelected ? 'active' : ''}`}
+                    onClick={() => setSelectedRegionId(region.id)}
+                  >
+                    <span className="vet-currency-pill-flag">{region.flag}</span>
+                    <span className="vet-currency-pill-name">{region.label}</span>
+                    <span className="vet-currency-pill-symbol">({region.symbol.trim() || region.currency})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="vet-pricing-grid">
@@ -725,7 +741,12 @@ export default function LandingPage() {
       </a>
 
       {showRegisterModal && (
-        <RegisterModal plan={selectedPlan} onClose={() => setShowRegisterModal(false)} />
+        <RegisterModal 
+          plan={selectedPlan} 
+          currency={activeRegion.currency}
+          pricing={pricing}
+          onClose={() => setShowRegisterModal(false)} 
+        />
       )}
 
       {showLegalModal && (

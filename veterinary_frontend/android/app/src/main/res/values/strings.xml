@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">VetCare Pro</string>
-    <string name="title_activity_main">VetCare Pro</string>
-    <string name="package_name">com.vetcarepro.app</string>
-    <string name="custom_url_scheme">com.vetcarepro.app</string>
-</resources>

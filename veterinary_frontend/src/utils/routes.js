@@ -26,6 +26,7 @@ export const TAB_IDS = new Set([
   'billing',
   'inventory',
   'staff',
+  'permissions',
   'attendance',
   'reports',
   'notifications',
@@ -35,6 +36,19 @@ export const TAB_IDS = new Set([
   'plans',
   'settings',
   'audit-logs',
+  'privacy-policy',
+  'terms',
+  'contact',
+  'features',
+  'benefits',
+  'testimonials',
+  'pricing',
+  'smart-appointments',
+  'electronic-medical-records',
+  'pharmacy-pos-billing',
+  'automated-whatsapp-alerts',
+  'hospitalization-ipd',
+  'multi-branch-reports',
 ]);
 
 const PREFIXES = new Set(Object.values(ROLE_PREFIX));
@@ -45,9 +59,22 @@ export function getRolePrefix(role) {
 
 /** Build path for a tab, e.g. /admin/appointments */
 export function pathForTab(tab, role) {
-  if (tab === 'landing') return '/landing';
+  if (tab === 'landing' || tab === 'home') return '/';
   if (tab === 'register') return '/register';
   if (tab === 'brochure') return '/brochure';
+  if (tab === 'privacy-policy') return '/privacy-policy';
+  if (tab === 'terms') return '/terms';
+  if (tab === 'contact') return '/contact';
+  if (tab === 'features') return '/features';
+  if (tab === 'benefits') return '/benefits';
+  if (tab === 'testimonials') return '/testimonials';
+  if (tab === 'pricing') return '/pricing';
+  if (tab === 'smart-appointments') return '/smart-appointments';
+  if (tab === 'electronic-medical-records') return '/electronic-medical-records';
+  if (tab === 'pharmacy-pos-billing') return '/pharmacy-pos-billing';
+  if (tab === 'automated-whatsapp-alerts') return '/automated-whatsapp-alerts';
+  if (tab === 'hospitalization-ipd') return '/hospitalization-ipd';
+  if (tab === 'multi-branch-reports') return '/multi-branch-reports';
   return `/${getRolePrefix(role)}/${tab}`;
 }
 
@@ -60,6 +87,19 @@ export function tabFromPath(pathname) {
     if (parts[0] === 'register') return 'register';
     if (parts[0] === 'brochure') return 'brochure';
     if (parts[0] === 'landing') return 'landing';
+    if (parts[0] === 'privacy-policy') return 'privacy-policy';
+    if (parts[0] === 'terms') return 'terms';
+    if (parts[0] === 'contact') return 'contact';
+    if (parts[0] === 'features') return 'features';
+    if (parts[0] === 'benefits') return 'benefits';
+    if (parts[0] === 'testimonials') return 'testimonials';
+    if (parts[0] === 'pricing') return 'pricing';
+    if (parts[0] === 'smart-appointments') return 'smart-appointments';
+    if (parts[0] === 'electronic-medical-records') return 'electronic-medical-records';
+    if (parts[0] === 'pharmacy-pos-billing') return 'pharmacy-pos-billing';
+    if (parts[0] === 'automated-whatsapp-alerts') return 'automated-whatsapp-alerts';
+    if (parts[0] === 'hospitalization-ipd') return 'hospitalization-ipd';
+    if (parts[0] === 'multi-branch-reports') return 'multi-branch-reports';
     if (TAB_IDS.has(parts[0])) return parts[0];
     return 'landing';
   }

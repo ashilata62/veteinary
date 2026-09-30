@@ -1,15 +1,61 @@
 {
   "short_name": "PetCare Pro",
-  "name": "PetCare Pro Veterinary Management System",
+  "name": "PetCare Pro - Veterinary Clinic Management System",
+  "description": "Complete Veterinary Clinic Management SaaS Dashboard & Mobile PWA",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/png"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
   "display": "standalone",
+  "background_color": "#ffffff",
   "theme_color": "#0d9488",
-  "background_color": "#f8fafc"
+  "orientation": "any",
+  "categories": ["medical", "business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Appointments",
+      "short_name": "Appointments",
+      "description": "View and manage clinic appointments",
+      "url": "/appointments",
+      "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Patients",
+      "short_name": "Patients",
+      "description": "View pet medical records",
+      "url": "/patients",
+      "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Billing & POS",
+      "short_name": "Billing",
+      "description": "Create invoices & collect payments",
+      "url": "/billing",
+      "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+    }
+  ]
 }

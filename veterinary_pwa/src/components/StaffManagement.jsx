@@ -450,12 +450,17 @@ export default function StaffManagement() {
       <div className="page-header">
         <div>
           <h1>Staff Management</h1>
-          <p>Manage clinic staff, roles, permissions, and registration. Admin-only module.</p>
+          <p>Manage clinic staff, doctor departments, roles, and employee records.</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>
-          <Plus size={16} /> Add Staff Member
-        </button>
+        {view === 'list' && (
+          <button className="btn btn-primary" onClick={openAdd}>
+            <Plus size={16} /> Add Staff Member
+          </button>
+        )}
       </div>
+
+      {view === 'list' && (
+        <>
 
       <div className="kpi-grid-responsive" style={{ marginBottom: '1.5rem' }}>
         {[
@@ -797,7 +802,8 @@ export default function StaffManagement() {
           </div>
         </div>
       )}
-
+        </>
+      )}
     </div>
   );
 }

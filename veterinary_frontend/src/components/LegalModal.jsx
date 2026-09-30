@@ -60,6 +60,29 @@ export default function LegalModal({ type, onClose }) {
               <br/>
               <h3>5. Contact Us</h3>
               <p>If you have any questions about this Privacy Policy, please contact us at info@kiaantechnology.com.</p>
+
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(20,184,166,0.12)', borderRadius: '12px', border: '1px solid rgba(20,184,166,0.35)', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#5eead4', fontWeight: 600 }}>
+                  Official Google Play Store Policy & Data Deletion Guidelines:
+                </p>
+                <a 
+                  href="/privacy-policy" 
+                  onClick={() => onClose()}
+                  style={{
+                    display: 'inline-block',
+                    padding: '8px 18px',
+                    background: '#0d9488',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    textDecoration: 'none',
+                    boxShadow: '0 2px 8px rgba(13, 148, 136, 0.4)'
+                  }}
+                >
+                  View Full Standalone Policy Page (/privacy-policy) ↗
+                </a>
+              </div>
             </div>
           ) : (
             <div>

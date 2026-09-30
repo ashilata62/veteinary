@@ -1,0 +1,8 @@
+{
+  "appId": "com.petcare.clinic",
+  "appName": "PetCare Clinic",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -89,12 +89,14 @@ const auditRoutes = require('./routes/auditRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const messagingRoutes = require('./routes/messagingRoutes');
+const permissionRoutes = require('./routes/permissionRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/v1/subscriptions', subscriptionRoutes);
 // Apply subscription middleware to all protected API routes
+app.use('/api/v1/permissions', protect, subscriptionMiddleware, permissionRoutes);
 app.use('/api/v1/inventory', protect, subscriptionMiddleware, inventoryRoutes);
 app.use('/api/v1/owners', protect, subscriptionMiddleware, petOwnerRoutes);
 app.use('/api/v1/pets', protect, subscriptionMiddleware, petRoutes);

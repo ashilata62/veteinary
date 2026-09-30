@@ -825,6 +825,80 @@
   gap: 0.25rem;
 }
 
+/* 5 Countries / Currencies Toggle Bar */
+.vet-currency-toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.5rem auto 2.5rem;
+}
+
+.vet-currency-toggle-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vet-currency-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(24, 24, 27, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.vet-currency-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.vet-currency-pill:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.vet-currency-pill.active {
+  background: #14b8a6;
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(20, 184, 166, 0.45);
+  border-color: #2dd4bf;
+}
+
+.vet-currency-pill-flag {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.vet-currency-pill-name {
+  font-weight: 700;
+}
+
+.vet-currency-pill-symbol {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
 /* Pricing Section (Critical for SaaS) */
 .vet-pricing-grid {
   display: grid;

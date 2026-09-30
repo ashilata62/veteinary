@@ -1,9 +1,0 @@
-{
-  "appId": "com.petcarepro.app",
-  "appName": "PetCare Pro",
-  "webDir": "dist",
-  "bundledWebRuntime": false,
-  "server": {
-    "androidScheme": "https"
-  }
-}

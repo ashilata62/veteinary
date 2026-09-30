@@ -23,7 +23,9 @@ import SetPassword from './components/SetPassword';
 import LandingPage from './components/LandingPage';
 import Register from './components/Register';
 import BrochurePage from './components/BrochurePage';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import StaffManagement from './components/StaffManagement';
+import RolePermissionsManager from './components/RolePermissionsManager';
 import Attendance from './components/Attendance';
 import Notifications from './components/Notifications';
 import TreatmentNotes from './components/TreatmentNotes';
@@ -209,7 +211,7 @@ export default function App() {
   // Authenticated: redirect login, landing, root, and legacy flat URLs → /{role}/{tab}
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/')) return;
+    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/') || location.pathname === '/privacy-policy') return;
     const home = pathForTab('dashboard', currentRole);
     if (location.pathname === LOGIN_PATH || location.pathname === '/' || location.pathname === LANDING_PATH) {
       navigate(home, { replace: true });
@@ -266,6 +268,10 @@ export default function App() {
 
   if (location.pathname === '/brochure') {
     return <BrochurePage />;
+  }
+
+  if (!isAuthenticated && location.pathname === '/privacy-policy') {
+    return <PrivacyPolicy />;
   }
 
   if (location.pathname === '/reset-password') {
@@ -510,6 +516,7 @@ export default function App() {
                 {currentTab === 'inventory' && <Inventory />}
                 {currentTab === 'hospitalization' && <Hospitalization />}
                 {currentTab === 'staff' && <StaffManagement />}
+                {currentTab === 'permissions' && <RolePermissionsManager />}
                 {currentTab === 'attendance' && <Attendance currentRole={currentRole} />}
                 {currentTab === 'reports' && <Reports />}
                 {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
@@ -517,6 +524,7 @@ export default function App() {
                 {currentTab === 'reminders' && <ReminderQueue />}
                 {currentTab === 'audit-logs' && <AuditLogs />}
                 {currentTab === 'support' && <Support />}
+                {currentTab === 'privacy-policy' && <PrivacyPolicy />}
               </>
             );
           })()}

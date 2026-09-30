@@ -318,7 +318,9 @@ export default function BrochurePage() {
         <div className="vcb3-fb-contact">
           <a href="tel:+919752100980"><PhoneCall size={18} /> +91-97521 00980</a>
           <a href="mailto:info@kiaantechnology.com"><Mail size={18} /> info@kiaantechnology.com</a>
-          <a href="https://kiaantechnology.com/" target="_blank" rel="noopener noreferrer"><Globe size={18} /> kiaantechnology.com</a>
+          <a href="/privacy-policy" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>Privacy Policy</a>
+          <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>Terms</a>
+          <a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}>Contact</a>
         </div>
       </div>
 

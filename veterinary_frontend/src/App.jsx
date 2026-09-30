@@ -23,7 +23,13 @@ import SetPassword from './components/SetPassword';
 import LandingPage from './components/LandingPage';
 import Register from './components/Register';
 import BrochurePage from './components/BrochurePage';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsConditions from './components/TermsConditions';
+import ContactPage from './components/ContactPage';
+import ModuleDetailPage from './components/ModuleDetailPage';
+import { OfflineNotice, InstallPrompt, BottomNav, QuickActionModal } from './components/pwa';
 import StaffManagement from './components/StaffManagement';
+import RolePermissionsManager from './components/RolePermissionsManager';
 import Attendance from './components/Attendance';
 import Notifications from './components/Notifications';
 import TreatmentNotes from './components/TreatmentNotes';
@@ -97,6 +103,31 @@ export default function App() {
     const handleTrialExpired = () => setIsTrialExpired(true);
     window.addEventListener('trial_expired', handleTrialExpired);
     return () => window.removeEventListener('trial_expired', handleTrialExpired);
+  }, []);
+
+  // PWA states: Online status & install prompt handling
+  const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
@@ -209,7 +240,28 @@ export default function App() {
   // Authenticated: redirect login, landing, root, and legacy flat URLs → /{role}/{tab}
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/')) return;
+    const publicBypass = [
+      '/plans',
+      '/privacy-policy',
+      '/terms',
+      '/terms-and-conditions',
+      '/contact',
+      '/brochure',
+      '/smart-appointments',
+      '/electronic-medical-records',
+      '/pharmacy-pos-billing',
+      '/automated-whatsapp-alerts',
+      '/hospitalization-ipd',
+      '/multi-branch-reports',
+      '/features',
+      '/pricing',
+      '/benefits',
+      '/testimonials'
+    ];
+    if (
+      location.pathname.startsWith('/checkout/') ||
+      publicBypass.some(p => location.pathname === p || location.pathname.endsWith(p))
+    ) return;
     const home = pathForTab('dashboard', currentRole);
     if (location.pathname === LOGIN_PATH || location.pathname === '/' || location.pathname === LANDING_PATH) {
       navigate(home, { replace: true });
@@ -276,6 +328,34 @@ export default function App() {
     return <SetPassword />;
   }
 
+  // Public Privacy Policy page (Required for Google Play Store review without login)
+  if (location.pathname === '/privacy-policy' || location.pathname.endsWith('/privacy-policy')) {
+    return <PrivacyPolicy />;
+  }
+
+  // Public Terms & Conditions page
+  if (location.pathname === '/terms' || location.pathname.endsWith('/terms') || location.pathname.endsWith('/terms-and-conditions')) {
+    return <TermsConditions />;
+  }
+
+  // Public Contact Us page
+  if (location.pathname === '/contact' || location.pathname.endsWith('/contact')) {
+    return <ContactPage />;
+  }
+
+  // Clinical Module Detail Pages (Smart Appointments, EMR, Pharmacy POS, WhatsApp Alerts, IPD, Reports)
+  const clinicalModuleRoutes = [
+    '/smart-appointments',
+    '/electronic-medical-records',
+    '/pharmacy-pos-billing',
+    '/automated-whatsapp-alerts',
+    '/hospitalization-ipd',
+    '/multi-branch-reports'
+  ];
+  if (clinicalModuleRoutes.some(route => location.pathname === route || location.pathname.endsWith(route))) {
+    return <ModuleDetailPage />;
+  }
+
   if (!isAuthenticated) {
     if (location.pathname === LOGIN_PATH) {
       return (
@@ -317,6 +397,7 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <OfflineNotice isOnline={isOnline} />
       <Toaster position="top-right" toastOptions={{
         style: {
           background: '#fff',
@@ -361,6 +442,8 @@ export default function App() {
           handleLogout={handleLogout}
           attendanceStatus={attendanceStatus}
           fetchAttendanceStatus={fetchAttendanceStatus}
+          deferredPrompt={deferredPrompt}
+          onOpenInstallModal={() => setShowInstallModal(true)}
         />
 
         <main className="content-container">
@@ -510,6 +593,7 @@ export default function App() {
                 {currentTab === 'inventory' && <Inventory />}
                 {currentTab === 'hospitalization' && <Hospitalization />}
                 {currentTab === 'staff' && <StaffManagement />}
+                {currentTab === 'permissions' && <RolePermissionsManager />}
                 {currentTab === 'attendance' && <Attendance currentRole={currentRole} />}
                 {currentTab === 'reports' && <Reports />}
                 {currentTab === 'settings' && <SettingsPage currentRole={currentRole} />}
@@ -517,11 +601,38 @@ export default function App() {
                 {currentTab === 'reminders' && <ReminderQueue />}
                 {currentTab === 'audit-logs' && <AuditLogs />}
                 {currentTab === 'support' && <Support />}
+                {currentTab === 'privacy-policy' && <PrivacyPolicy />}
               </>
             );
           })()}
         </main>
       </div>
+
+      {/* PWA Mobile Bottom Navigation Bar */}
+      <BottomNav 
+        currentTab={currentTab} 
+        setCurrentTab={setCurrentTab} 
+        onOpenQuickAction={() => setShowQuickActions(true)} 
+      />
+
+      {/* PWA Quick Action Sheet (Triggered from FAB) */}
+      <QuickActionModal 
+        isOpen={showQuickActions} 
+        onClose={() => setShowQuickActions(false)} 
+        setCurrentTab={setCurrentTab} 
+      />
+
+      {/* PWA Install Modal / Instructions */}
+      {showInstallModal && (
+        <InstallPrompt 
+          deferredPrompt={deferredPrompt} 
+          onClose={() => setShowInstallModal(false)} 
+          onInstallSuccess={() => {
+            setDeferredPrompt(null);
+            setShowInstallModal(false);
+          }} 
+        />
+      )}
     </div>
   );
 }

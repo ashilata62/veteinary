@@ -1,6 +1,6 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, Menu, ShieldCheck, AlertTriangle, CheckCircle, Info, X, LogOut, User, Settings } from 'lucide-react';
+import { Bell, Search, Menu, ShieldCheck, AlertTriangle, CheckCircle, Info, X, LogOut, User, Settings, Download } from 'lucide-react';
 import { USERS } from '../data/mockData';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -16,6 +16,8 @@ export default function Navbar({
   handleLogout,
   attendanceStatus,
   fetchAttendanceStatus,
+  deferredPrompt,
+  onOpenInstallModal,
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -202,6 +204,23 @@ export default function Navbar({
             </button>
           )}
         </div>
+
+        <button
+          type="button"
+          className="pwa-navbar-install-btn"
+          onClick={() => {
+            if (onOpenInstallModal) {
+              onOpenInstallModal();
+            } else if (deferredPrompt) {
+              deferredPrompt.prompt();
+            }
+          }}
+          title="Install PetCare Pro (PWA)"
+          aria-label="Install App"
+        >
+          <Download size={15} />
+          <span>Install App</span>
+        </button>
 
         <div className="app-navbar__notif-wrap">
           <button

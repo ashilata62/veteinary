@@ -1,7 +1,23 @@
 import { apiFetch } from '../utils/api';
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight, MessageSquare, Send, Smartphone, Check } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Palette, Save, Bell, Mail, User, Eye, EyeOff, CheckCircle2, Database, Cloud, Download, HardDrive, Server, RefreshCw, FileCode, CreditCard, FileText, ExternalLink, Calendar, Receipt, Sparkles, AlertTriangle, ArrowRight, MessageSquare, Send, Smartphone, Check, Coins, DollarSign, Globe, Building2 } from 'lucide-react';
 import { CLINIC_SETTINGS } from '../data/mockData';
+
+export const CURRENCY_OPTIONS = [
+  { code: 'USD', symbol: '$', name: 'US Dollar', flag: '🇺🇸', region: 'United States' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳', region: 'India / South Asia' },
+  { code: 'GBP', symbol: '£', name: 'British Pound', flag: '🇬🇧', region: 'United Kingdom' },
+  { code: 'EUR', symbol: '€', name: 'Euro', flag: '🇪🇺', region: 'European Union' },
+  { code: 'AED', symbol: 'AED', name: 'UAE Dirham', flag: '🇦🇪', region: 'United Arab Emirates' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺', region: 'Australia' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', flag: '🇨🇦', region: 'Canada' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar', flag: '🇸🇬', region: 'Singapore' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', flag: '🇳🇿', region: 'New Zealand' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand', flag: '🇿🇦', region: 'South Africa' },
+  { code: 'SAR', symbol: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦', region: 'Saudi Arabia' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', flag: '🇯🇵', region: 'Japan' },
+];
+
 export default function SettingsPage({ currentRole }) {
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -13,6 +29,8 @@ export default function SettingsPage({ currentRole }) {
   const [logo, setLogo] = useState(CLINIC_SETTINGS.logo);
   const [autoEmail, setAutoEmail] = useState(true);
   const [reminderTime, setReminderTime] = useState('24h');
+  const [currency, setCurrency] = useState('USD');
+  const [currencySymbol, setCurrencySymbol] = useState('$');
 
   // Database Backup State
   const [backupLoading, setBackupLoading] = useState(false);
@@ -103,6 +121,8 @@ export default function SettingsPage({ currentRole }) {
           setLogo(data.data.logo || '');
           setAutoEmail(data.data.autoEmail === 1 || data.data.autoEmail === true);
           setReminderTime(data.data.reminderTime || '24h');
+          setCurrency(data.data.currency || 'USD');
+          setCurrencySymbol(data.data.currency_symbol || data.data.currencySymbol || '$');
         }
       } catch (err) {
         console.error('Failed to fetch clinic settings', err);
@@ -421,12 +441,17 @@ export default function SettingsPage({ currentRole }) {
           primaryThemeColor: themeColor,
           logo,
           autoEmail,
-          reminderTime
+          reminderTime,
+          currency,
+          currency_symbol: currencySymbol
         })
       });
       const data = await response.json();
       if (response.ok && data.status === 'success') {
-        setSuccessModal({ isOpen: true, message: 'Clinic system settings updated successfully in database!' });
+        localStorage.setItem('petcare_currency', currency);
+        localStorage.setItem('petcare_currency_symbol', currencySymbol);
+        window.dispatchEvent(new CustomEvent('petcare_currency_changed', { detail: { currency, currencySymbol } }));
+        setSuccessModal({ isOpen: true, message: 'Clinic system & currency settings updated successfully in database!' });
       } else {
         alert(data.message || 'Failed to update clinic settings');
       }
@@ -575,7 +600,7 @@ export default function SettingsPage({ currentRole }) {
 
   const tabs = [
     { id: 'profile', label: 'Personal Profile', icon: User },
-    { id: 'clinic', label: 'Hospital Information', icon: Settings },
+    { id: 'clinic', label: 'Hospital & Currency Settings', icon: Settings },
     { id: 'billing', label: 'Subscription & Invoices', icon: CreditCard },
     { id: 'notifications', label: 'WhatsApp & SMS Alerts', icon: MessageSquare },
     { id: 'branding', label: 'Visual Branding & Themes', icon: Palette },
@@ -734,34 +759,172 @@ export default function SettingsPage({ currentRole }) {
             {/* PERSONAL PROFILE */}
             {activeTab === 'profile' && renderProfileForm()}
 
-            {/* HOSPITAL INFORMATION */}
+            {/* HOSPITAL & CURRENCY SETTINGS */}
             {activeTab === 'clinic' && (
-              <div className="card animate-fade-in" style={{ margin: 0 }}>
-                <h3 className="font-bold text-lg mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-                  <Settings size={20} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
-                  Hospital Information
-                </h3>
-                <form onSubmit={handleSave}>
-                  <div className="form-group">
-                    <label className="form-label">Clinic / Animal Hospital Name</label>
-                    <input type="text" className="form-control" value={clinicName} onChange={(e) => setClinicName(e.target.value)} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Contact Email Address</label>
-                    <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Contact Phone Number</label>
-                    <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Clinic Complete Address</label>
-                    <textarea className="form-control" rows="3" value={address} onChange={(e) => setAddress(e.target.value)} required />
-                  </div>
-                  <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', width: '100%', display: 'flex', gap: '6px' }}>
-                    <Save size={16} /> Save Clinic Profile
-                  </button>
-                </form>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="card animate-fade-in" style={{ margin: 0 }}>
+                  <h3 className="font-bold text-lg mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+                    <Building2 size={20} className="text-secondary" style={{ color: 'var(--primary-teal)' }} />
+                    Hospital Information & Clinic Profile
+                  </h3>
+                  <form onSubmit={handleSave}>
+                    <div className="form-group">
+                      <label className="form-label">Clinic / Animal Hospital Name</label>
+                      <input type="text" className="form-control" value={clinicName} onChange={(e) => setClinicName(e.target.value)} required />
+                    </div>
+                    <div className="form-row" style={{ gap: '1rem' }}>
+                      <div className="form-group" style={{ flex: 1 }}>
+                        <label className="form-label">Contact Email Address</label>
+                        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                      </div>
+                      <div className="form-group" style={{ flex: 1 }}>
+                        <label className="form-label">Contact Phone Number</label>
+                        <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Clinic Complete Address</label>
+                      <textarea className="form-control" rows="3" value={address} onChange={(e) => setAddress(e.target.value)} required />
+                    </div>
+
+                    {/* ── Currency Configuration Section ── */}
+                    <div style={{ marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px dashed var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Coins size={20} style={{ color: 'var(--primary-teal)' }} />
+                            Clinic Operational Currency & Regional Billing
+                          </h4>
+                          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
+                            Select the primary operating currency for all patient invoices, doctor consultations, inventory costs, and reports.
+                          </p>
+                        </div>
+                        <span style={{ 
+                          backgroundColor: '#f0fdfa', 
+                          color: '#0f766e', 
+                          padding: '5px 12px', 
+                          borderRadius: '9999px', 
+                          fontSize: '0.8rem', 
+                          fontWeight: 700,
+                          border: '1px solid #ccfbf1',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          <Check size={14} /> Active: <strong>{currency} ({currencySymbol})</strong>
+                        </span>
+                      </div>
+
+                      {/* Quick Currency Selection Grid */}
+                      <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontSize: '0.82rem', fontWeight: 600 }}>
+                        Select Preset Global Currency:
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '1.25rem' }}>
+                        {CURRENCY_OPTIONS.map((opt) => {
+                          const isSelected = currency === opt.code;
+                          return (
+                            <button
+                              key={opt.code}
+                              type="button"
+                              onClick={() => {
+                                setCurrency(opt.code);
+                                setCurrencySymbol(opt.symbol);
+                              }}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                padding: '9px 11px',
+                                borderRadius: '8px',
+                                border: isSelected ? '2px solid var(--primary-teal)' : '1px solid var(--border)',
+                                backgroundColor: isSelected ? '#f0fdfa' : '#ffffff',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                textAlign: 'left',
+                                boxShadow: isSelected ? '0 0 0 1px var(--primary-teal)' : 'none'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '3px' }}>
+                                <span style={{ fontSize: '1.15rem' }}>{opt.flag}</span>
+                                <span style={{ 
+                                  fontWeight: 800, 
+                                  fontSize: '0.85rem', 
+                                  color: isSelected ? 'var(--primary-teal)' : 'var(--text-primary)' 
+                                }}>
+                                  {opt.code}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: isSelected ? '#0f766e' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', fontWeight: isSelected ? 600 : 400 }}>
+                                {opt.name} ({opt.symbol})
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Custom Currency Details Inputs */}
+                      <div className="form-row" style={{ gap: '1rem', marginTop: '0.75rem' }}>
+                        <div className="form-group" style={{ flex: 1, margin: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.8rem' }}>ISO Currency Code</label>
+                          <input 
+                            type="text" 
+                            className="form-control" 
+                            value={currency} 
+                            onChange={(e) => setCurrency(e.target.value.toUpperCase())} 
+                            placeholder="e.g. USD, INR, EUR, AED"
+                            required 
+                          />
+                          <small style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>3-letter standard code</small>
+                        </div>
+                        <div className="form-group" style={{ flex: 1, margin: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.8rem' }}>Display Currency Symbol</label>
+                          <input 
+                            type="text" 
+                            className="form-control" 
+                            value={currencySymbol} 
+                            onChange={(e) => setCurrencySymbol(e.target.value)} 
+                            placeholder="e.g. $, ₹, £, AED, A$"
+                            required 
+                          />
+                          <small style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Prefix symbol used on receipts</small>
+                        </div>
+                      </div>
+
+                      {/* Live Preview Box */}
+                      <div style={{ 
+                        marginTop: '1.25rem', 
+                        padding: '1rem 1.25rem', 
+                        backgroundColor: '#f8fafc', 
+                        borderRadius: '10px', 
+                        border: '1px dashed #cbd5e1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '1rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <DollarSign size={20} />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Live Pricing Format Preview</span>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>
+                              General Consultation: <span style={{ color: 'var(--primary-teal)' }}>{currencySymbol} 50.00</span> &nbsp;|&nbsp; Surgery Package: <span style={{ color: 'var(--primary-teal)' }}>{currencySymbol} 1,250.00</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', backgroundColor: '#ffffff', padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          Database State: <strong>{currency}</strong> • <strong>{currencySymbol}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1.5rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '0.75rem', fontSize: '0.95rem', fontWeight: 600 }}>
+                      <Save size={18} /> Save Clinic Profile & Currency Settings
+                    </button>
+                  </form>
+                </div>
               </div>
             )}
 

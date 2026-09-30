@@ -1,36 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Globe, ChevronDown, Check } from 'lucide-react';
 
-const LANGUAGES = [
-  { code: 'en', label: 'English', short: 'EN', flag: '🇬🇧' },
-  { code: 'hi', label: 'हिन्दी', short: 'HI', flag: '🇮🇳' },
-  { code: 'gu', label: 'ગુજરાતી', short: 'GU', flag: '🇮🇳' },
-  { code: 'mr', label: 'मराठी', short: 'MR', flag: '🇮🇳' },
-  { code: 'fr', label: 'Français', short: 'FR', flag: '🇫🇷' },
+export const EDITIONS = [
+  { code: 'usa', label: 'USA ($)', short: 'USA', flag: '🇺🇸', currency: 'USD', symbol: '$' },
+  { code: 'uk', label: 'UK (£)', short: 'UK', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
+  { code: 'uae', label: 'UAE (AED)', short: 'UAE', flag: '🇦🇪', currency: 'AED', symbol: 'AED' },
+  { code: 'au', label: 'Australia (A$)', short: 'AUS', flag: '🇦🇺', currency: 'AUD', symbol: 'A$' },
+  { code: 'en', label: 'India / Global (₹)', short: 'GLB', flag: '🌐', currency: 'INR', symbol: '₹' },
 ];
 
-export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-  const [currentLang, setCurrentLang] = useState(() => {
-    const raw = i18n.language?.split('-')[0] || 'en';
-    return LANGUAGES.some(l => l.code === raw) ? raw : 'en';
+export default function LanguageSwitcher({ selectedRegion, onRegionChange }) {
+  const [currentRegion, setCurrentRegion] = useState(() => {
+    if (selectedRegion) return selectedRegion;
+    const stored = localStorage.getItem('petcare_region');
+    return stored && EDITIONS.some(e => e.code === stored) ? stored : 'usa';
   });
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Sync React state if Google Translate widget changes
+  // Sync with prop if provided
   useEffect(() => {
-    const syncWithGoogle = () => {
-      const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
-      if (masterSelect && masterSelect.value && masterSelect.value !== currentLang) {
-        setCurrentLang(masterSelect.value);
-        i18n.changeLanguage(masterSelect.value);
+    if (selectedRegion && selectedRegion !== currentRegion) {
+      setCurrentRegion(selectedRegion);
+    }
+  }, [selectedRegion]);
+
+  // Listen to global region change events
+  useEffect(() => {
+    const handleGlobalChange = (e) => {
+      if (e.detail && e.detail !== currentRegion) {
+        setCurrentRegion(e.detail);
       }
     };
-    const interval = setInterval(syncWithGoogle, 1000);
-    return () => clearInterval(interval);
-  }, [currentLang, i18n]);
+    window.addEventListener('petcare_region_changed', handleGlobalChange);
+    return () => window.removeEventListener('petcare_region_changed', handleGlobalChange);
+  }, [currentRegion]);
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -43,20 +47,17 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Trigger Google Translate when custom language is selected
-  const handleLanguageChange = (langCode) => {
-    i18n.changeLanguage(langCode);
-    setCurrentLang(langCode);
+  const handleSelect = (regionCode) => {
+    setCurrentRegion(regionCode);
+    localStorage.setItem('petcare_region', regionCode);
     setIsOpen(false);
-
-    const masterSelect = document.querySelector("#google_translate_master_container select.goog-te-combo");
-    if (masterSelect) {
-      masterSelect.value = langCode;
-      masterSelect.dispatchEvent(new Event("change"));
+    if (onRegionChange) {
+      onRegionChange(regionCode);
     }
+    window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: regionCode }));
   };
 
-  const activeLangObj = LANGUAGES.find(l => l.code === currentLang) || LANGUAGES[0];
+  const activeObj = EDITIONS.find(e => e.code === currentRegion) || EDITIONS[0];
 
   return (
     <div className="notranslate" ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
@@ -68,27 +69,27 @@ export default function LanguageSwitcher() {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #e2e8f0',
+          backgroundColor: '#ffffff',
+          border: '1px solid #cbd5e1',
           borderRadius: '8px',
-          padding: '6px 10px',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          color: '#334155',
+          padding: '6px 12px',
+          fontSize: '0.82rem',
+          fontWeight: 700,
+          color: '#1e293b',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
         }}
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#14b8a6'; e.currentTarget.style.backgroundColor = '#f0fdfa'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-        title="Select Application Language"
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
+        title="Select Country & Currency Edition"
       >
         <Globe size={15} style={{ color: '#14b8a6' }} />
-        <span>{activeLangObj.flag} {activeLangObj.short}</span>
-        <ChevronDown size={14} style={{ color: '#94a3b8', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+        <span>{activeObj.flag} {activeObj.short} ({activeObj.symbol})</span>
+        <ChevronDown size={14} style={{ color: '#64748b', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
       </button>
 
-      {/* Language Selection Menu */}
+      {/* Region & Currency Selection Menu */}
       {isOpen && (
         <div style={{
           position: 'absolute',
@@ -98,24 +99,24 @@ export default function LanguageSwitcher() {
           border: '1px solid #e2e8f0',
           borderRadius: '10px',
           padding: '6px',
-          width: '160px',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          width: '190px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
           gap: '2px'
         }}>
-          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', padding: '4px 8px', letterSpacing: '0.05em' }}>
-            5 Languages
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', padding: '6px 8px', letterSpacing: '0.06em' }}>
+            5 Regional Editions
           </div>
 
-          {LANGUAGES.map((lang) => {
-            const isSelected = lang.code === currentLang;
+          {EDITIONS.map((reg) => {
+            const isSelected = reg.code === currentRegion;
             return (
               <button
-                key={lang.code}
+                key={reg.code}
                 type="button"
-                onClick={() => handleLanguageChange(lang.code)}
+                onClick={() => handleSelect(reg.code)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -136,8 +137,8 @@ export default function LanguageSwitcher() {
                 onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{lang.flag}</span>
-                  <span>{lang.label}</span>
+                  <span style={{ fontSize: '1.05rem' }}>{reg.flag}</span>
+                  <span>{reg.label}</span>
                 </span>
                 {isSelected && <Check size={14} style={{ color: '#14b8a6' }} />}
               </button>

@@ -6,15 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "cap:sync": "npm run build && cap sync",
-    "cap:add-android": "cap add android",
-    "cap:open-android": "cap open android"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/android": "^8.5.0",
-    "@capacitor/cli": "^7.6.8",
-    "@capacitor/core": "^8.5.0",
     "axios": "^1.19.0",
     "clsx": "^2.1.1",
     "i18next": "^26.4.2",

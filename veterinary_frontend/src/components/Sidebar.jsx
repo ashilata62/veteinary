@@ -3,10 +3,12 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity, Shield
 } from 'lucide-react';
 import './Sidebar.css';
 import { isTabAllowedForPlan } from '../utils/planPermissions';
+
+import { apiFetch } from '../utils/api';
 
 export default function Sidebar({ 
   currentTab, setCurrentTab,
@@ -20,6 +22,41 @@ export default function Sidebar({
     catch (e) { return {}; }
   })();
   const userPlanId = user.plan_id || user.plan || (user.subscription_status === 'trial' ? 'plan-free-trial' : 'plan-starter');
+
+  const [roleMatrix, setRoleMatrix] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem('petcare_role_matrix');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  React.useEffect(() => {
+    const fetchPerms = async () => {
+      try {
+        const res = await apiFetch('/api/v1/permissions');
+        const data = await res.json();
+        if (data.status === 'success' && data.data.matrix) {
+          setRoleMatrix(data.data.matrix);
+          localStorage.setItem('petcare_role_matrix', JSON.stringify(data.data.matrix));
+        }
+      } catch (err) {
+        // Silently fallback to static defaults
+      }
+    };
+    fetchPerms();
+
+    const handlePermUpdate = (e) => {
+      if (e.detail) {
+        setRoleMatrix(e.detail);
+      } else {
+        fetchPerms();
+      }
+    };
+    window.addEventListener('petcare_permissions_updated', handlePermUpdate);
+    return () => window.removeEventListener('petcare_permissions_updated', handlePermUpdate);
+  }, []);
 
   const menuItems = [
     { id: 'dashboard',    label: 'Dashboard',             icon: LayoutDashboard, roles: ['Admin','Manager','Doctor','Receptionist','Vet Assistant'] },
@@ -37,6 +74,7 @@ export default function Sidebar({
     { id: 'inventory',    label: 'Inventory',             icon: Package,         roles: ['Admin','Manager','Receptionist'] },
     { id: 'reminders',    label: 'Email Reminders',       icon: Mail,            roles: ['Admin','Manager','Receptionist'] },
     { id: 'staff',        label: 'Staff Management',      icon: UserCog,         roles: ['Admin'] },
+    { id: 'permissions',  label: 'Role Permissions',      icon: Shield,          roles: ['Admin', 'Manager'] },
     { id: 'attendance',   label: 'Attendance',            icon: Clock,           roles: ['Admin','Manager'] },
     { id: 'reports',      label: 'Reports & Analytics',   icon: BarChart3,       roles: ['Admin','Manager'] },
     { id: 'settings',     label: currentRole !== 'Admin' ? 'Profile Settings' : 'Settings', icon: Settings, roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
@@ -45,7 +83,15 @@ export default function Sidebar({
   ];
 
   const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
-  const filteredItems = menuItems.filter(item => item.roles.includes(currentRole));
+  const filteredItems = menuItems.filter(item => {
+    if (currentRole === 'Admin' || currentRole === 'Super Admin' || currentRole === 'super_admin' || currentRole === 'master_admin') {
+      return true;
+    }
+    if (roleMatrix && roleMatrix[currentRole] && roleMatrix[currentRole][item.id] !== undefined) {
+      return Boolean(roleMatrix[currentRole][item.id]);
+    }
+    return item.roles.includes(currentRole);
+  });
 
   const displayName = user.name || user.fullName || user.clinic_name || ({
     Admin: 'Admin User',

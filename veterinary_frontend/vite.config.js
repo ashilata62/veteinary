@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
   let envApiUrl = '';
   try {
     const envContent = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
-    const match = envContent.match(/VITE_API_URL\s*=\s*(.*)/);
+    const match = envContent.match(/^\s*VITE_API_URL\s*=\s*(.*)/m);
     if (match && match[1]) {
       envApiUrl = match[1].trim().replace(/^['"]|['"]$/g, ''); // strip optional quotes
     }
@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       port: 5174,
       open: true,
       watch: {
-        ignored: ['**/android/**', '**/node_modules/**', '**/.git/**']
+        ignored: ['**/pwa/**', '**/android/**', '**/node_modules/**', '**/.git/**']
       },
       proxy: {
         '/api': {

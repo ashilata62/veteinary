@@ -16,9 +16,13 @@ const PLANS = {
   'custom':     { name: 'Custom Plan', price: 'Custom', cycle: '/tailored' },
 };
 
-export default function RegisterModal({ plan = 'free-trial', onClose }) {
+export default function RegisterModal({ plan = 'free-trial', currency = 'USD', pricing = null, onClose }) {
   const navigate = useNavigate();
-  const planObj = PLANS[plan] || PLANS['free-trial'];
+  const dynamicPrice = (pricing && pricing[plan]?.price) ? `${pricing.symbol}${pricing[plan].price}` : null;
+  const planObj = {
+    ...(PLANS[plan] || PLANS['free-trial']),
+    price: dynamicPrice || (PLANS[plan]?.price || '₹0')
+  };
 
   const [form, setForm] = useState({
     clinicName: '', adminName: '', email: '', mobile: '', password: '', confirmPassword: ''

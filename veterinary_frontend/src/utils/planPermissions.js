@@ -25,6 +25,7 @@ const CORE_TABS = [
   'my-revenue',
   'reminders',
   'staff',
+  'permissions',
   'attendance',
   'settings',
   'support',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, ArrowLeft, Send, MessageSquare, Clipboard, User, Mail, Filter, RotateCcw, CheckCircle2 } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
 
 export default function SuperAdminTickets() {
   const [search, setSearch] = useState("");
