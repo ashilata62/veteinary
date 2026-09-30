@@ -6,6 +6,23 @@ import './index.css'
 import './i18n'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { CurrencyProvider } from './context/CurrencyContext'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
+
+// Initialize native mobile status bar if running inside native APK
+if (Capacitor.isNativePlatform()) {
+  document.documentElement.classList.add('is-capacitor-native');
+  if (Capacitor.getPlatform() === 'android') {
+    document.documentElement.classList.add('is-capacitor-android');
+  }
+  try {
+    StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+    StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+    StatusBar.setBackgroundColor({ color: '#0f0f0f' }).catch(() => {});
+  } catch (err) {
+    console.warn('StatusBar init exception:', err);
+  }
+}
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {

@@ -18,12 +18,14 @@
 .vet-landing-header {
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: rgba(15, 15, 15, 0.92);
+  z-index: 1000;
+  background: rgba(15, 15, 15, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.75rem 0;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  padding-bottom: 0.75rem;
+  box-sizing: border-box;
 }
 
 .vet-header-container {
@@ -394,7 +396,7 @@
   background: #111827;
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 1000;
-  padding: 1.25rem 1.25rem 2.5rem 1.25rem;
+  padding: max(1.25rem, env(safe-area-inset-top, 0px)) max(1.25rem, env(safe-area-inset-right, 0px)) max(2.5rem, env(safe-area-inset-bottom, 0px)) max(1.25rem, env(safe-area-inset-left, 0px));
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -1522,14 +1524,19 @@
 
 @media (max-width: 768px) {
   .vet-landing-header {
-    padding: 0.45rem 0 !important;
+    padding-top: max(0.65rem, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: 0.65rem !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .vet-header-container {
-    padding: 0 0.75rem !important;
+    padding: 0 0.85rem !important;
+    padding-left: max(0.85rem, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(0.85rem, env(safe-area-inset-right, 0px)) !important;
     height: auto !important;
     min-height: 52px !important;
-    gap: 0.45rem !important;
+    gap: 0.5rem !important;
     flex-wrap: nowrap !important;
   }
 
@@ -1542,14 +1549,14 @@
   }
 
   .vet-brand-logo img {
-    height: 28px !important;
+    height: 30px !important;
     width: auto !important;
   }
 
   .vet-header-actions {
     display: flex !important;
     align-items: center !important;
-    gap: 0.45rem !important;
+    gap: 0.5rem !important;
     flex-shrink: 0 !important;
   }
 
@@ -1568,8 +1575,23 @@
   }
 
   .vet-mobile-toggle {
-    width: 36px !important;
-    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    touch-action: manipulation !important;
+  }
+
+  .vet-mobile-toggle:active {
+    background: rgba(20, 184, 166, 0.25) !important;
+    border-color: #14b8a6 !important;
   }
 
   .vet-section-container {
