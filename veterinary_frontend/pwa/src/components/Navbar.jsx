@@ -259,7 +259,7 @@ export default function Navbar({
           </button>
         </div>
 
-        <GlobalLocaleSelector />
+        <LanguageSwitcher />
 
         {showNotifications && (
           <>

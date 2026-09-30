@@ -15,11 +15,11 @@ export const EDITIONS = [
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', native: 'English', flag: '🇬🇧' },
-  { code: 'hi', name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇦🇪', rtl: true },
-  { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' },
-  { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪' }
+  { code: 'hi', name: 'Hindi', native: 'Hindi', flag: '🇮🇳' },
+  { code: 'ar', name: 'Arabic', native: 'Arabic', flag: '🇦🇪', rtl: true },
+  { code: 'fr', name: 'French', native: 'French', flag: '🇫🇷' },
+  { code: 'es', name: 'Spanish', native: 'Spanish', flag: '🇪🇸' },
+  { code: 'de', name: 'German', native: 'German', flag: '🇩🇪' }
 ];
 
 i18n
