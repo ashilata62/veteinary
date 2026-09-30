@@ -109,31 +109,60 @@ export default function PrivacyPolicy() {
 
           <section style={{ marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <RefreshCw size={20} /> 5. Data Retention & Account Deletion
+              <RefreshCw size={20} /> 5. Third-Party Services & Integrations
             </h2>
             <p>
-              We retain clinic data as long as your account remains active or as required by law. Users or clinic administrators may request account deactivation, data export, or permanent data deletion by reaching out to our support team.
+              To deliver mission-critical veterinary clinic functionality, our platform securely interfaces with select trusted third-party service providers under strict data confidentiality:
+            </p>
+            <ul style={{ paddingLeft: '1.25rem' }}>
+              <li><strong>Payment Processors:</strong> We use authorized, PCI-DSS compliant payment gateways (such as Razorpay / Stripe) to process clinic subscription transactions. Financial credit card numbers and bank details are handled directly by the payment provider and never stored on our servers.</li>
+              <li><strong>SMS & Email Communication:</strong> Services such as Twilio, Fast2SMS, and transactional email relays are utilized strictly to transmit appointment alerts, vaccination reminders, and verification OTPs to pet owners and clinic personnel.</li>
+              <li><strong>Cloud Storage:</strong> Encrypted cloud storage systems are utilized for secure persistence of pet diagnostic attachments, invoices, and clinic backups.</li>
+            </ul>
+          </section>
+
+          <section style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={20} /> 6. Data Retention & Account Deletion (Google Play Compliance)
+            </h2>
+            <p>
+              We retain account data for as long as your clinic account remains active. As required by Google Play policy, users have full rights to request permanent deletion of their account and associated personal data:
+            </p>
+            <ul style={{ paddingLeft: '1.25rem' }}>
+              <li><strong>In-App Deletion:</strong> Authenticated users can permanently delete their profile and personal data at any time via <strong>Settings &rarr; Profile &rarr; Delete Account</strong>.</li>
+              <li><strong>Public Web Deletion:</strong> If you cannot access the application, you can submit a public deletion request at <a href="/delete-account" onClick={(e) => { e.preventDefault(); navigate('/delete-account'); }} style={{ color: '#0f766e', fontWeight: 600 }}>/delete-account</a>.</li>
+              <li><strong>Processing Timeframe:</strong> Personal records, credentials, and profile identifiers are permanently purged within 30 days of confirmed deletion. Transactional tax invoices are anonymized and retained solely where mandated by statutory commercial regulations.</li>
+            </ul>
+          </section>
+
+          <section style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={20} /> 7. Children's Privacy
+            </h2>
+            <p>
+              PetCare Pro is a commercial B2B veterinary practice management system intended strictly for veterinary clinic staff, doctors, and adult pet owners (aged 18 or older). We do not knowingly solicit or collect personal information from individuals under 13 years of age.
             </p>
           </section>
 
           <section style={{ marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Mail size={20} /> 6. Contact Us
+              <Mail size={20} /> 8. Contact Us
             </h2>
             <p>
-              If you have any questions or privacy concerns regarding this Privacy Policy, please contact our privacy team:
+              For any inquiries, privacy concerns, or data rights requests, please contact our Data Protection Officer:
             </p>
-            <div style={{ backgroundColor: '#f1f5f9', padding: '1rem 1.25rem', borderRadius: '10px', fontSize: '0.9rem', color: '#0f172a' }}>
-              <strong>PetCare Clinic Support Team</strong><br />
-              Email: privacy@petcareclinic.com<br />
-              Support: support@petcareclinic.com
+            <div style={{ backgroundColor: '#f1f5f9', padding: '1.25rem', borderRadius: '12px', fontSize: '0.9rem', color: '#0f172a', lineHeight: '1.7' }}>
+              <strong>Kiaan Technology — PetCare Pro Privacy Team</strong><br />
+              Email: <a href="mailto:contact@kiaantechnology.com" style={{ color: '#0f766e', textDecoration: 'none', fontWeight: 600 }}>contact@kiaantechnology.com</a><br />
+              Website: <a href="https://kiaantechnology.com" target="_blank" rel="noopener noreferrer" style={{ color: '#0f766e', textDecoration: 'none', fontWeight: 600 }}>https://kiaantechnology.com</a><br />
+              Address: Kiaan Technology Enterprise Software Division
             </div>
           </section>
         </div>
 
         {/* Footer */}
         <div style={{ marginTop: '2.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8' }}>
-          &copy; {new Date().getFullYear()} PetCare Clinic SaaS. All Rights Reserved.
+          &copy; {new Date().getFullYear()} Kiaan Technology. All Rights Reserved.
         </div>
       </div>
     </div>

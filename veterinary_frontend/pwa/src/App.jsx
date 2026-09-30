@@ -24,6 +24,9 @@ import LandingPage from './components/LandingPage';
 import Register from './components/Register';
 import BrochurePage from './components/BrochurePage';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsConditions from './components/TermsConditions';
+import ContactPage from './components/ContactPage';
+import DeleteAccount from './components/DeleteAccount';
 import StaffManagement from './components/StaffManagement';
 import RolePermissionsManager from './components/RolePermissionsManager';
 import Attendance from './components/Attendance';
@@ -242,7 +245,7 @@ export default function App() {
   // Authenticated: redirect login, landing, root, and legacy flat URLs → /{role}/{tab}
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/') || location.pathname === '/privacy-policy') return;
+    if (location.pathname === '/plans' || location.pathname.endsWith('/plans') || location.pathname.startsWith('/checkout/') || location.pathname === '/privacy-policy' || location.pathname === '/terms' || location.pathname === '/contact' || location.pathname === '/delete-account') return;
     const home = pathForTab('dashboard', currentRole);
     if (location.pathname === LOGIN_PATH || location.pathname === '/' || location.pathname === LANDING_PATH) {
       navigate(home, { replace: true });
@@ -301,8 +304,20 @@ export default function App() {
     return <BrochurePage />;
   }
 
-  if (!isAuthenticated && location.pathname === '/privacy-policy') {
+  if (location.pathname === '/privacy-policy') {
     return <PrivacyPolicy />;
+  }
+
+  if (location.pathname === '/terms') {
+    return <TermsConditions />;
+  }
+
+  if (location.pathname === '/contact') {
+    return <ContactPage />;
+  }
+
+  if (location.pathname === '/delete-account') {
+    return <DeleteAccount />;
   }
 
   if (location.pathname === '/reset-password') {
