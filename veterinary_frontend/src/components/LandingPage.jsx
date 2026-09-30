@@ -235,11 +235,11 @@ export default function LandingPage() {
             <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
             <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
             <li><a href="/#mobile-app" onClick={(e) => { e.preventDefault(); scrollToSection('mobile-app'); }}>Mobile App 📱</a></li>
-            <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
-            <li><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
+            <li className="vet-nav-link-optional"><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
+            <li className="vet-nav-link-optional"><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
             <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
             <li><a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}>{t('nav.contact')}</a></li>
-            <li><a href="/brochure" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
+            <li className="vet-nav-link-optional"><a href="/brochure" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
           </ul>
 
           {/* Right Actions */}
@@ -786,35 +786,6 @@ export default function LandingPage() {
           <p className="vet-section-subtitle">
             {t('pricing.subtitle')}
           </p>
-
-          {/* 5 Country / Currency Switcher Bar */}
-          <div className="vet-currency-toggle-container">
-            <span className="vet-currency-toggle-label">Select Country / Currency:</span>
-            <div className="vet-currency-pills">
-              {LANGUAGES.map((region) => {
-                const isSelected = region.id === selectedRegionId;
-                return (
-                  <button
-                    key={region.id}
-                    type="button"
-                    className={`vet-currency-pill ${isSelected ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedRegionId(region.id);
-                      localStorage.setItem('petcare_region', region.id);
-                      window.dispatchEvent(new CustomEvent('petcare_region_changed', { detail: region.id }));
-                      if (region.currency) {
-                        localStorage.setItem('petcare_currency', region.currency);
-                        window.dispatchEvent(new CustomEvent('petcare_currency_changed', { detail: region.currency }));
-                      }
-                    }}
-                  >
-                    <span className="vet-currency-pill-flag">{region.flag}</span>
-                    <span className="vet-currency-pill-name">{region.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         <div className="vet-pricing-grid">

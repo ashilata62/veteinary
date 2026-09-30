@@ -4,13 +4,13 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Supported regional editions (7 Regional & Language Editions)
 export const EDITIONS = [
-  { code: 'us', short: 'US', label: 'USA ($)', lang: 'en', currency: 'USD', symbol: '$' },
-  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'en', currency: 'INR', symbol: '₹' },
-  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'en', currency: 'AED', symbol: 'AED' },
-  { code: 'fr', short: 'FR', label: 'France (€)', lang: 'fr', currency: 'EUR', symbol: '€' },
-  { code: 'es', short: 'ES', label: 'Spain ($)', lang: 'es', currency: 'USD', symbol: '$' },
-  { code: 'de', short: 'DE', label: 'Germany (€)', lang: 'de', currency: 'EUR', symbol: '€' },
-  { code: 'gb', short: 'GB', label: 'UK (£)', lang: 'en', currency: 'GBP', symbol: '£' }
+  { code: 'us', short: 'US', label: 'USA', lang: 'en', currency: 'USD', symbol: '$' },
+  { code: 'in', short: 'IN', label: 'India', lang: 'en', currency: 'INR', symbol: '₹' },
+  { code: 'ae', short: 'AE', label: 'UAE', lang: 'en', currency: 'AED', symbol: 'AED' },
+  { code: 'fr', short: 'FR', label: 'France', lang: 'fr', currency: 'EUR', symbol: '€' },
+  { code: 'es', short: 'ES', label: 'Spain', lang: 'es', currency: 'USD', symbol: '$' },
+  { code: 'de', short: 'DE', label: 'Germany', lang: 'de', currency: 'EUR', symbol: '€' },
+  { code: 'gb', short: 'GB', label: 'UK', lang: 'en', currency: 'GBP', symbol: '£' }
 ];
 
 export const SUPPORTED_LANGUAGES = [

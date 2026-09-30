@@ -6,13 +6,13 @@ import { EDITIONS } from '../i18n';
 
 // Fallback if not loaded
 const FALLBACK_EDITIONS = [
-  { code: 'us', short: 'US', label: 'USA ($)', lang: 'en', currency: 'USD', symbol: '$' },
-  { code: 'in', short: 'IN', label: 'India (₹)', lang: 'en', currency: 'INR', symbol: '₹' },
-  { code: 'ae', short: 'AE', label: 'UAE (AED)', lang: 'en', currency: 'AED', symbol: 'AED' },
-  { code: 'fr', short: 'FR', label: 'France (€)', lang: 'fr', currency: 'EUR', symbol: '€' },
-  { code: 'es', short: 'ES', label: 'Spain ($)', lang: 'es', currency: 'USD', symbol: '$' },
-  { code: 'de', short: 'DE', label: 'Germany (€)', lang: 'de', currency: 'EUR', symbol: '€' },
-  { code: 'gb', short: 'GB', label: 'UK (£)', lang: 'en', currency: 'GBP', symbol: '£' },
+  { code: 'us', short: 'US', label: 'USA', lang: 'en', currency: 'USD', symbol: '$' },
+  { code: 'in', short: 'IN', label: 'India', lang: 'en', currency: 'INR', symbol: '₹' },
+  { code: 'ae', short: 'AE', label: 'UAE', lang: 'en', currency: 'AED', symbol: 'AED' },
+  { code: 'fr', short: 'FR', label: 'France', lang: 'fr', currency: 'EUR', symbol: '€' },
+  { code: 'es', short: 'ES', label: 'Spain', lang: 'es', currency: 'USD', symbol: '$' },
+  { code: 'de', short: 'DE', label: 'Germany', lang: 'de', currency: 'EUR', symbol: '€' },
+  { code: 'gb', short: 'GB', label: 'UK', lang: 'en', currency: 'GBP', symbol: '£' },
 ];
 
 const ALL_EDITIONS = EDITIONS && EDITIONS.length > 0 ? EDITIONS : FALLBACK_EDITIONS;
@@ -318,9 +318,6 @@ export const LanguageSwitcher = ({
         <span className="vet-edition-label-full" style={{ fontWeight: 700, color: '#0f172a' }}>
           {activeObj.label}
         </span>
-        <span className="vet-edition-symbol-mobile" style={{ fontWeight: 700, color: '#0f172a' }}>
-          ({activeObj.symbol})
-        </span>
         <ChevronDown
           size={14}
           color="#475569"
@@ -364,7 +361,7 @@ export const LanguageSwitcher = ({
               letterSpacing: '0.06em'
             }}
           >
-            REGIONAL & LANGUAGE EDITIONS
+            REGIONAL EDITIONS
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
