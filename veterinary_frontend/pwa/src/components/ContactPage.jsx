@@ -63,7 +63,10 @@ export default function ContactPage() {
       <nav style={{
         backgroundColor: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
-        padding: '0.85rem 1.5rem',
+        paddingTop: 'max(0.85rem, env(safe-area-inset-top, 38px))',
+        paddingBottom: '0.85rem',
+        paddingLeft: '1.5rem',
+        paddingRight: '1.5rem',
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -630,7 +633,7 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem', textAlign: 'center', fontSize: '0.82rem', color: '#94a3b8' }}>
+          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem', paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 24px))', textAlign: 'center', fontSize: '0.82rem', color: '#94a3b8' }}>
             &copy; {new Date().getFullYear()} PetCare Pro SaaS by Kiaan Tech Craft Pvt. Ltd. All rights reserved.
           </div>
         </div>

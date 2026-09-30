@@ -54,10 +54,10 @@ export default function PlansPage() {
   };
 
   return (
-    <div style={{ padding: '2rem 0', backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+    <div style={{ paddingTop: 'max(2rem, env(safe-area-inset-top, 40px))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 24px))', paddingLeft: 0, paddingRight: 0, backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <button 
         onClick={() => navigate('/')} 
-        style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+        style={{ position: 'absolute', top: 'max(1.5rem, env(safe-area-inset-top, 40px))', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
       >
         <ArrowLeft size={18} /> Back to Dashboard
       </button>

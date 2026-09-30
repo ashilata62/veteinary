@@ -138,7 +138,7 @@ export default function LandingPage() {
   const [downloadToast, setDownloadToast] = useState('');
 
   const handleAndroidDownload = () => {
-    setDownloadToast('⬇️ Downloading PetCare Pro Android APK (10 MB)... Once downloaded, open the file to install.');
+    setDownloadToast('⬇️ Downloading PetCare Pro APK... Once downloaded, open the file to install.');
     setTimeout(() => {
       setDownloadToast('');
     }, 4500);

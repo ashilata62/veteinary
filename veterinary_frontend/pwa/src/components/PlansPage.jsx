@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard, Check, ArrowLeft, X, Send, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import './LandingPage.css'; // Original Landing Page styling
-import { Capacitor } from '@capacitor/core';
 
 export default function PlansPage() {
   const navigate = useNavigate();
   const [showContactModal, setShowContactModal] = useState(false);
-  const [showNativeNotice, setShowNativeNotice] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
   const [inquiryData, setInquiryData] = useState(() => {
     let defaultEmail = '';
     let defaultName = '';
@@ -26,10 +23,6 @@ export default function PlansPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const handleBuyPlan = (planId) => {
-    if (isNative) {
-      setShowNativeNotice(true);
-      return;
-    }
     if (planId === 'custom') {
       setShowContactModal(true);
       return;
@@ -61,10 +54,10 @@ export default function PlansPage() {
   };
 
   return (
-    <div style={{ padding: '2rem 0', backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+    <div style={{ paddingTop: 'max(2rem, env(safe-area-inset-top, 40px))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 24px))', paddingLeft: 0, paddingRight: 0, backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <button 
         onClick={() => navigate('/')} 
-        style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+        style={{ position: 'absolute', top: 'max(1.5rem, env(safe-area-inset-top, 40px))', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
       >
         <ArrowLeft size={18} /> Back to Dashboard
       </button>
@@ -277,39 +270,6 @@ export default function PlansPage() {
                 </form>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Native App Companion Billing Notice Modal */}
-      {showNativeNotice && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }}>
-          <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '480px', color: '#f8fafc', position: 'relative', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
-            <button 
-              onClick={() => setShowNativeNotice(false)}
-              style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-            >
-              <X size={20} />
-            </button>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto' }}>
-              <CreditCard size={28} color="#ea580c" />
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: '#fff' }}>SaaS Subscription Management</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-              PetCare Pro is a multi-platform veterinary enterprise service. To subscribe or manage your clinic billing, please log in via our secure web portal:
-            </p>
-            <div style={{ background: '#0f172a', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155', color: '#38bdf8', fontWeight: 600, fontSize: '0.85rem', marginBottom: '1.5rem', wordBreak: 'break-all' }}>
-              https://veterinary-saas.kiaantechnology.com
-            </div>
-            <p style={{ color: '#64748b', fontSize: '0.8rem', margin: '0 0 1.5rem 0' }}>
-              Subscriptions activated on the web portal immediately sync across all your mobile devices.
-            </p>
-            <button 
-              onClick={() => setShowNativeNotice(false)}
-              style={{ width: '100%', backgroundColor: '#ea580c', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.75rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}
-            >
-              Understood
-            </button>
           </div>
         </div>
       )}

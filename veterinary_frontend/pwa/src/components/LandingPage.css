@@ -2223,15 +2223,15 @@
 /* Download Toast Notification */
 .vet-download-toast {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   background: #0f172a;
   border: 1px solid #14b8a6;
   color: #ffffff;
-  padding: 0.85rem 1.5rem;
+  padding: 0.75rem 1rem;
   border-radius: 12px;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 600;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(20, 184, 166, 0.3);
   z-index: 10001;
@@ -2239,7 +2239,8 @@
   align-items: center;
   gap: 0.65rem;
   animation: slideUpToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: 90vw;
+  width: min(360px, 92vw);
+  max-width: 92vw;
   text-align: center;
 }
 

@@ -71,7 +71,10 @@ export default function ResetPassword() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1.5rem',
+      paddingTop: 'max(1.5rem, env(safe-area-inset-top, 40px))',
+      paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 24px))',
+      paddingLeft: '1.5rem',
+      paddingRight: '1.5rem',
       fontFamily: "'Inter', sans-serif"
     }}>
       <div style={{

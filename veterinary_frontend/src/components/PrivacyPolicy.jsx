@@ -25,7 +25,10 @@ export default function PrivacyPolicy() {
       backgroundColor: '#f8fafc',
       color: '#1e293b',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      padding: '2rem 1rem',
+      paddingTop: 'max(2rem, env(safe-area-inset-top, 40px))',
+      paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 24px))',
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center'
@@ -37,7 +40,7 @@ export default function PrivacyPolicy() {
         borderRadius: '20px',
         boxShadow: '0 10px 40px -10px rgba(15, 23, 42, 0.08)',
         border: '1px solid #e2e8f0',
-        padding: '2.5rem 2rem',
+        padding: window.innerWidth <= 768 ? '1.5rem 1rem' : '2.5rem 2rem',
       }}>
         {/* Header */}
         <div style={{ 
