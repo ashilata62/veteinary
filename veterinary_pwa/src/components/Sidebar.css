@@ -11,7 +11,7 @@
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 20px rgba(0,0,0,0.5);
-  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-top: max(0.75rem, env(safe-area-inset-top, 38px));
   padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 70px));
   box-sizing: border-box;
 }
@@ -250,5 +250,12 @@
   }
   .sidebar-collapse-btn .mobile-icon {
     display: inline-flex !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-premium {
+    padding-top: max(1rem, env(safe-area-inset-top, 38px)) !important;
+    width: min(300px, 82vw) !important;
   }
 }

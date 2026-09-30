@@ -327,8 +327,7 @@ export default function RegisterModal({ plan = 'free-trial', currency = 'USD', p
               {errorMessage && <div className="register-modal-error-msg">{errorMessage}</div>}
 
               {/* Google reCAPTCHA Security Widget */}
-              <div style={{
-                gridColumn: 'span 2',
+              <div className="register-modal-recaptcha" style={{
                 background: '#f9f9f9',
                 border: '1px solid #d3d3d3',
                 borderRadius: '4px',
@@ -627,23 +626,65 @@ export default function RegisterModal({ plan = 'free-trial', currency = 'USD', p
           @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
           @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
           @keyframes spin { to { transform: rotate(360deg); } }
+          .register-modal-recaptcha {
+            grid-column: span 2;
+          }
+
           @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-          @media (max-width: 600px) {
-            .register-modal-form-grid {
-              grid-template-columns: 1fr;
-            }
-            .register-modal-submit-btn,
-            .register-modal-strength-hint,
-            .register-modal-error-msg {
-              grid-column: span 1;
+          @media (max-width: 768px) {
+            .register-modal-overlay {
+              padding: 0.5rem !important;
+              align-items: center !important;
             }
             .register-modal-card {
-              padding: 1.5rem 1.25rem;
+              padding: 1.25rem 1rem !important;
+              max-height: 94vh !important;
+              max-height: 94dvh !important;
+              width: 100% !important;
+              box-sizing: border-box !important;
             }
             .register-modal-heading-section {
-              padding-right: 0;
-              margin-top: 1.5rem;
+              padding-right: 0 !important;
+              margin-top: 1.25rem !important;
+              margin-bottom: 0.85rem !important;
+            }
+            .register-modal-heading {
+              font-size: 1.25rem !important;
+            }
+            .register-modal-form-grid {
+              display: flex !important;
+              flex-direction: column !important;
+              width: 100% !important;
+              gap: 0.75rem !important;
+            }
+            .register-modal-group {
+              width: 100% !important;
+              min-width: 0 !important;
+            }
+            .register-modal-input {
+              width: 100% !important;
+              min-width: 0 !important;
+              height: 3rem !important;
+              font-size: 0.95rem !important;
+            }
+            .register-modal-recaptcha {
+              width: 100% !important;
+              grid-column: span 1 !important;
+              box-sizing: border-box !important;
+            }
+            .register-modal-submit-btn {
+              width: 100% !important;
+              grid-column: span 1 !important;
+              height: 3.2rem !important;
+              font-size: 0.95rem !important;
+              margin-top: 0.5rem !important;
+              display: flex !important;
+            }
+            .register-modal-strength-hint,
+            .register-modal-error-msg {
+              grid-column: span 1 !important;
+              width: 100% !important;
             }
           }
         `}</style>

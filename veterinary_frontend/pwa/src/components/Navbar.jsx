@@ -17,29 +17,12 @@ export default function Navbar({
   handleLogout,
   attendanceStatus,
   fetchAttendanceStatus,
+  deferredPrompt,
+  onOpenInstallModal,
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-
-  useEffect(() => {
-    const handlePrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handlePrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handlePrompt);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-    }
-  };
 
   const isCheckedIn = attendanceStatus?.isCheckedIn || false;
   const checkInTime = attendanceStatus?.checkInTime || null;
@@ -198,7 +181,7 @@ export default function Navbar({
           <Search size={18} />
         </button>
 
-        <div className="app-navbar__attendance hidden-mobile" style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
+        <div className="app-navbar__attendance">
           {isCheckedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -223,29 +206,22 @@ export default function Navbar({
           )}
         </div>
 
-        {deferredPrompt && (
-          <button
-            type="button"
-            onClick={handleInstallClick}
-            style={{
-              background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
-              color: '#fff',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.4rem 0.85rem',
-              borderRadius: '4px',
-              fontWeight: 600,
-              fontSize: '0.75rem',
-              marginRight: '0.75rem',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(13, 148, 136, 0.3)'
-            }}
-          >
-            <Download size={14} /> Install App
-          </button>
-        )}
+        <button
+          type="button"
+          className="pwa-navbar-install-btn"
+          onClick={() => {
+            if (onOpenInstallModal) {
+              onOpenInstallModal();
+            } else if (deferredPrompt) {
+              deferredPrompt.prompt();
+            }
+          }}
+          title="Install PetCare Pro (PWA)"
+          aria-label="Install App"
+        >
+          <Download size={15} />
+          <span>Install App</span>
+        </button>
 
         <div className="app-navbar__notif-wrap">
           <button

@@ -181,7 +181,7 @@ export default function Navbar({
           <Search size={18} />
         </button>
 
-        <div className="app-navbar__attendance hidden-mobile" style={{ display: 'flex', alignItems: 'center', marginRight: '1rem' }}>
+        <div className="app-navbar__attendance">
           {isCheckedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
