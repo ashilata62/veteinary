@@ -66,6 +66,15 @@ export default function SettingsPage({ currentRole }) {
   const [backupHistory, setBackupHistory] = useState([]);
   const [backupSuccessInfo, setBackupSuccessInfo] = useState(null);
 
+  // 7-Day Email Report State
+  const [reportEmail, setReportEmail] = useState('');
+  const [reportSending, setReportSending] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [reportHistory, setReportHistory] = useState([]);
+  const [reportSubscriptions, setReportSubscriptions] = useState([]);
+  const [subscribeEmail, setSubscribeEmail] = useState('');
+
   // Cloud Storage Settings State
   const [storageProvider, setStorageProvider] = useState('local');
   const [s3Bucket, setS3Bucket] = useState('');
@@ -263,12 +272,34 @@ export default function SettingsPage({ currentRole }) {
       }
     };
 
+    const fetchReportHistory = async () => {
+      try {
+        const res = await apiFetch('/api/v1/system/report/history');
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data.status === 'success') setReportHistory(data.data || []);
+        }
+      } catch (err) { console.error('Failed to fetch report history', err); }
+    };
+
+    const fetchReportSubscriptions = async () => {
+      try {
+        const res = await apiFetch('/api/v1/system/report/subscriptions');
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data.status === 'success') setReportSubscriptions(data.data || []);
+        }
+      } catch (err) { console.error('Failed to fetch report subscriptions', err); }
+    };
+
     fetchProfile();
     fetchClinicSettings();
     fetchBackupHistory();
     fetchStorageSettings();
     fetchBillingData();
     fetchMessagingData();
+    fetchReportHistory();
+    fetchReportSubscriptions();
   }, []);
 
   const handleSaveMessagingGateways = async (e) => {
@@ -1785,6 +1816,222 @@ export default function SettingsPage({ currentRole }) {
                         </table>
                       </div>
                     )}
+                  </div>
+                  {/* ========== 7-DAY EMAIL REPORT SECTION ========== */}
+                  <div style={{ borderTop: '2px solid var(--border)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Mail size={18} style={{ color: '#14b8a6' }} />
+                      📧 7-Day Automatic Email Report
+                    </h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+                      Enter an email below to instantly receive a 7-day clinic data summary (Revenue, Appointments, Patients, Inventory & more). You can also subscribe emails for automatic weekly delivery.
+                    </p>
+
+                    {/* Send Report Form */}
+                    <div style={{
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%)',
+                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      borderRadius: '14px',
+                      padding: '1.25rem',
+                      marginBottom: '1.25rem'
+                    }}>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!reportEmail) return;
+                        setReportSending(true); setReportSuccess(''); setReportError('');
+                        try {
+                          const res = await apiFetch('/api/v1/system/report/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: reportEmail })
+                          });
+                          const data = await res.json();
+                          if (data.status === 'success') {
+                            setReportSuccess(`✅ Report sent to ${reportEmail}`);
+                            setReportEmail('');
+                            // Refresh report history
+                            const hRes = await apiFetch('/api/v1/system/report/history');
+                            if (hRes && hRes.ok) { const h = await hRes.json(); setReportHistory(h.data || []); }
+                          } else {
+                            setReportError(data.message || 'Failed to send report');
+                          }
+                        } catch (err) {
+                          setReportError('Network error: ' + err.message);
+                        } finally { setReportSending(false); }
+                      }} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: '220px' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px', display: 'block' }}>Recipient Email</label>
+                          <input
+                            type="email"
+                            value={reportEmail}
+                            onChange={(e) => setReportEmail(e.target.value)}
+                            placeholder="admin@clinic.com"
+                            required
+                            style={{
+                              width: '100%', padding: '0.7rem 0.85rem', fontSize: '0.9rem',
+                              border: '1px solid var(--border)', borderRadius: '10px',
+                              background: 'var(--card-bg)', color: 'var(--text-primary)',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={reportSending || !reportEmail}
+                          className="btn btn-primary"
+                          style={{ padding: '0.7rem 1.4rem', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.88rem', whiteSpace: 'nowrap' }}
+                        >
+                          {reportSending ? (
+                            <><div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%' }} /> Sending...</>
+                          ) : (
+                            <><Send size={16} /> Send 7-Day Report</>
+                          )}
+                        </button>
+                      </form>
+                      {reportSuccess && <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#16a34a', fontWeight: 600 }}>{reportSuccess}</p>}
+                      {reportError && <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#ef4444', fontWeight: 600 }}>❌ {reportError}</p>}
+                    </div>
+
+                    {/* Subscribe Email for Auto Weekly Reports */}
+                    <div style={{
+                      background: '#f8fafc', border: '1px solid var(--border)',
+                      borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem'
+                    }}>
+                      <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: '0 0 0.5rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Bell size={15} style={{ color: '#6366f1' }} /> Auto-Subscribe Weekly Report
+                      </h4>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                        Add emails to receive automatic reports every 7 days.
+                      </p>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!subscribeEmail) return;
+                        try {
+                          const res = await apiFetch('/api/v1/system/report/subscribe', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: subscribeEmail })
+                          });
+                          const data = await res.json();
+                          if (data.status === 'success') {
+                            setSubscribeEmail('');
+                            const sRes = await apiFetch('/api/v1/system/report/subscriptions');
+                            if (sRes && sRes.ok) { const s = await sRes.json(); setReportSubscriptions(s.data || []); }
+                          }
+                        } catch (err) { console.error(err); }
+                      }} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <input
+                          type="email"
+                          value={subscribeEmail}
+                          onChange={(e) => setSubscribeEmail(e.target.value)}
+                          placeholder="weekly-report@clinic.com"
+                          required
+                          style={{
+                            flex: 1, minWidth: '200px', padding: '0.6rem 0.75rem', fontSize: '0.85rem',
+                            border: '1px solid var(--border)', borderRadius: '8px',
+                            background: '#fff', color: 'var(--text-primary)', outline: 'none'
+                          }}
+                        />
+                        <button type="submit" className="btn" style={{ padding: '0.6rem 1rem', fontSize: '0.82rem', fontWeight: 600, background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                          + Subscribe
+                        </button>
+                      </form>
+
+                      {/* Subscribed Email List */}
+                      {reportSubscriptions.length > 0 && (
+                        <div style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {reportSubscriptions.map(sub => (
+                            <div key={sub.id} style={{
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              padding: '5px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600,
+                              background: sub.is_active ? 'rgba(20, 184, 166, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                              border: sub.is_active ? '1px solid rgba(20, 184, 166, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                              color: sub.is_active ? '#0d9488' : '#dc2626'
+                            }}>
+                              <Mail size={12} />
+                              {sub.email}
+                              {sub.is_active ? (
+                                <span style={{ color: '#16a34a', fontSize: '0.7rem' }}>● Active</span>
+                              ) : (
+                                <span style={{ color: '#dc2626', fontSize: '0.7rem' }}>● Disabled</span>
+                              )}
+                              {sub.is_active && (
+                                <button
+                                  onClick={async () => {
+                                    await apiFetch('/api/v1/system/report/unsubscribe', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ email: sub.email })
+                                    });
+                                    const sRes = await apiFetch('/api/v1/system/report/subscriptions');
+                                    if (sRes && sRes.ok) { const s = await sRes.json(); setReportSubscriptions(s.data || []); }
+                                  }}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '0.85rem', fontWeight: 700, padding: '0 4px' }}
+                                  title="Unsubscribe"
+                                >✕</button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Report Status / History Log */}
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <RefreshCw size={15} style={{ color: '#14b8a6' }} /> Report Delivery Log
+                      </h4>
+                      {reportHistory.length === 0 ? (
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No report emails sent yet.</p>
+                      ) : (
+                        <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: '10px' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                            <thead>
+                              <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Recipient</th>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Period</th>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Type</th>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Status</th>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Attempts</th>
+                                <th style={{ padding: '0.6rem 0.85rem', color: 'var(--text-secondary)' }}>Sent At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {reportHistory.slice(0, 15).map((r) => (
+                                <tr key={r.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                  <td style={{ padding: '0.6rem 0.85rem', fontWeight: 600 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                      <Mail size={13} color="#6366f1" />
+                                      {r.recipient_email}
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '0.6rem 0.85rem', fontSize: '0.78rem' }}>{r.period_start} → {r.period_end}</td>
+                                  <td style={{ padding: '0.6rem 0.85rem' }}>
+                                    <span style={{
+                                      padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700,
+                                      background: r.report_type === 'WEEKLY_7DAY' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(20, 184, 166, 0.12)',
+                                      color: r.report_type === 'WEEKLY_7DAY' ? '#6366f1' : '#0d9488'
+                                    }}>{r.report_type === 'WEEKLY_7DAY' ? 'Auto Weekly' : 'Manual'}</span>
+                                  </td>
+                                  <td style={{ padding: '0.6rem 0.85rem' }}>
+                                    <span style={{
+                                      padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700,
+                                      background: r.status === 'SENT' ? 'rgba(22, 163, 74, 0.12)' : r.status === 'FAILED' ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                                      color: r.status === 'SENT' ? '#16a34a' : r.status === 'FAILED' ? '#dc2626' : '#d97706'
+                                    }}>{r.status}</span>
+                                    {r.last_error && <div style={{ fontSize: '0.7rem', color: '#ef4444', marginTop: '2px' }} title={r.last_error}>⚠️ {r.last_error.substring(0, 40)}...</div>}
+                                  </td>
+                                  <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center' }}>{r.attempt_count}/{r.max_retries}</td>
+                                  <td style={{ padding: '0.6rem 0.85rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                                    {r.sent_at ? new Date(r.sent_at).toLocaleString() : '—'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
