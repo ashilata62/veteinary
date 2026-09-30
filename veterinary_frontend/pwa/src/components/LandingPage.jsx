@@ -235,11 +235,10 @@ export default function LandingPage() {
             <li><a href="/" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>{t('nav.home')}</a></li>
             <li><a href="/features" onClick={(e) => { e.preventDefault(); scrollToSection('features'); }}>{t('nav.features')}</a></li>
             <li><a href="/#mobile-app" onClick={(e) => { e.preventDefault(); scrollToSection('mobile-app'); }}>Mobile App 📱</a></li>
-            <li className="vet-nav-link-optional"><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
-            <li className="vet-nav-link-optional"><a href="/testimonials" onClick={(e) => { e.preventDefault(); scrollToSection('testimonials'); }}>{t('nav.testimonials')}</a></li>
+            <li><a href="/benefits" onClick={(e) => { e.preventDefault(); scrollToSection('benefits'); }}>{t('nav.benefits')}</a></li>
             <li><a href="/pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }}>{t('nav.pricing')}</a></li>
             <li><a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }}>{t('nav.contact')}</a></li>
-            <li className="vet-nav-link-optional"><a href="/brochure" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} style={{ color: '#14b8a6', fontWeight: 'bold' }}>{t('nav.brochure')}</a></li>
+            <li><a href="/brochure" onClick={(e) => { e.preventDefault(); navigate('/brochure'); }} className="vet-nav-brochure-link">{t('nav.brochure')} 📄</a></li>
           </ul>
 
           {/* Right Actions */}

@@ -310,16 +310,21 @@ export const LanguageSwitcher = ({
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
           userSelect: 'none',
           outline: 'none',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          padding: '5px 11px',
+          fontSize: '0.82rem',
+          height: '36px',
+          gap: '6px',
+          boxSizing: 'border-box'
         }}
       >
-        <Globe size={16} color="#0d9488" strokeWidth={2.2} style={{ flexShrink: 0 }} />
-        <span className="vet-edition-short" style={{ fontWeight: 800, color: '#0f172a' }}>{activeObj.short}</span>
-        <span className="vet-edition-label-full" style={{ fontWeight: 700, color: '#0f172a' }}>
+        <Globe size={15} color="#0d9488" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+        <span className="vet-edition-short" style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.82rem' }}>{activeObj.short}</span>
+        <span className="vet-edition-label-full" style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
           {activeObj.label}
         </span>
         <ChevronDown
-          size={14}
+          size={13}
           color="#475569"
           strokeWidth={2.5}
           style={{
