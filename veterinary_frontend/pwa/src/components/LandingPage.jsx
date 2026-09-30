@@ -41,10 +41,12 @@ export default function LandingPage() {
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalType, setLegalType] = useState('privacy');
 
-  const [selectedRegionId, setSelectedRegionId] = useState('usa');
-  const activeRegion = LANGUAGES.find((l) => l.id === selectedRegionId) || LANGUAGES[0];
+  const [selectedRegionId, setSelectedRegionId] = useState(() => {
+    return localStorage.getItem('petcare_region') || 'us';
+  });
+  const activeRegion = LANGUAGES.find((l) => l.id === selectedRegionId || l.short?.toLowerCase() === selectedRegionId?.toLowerCase()) || LANGUAGES[0];
   const pricing = PLAN_PRICING[activeRegion.currency] || PLAN_PRICING.USD;
-  const tData = TRANSLATIONS[selectedRegionId] || TRANSLATIONS.en || TRANSLATIONS.usa;
+  const tData = TRANSLATIONS[selectedRegionId] || TRANSLATIONS[activeRegion.id] || TRANSLATIONS.en || TRANSLATIONS.usa;
 
   // Translation helper
   const t = (path) => {

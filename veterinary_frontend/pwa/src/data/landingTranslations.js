@@ -1,9 +1,15 @@
 export const LANGUAGES = [
-  { id: 'usa', label: 'USA', nativeName: 'USA (English)', flag: '🇺🇸', currency: 'USD', symbol: '$' },
-  { id: 'uk', label: 'UK', nativeName: 'UK (English)', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
-  { id: 'uae', label: 'UAE', nativeName: 'UAE (English)', flag: '🇦🇪', currency: 'AED', symbol: 'AED' },
-  { id: 'au', label: 'Australia', nativeName: 'Australia (English)', flag: '🇦🇺', currency: 'AUD', symbol: 'A$' },
-  { id: 'en', label: 'Global', nativeName: 'Global (English)', flag: '🌐', currency: 'INR', symbol: '₹' },
+  { id: 'us', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$' },
+  { id: 'in', label: 'India (₹)', short: 'IN', lang: 'hi', currency: 'INR', symbol: '₹' },
+  { id: 'ae', label: 'UAE (AED)', short: 'AE', lang: 'ar', currency: 'AED', symbol: 'AED' },
+  { id: 'fr', label: 'France (€)', short: 'FR', lang: 'fr', currency: 'EUR', symbol: '€' },
+  { id: 'es', label: 'Spain ($)', short: 'ES', lang: 'es', currency: 'USD', symbol: '$' },
+  { id: 'de', label: 'Germany (€)', short: 'DE', lang: 'de', currency: 'EUR', symbol: '€' },
+  { id: 'gb', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£' },
+  { id: 'usa', label: 'USA ($)', short: 'US', lang: 'en', currency: 'USD', symbol: '$' },
+  { id: 'uk', label: 'UK (£)', short: 'GB', lang: 'en', currency: 'GBP', symbol: '£' },
+  { id: 'uae', label: 'UAE (AED)', short: 'AE', lang: 'ar', currency: 'AED', symbol: 'AED' },
+  { id: 'en', label: 'India (₹)', short: 'IN', lang: 'hi', currency: 'INR', symbol: '₹' }
 ];
 
 export const PLAN_PRICING = {
@@ -14,6 +20,15 @@ export const PLAN_PRICING = {
     starter: { price: '7', unit: 'per month' },
     standard: { price: '9', unit: 'per month' },
     pro: { price: '15', unit: 'per month' },
+    custom: { price: 'Custom', unit: '' }
+  },
+  EUR: {
+    symbol: '€',
+    code: 'EUR',
+    'free-trial': { price: '0', unit: 'per week' },
+    starter: { price: '6.50', unit: 'per month' },
+    standard: { price: '8.50', unit: 'per month' },
+    pro: { price: '14', unit: 'per month' },
     custom: { price: 'Custom', unit: '' }
   },
   GBP: {
@@ -47,9 +62,9 @@ export const PLAN_PRICING = {
     symbol: '₹',
     code: 'INR',
     'free-trial': { price: '0', unit: 'per week' },
-    starter: { price: '599', unit: 'per month' },
-    standard: { price: '799', unit: 'per month' },
-    pro: { price: '1,299', unit: 'per month' },
+    starter: { price: '999', unit: 'per month' },
+    standard: { price: '1,299', unit: 'per month' },
+    pro: { price: '1,499', unit: 'per month' },
     custom: { price: 'Custom', unit: '' }
   }
 };
@@ -165,6 +180,25 @@ const baseEnglish = {
 };
 
 export const TRANSLATIONS = {
+  us: { ...baseEnglish },
+  in: { ...baseEnglish },
+  ae: {
+    ...baseEnglish,
+    footer: {
+      ...baseEnglish.footer,
+      address: 'Business Bay & Internet City, Dubai, United Arab Emirates'
+    }
+  },
+  fr: { ...baseEnglish },
+  es: { ...baseEnglish },
+  de: { ...baseEnglish },
+  gb: {
+    ...baseEnglish,
+    footer: {
+      ...baseEnglish.footer,
+      address: 'Central Tech Hub, London, United Kingdom'
+    }
+  },
   usa: { ...baseEnglish },
   uk: {
     ...baseEnglish,
