@@ -4,7 +4,7 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity, Shield, ShieldCheck
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity, Shield
 } from 'lucide-react';
 import './Sidebar.css';
 import { isTabAllowedForPlan } from '../utils/planPermissions';
@@ -81,8 +81,7 @@ export default function Sidebar({
     { id: 'reports',      label: 'Reports & Analytics',   icon: BarChart3,       roles: ['Admin','Manager'] },
     { id: 'settings',     label: currentRole !== 'Admin' ? 'Profile Settings' : 'Settings', icon: Settings, roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
     { id: 'audit-logs',   label: 'Audit Logs',            icon: Activity,        roles: ['Admin'] },
-    { id: 'support',      label: 'Support',               icon: Headphones,      roles: ['Admin'] },
-    { id: 'privacy-policy', label: 'Privacy Policy',      icon: ShieldCheck,     roles: ['Admin', 'Manager', 'Doctor', 'Receptionist', 'Vet Assistant'] },
+    { id: 'support',      label: 'Support',               icon: Headphones,      roles: ['Admin'] }
   ];
 
   const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
