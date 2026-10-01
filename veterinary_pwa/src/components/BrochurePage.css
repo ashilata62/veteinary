@@ -466,3 +466,25 @@
   .vcb3-hero-full { padding: 2.5rem 1.25rem 2rem 1.25rem; }
 }
 
+
+
+/* Mobile Responsiveness Enhancements */
+@media (max-width: 768px) {
+  .vcb3-hero-title { font-size: 1.8rem !important; line-height: 1.25 !important; margin-bottom: 0.75rem !important; }
+  .vcb3-hero-subtitle { font-size: 1.15rem !important; margin-bottom: 0.5rem !important; }
+  .vcb3-hero-desc { font-size: 0.95rem !important; line-height: 1.5 !important; }
+  .hero-mockup-wrapper { width: 100% !important; max-width: 100% !important; overflow: hidden !important; }
+  .hero-dashboard-img, .hero-mobile-img { max-width: 100% !important; height: auto !important; }
+  .cta-img { max-width: 100% !important; height: auto !important; }
+}
+
+@media (max-width: 480px) {
+  .vcb3-page { padding: 0 !important; overflow-x: hidden !important; }
+  .vcb3-hero-full { padding: 1.5rem 0.75rem 1.5rem 0.75rem !important; }
+  .vcb3-hero-title { font-size: 1.5rem !important; }
+  .vcb3-hero-subtitle { font-size: 1rem !important; }
+  .vcb3-hero-desc { font-size: 0.85rem !important; }
+  .vcb3-why-row { grid-template-columns: 1fr !important; }
+  .vcb3-icon-grid { grid-template-columns: 1fr !important; }
+  .cta-btn-group button, .vcb3-back-btn { width: 100% !important; justify-content: center !important; }
+}
