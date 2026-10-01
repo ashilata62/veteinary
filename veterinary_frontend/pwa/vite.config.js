@@ -23,6 +23,12 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '../src'),
+        '/src': path.resolve(__dirname, '../src')
+      }
+    },
     server: {
       port: 5175,
       open: true,
