@@ -76,7 +76,7 @@ export default function SessionTerminatedModal() {
           lineHeight: '1.55',
           marginBottom: '1rem'
         }}>
-          Aapka account kisi dusre computer ya browser par login ho gaya hai. Suraksha ke liye is device ka session disconnect kar diya gaya hai.
+          {message || 'Your account was logged in from another device or browser. For security, this active session has been ended.'}
         </p>
 
         <div style={{

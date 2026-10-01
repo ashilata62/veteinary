@@ -23,7 +23,7 @@ async function ensureTables() {
         await db.query(`
             CREATE TABLE IF NOT EXISTS scheduled_reports (
                 id VARCHAR(64) PRIMARY KEY,
-                clinic_id INT NOT NULL,
+                clinic_id VARCHAR(64) NOT NULL,
                 report_type ENUM('WEEKLY_7DAY', 'MANUAL_EMAIL') NOT NULL DEFAULT 'WEEKLY_7DAY',
                 recipient_email VARCHAR(255) NOT NULL,
                 period_start DATE NOT NULL,
@@ -46,7 +46,7 @@ async function ensureTables() {
         await db.query(`
             CREATE TABLE IF NOT EXISTS report_email_subscriptions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                clinic_id INT NOT NULL,
+                clinic_id VARCHAR(64) NOT NULL,
                 email VARCHAR(255) NOT NULL,
                 frequency ENUM('WEEKLY', 'DISABLED') NOT NULL DEFAULT 'WEEKLY',
                 is_active TINYINT(1) NOT NULL DEFAULT 1,
@@ -123,7 +123,7 @@ async function generate7DayReportData(clinicId) {
             SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days,
             SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) as absent_days
         FROM attendance 
-        WHERE clinic_id = ? AND date BETWEEN ? AND ?
+        WHERE clinic_id = ? AND attendance_date BETWEEN ? AND ?
     `, [clinicId, startStr, endStr]);
 
     // 7. Home visits
@@ -132,8 +132,8 @@ async function generate7DayReportData(clinicId) {
             COUNT(*) as total_visits,
             SUM(CASE WHEN visit_status = 'Completed' THEN 1 ELSE 0 END) as completed_visits
         FROM home_visits 
-        WHERE clinic_id = ? AND visit_date BETWEEN ? AND ?
-    `, [clinicId, startStr, endStr]);
+        WHERE clinic_id = ?
+    `, [clinicId]);
 
     return {
         periodStart: startStr,

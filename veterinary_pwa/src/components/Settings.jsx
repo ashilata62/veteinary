@@ -791,68 +791,13 @@ export default function SettingsPage({ currentRole }) {
       {currentRole === 'Admin' ? (
         <div className="settings-admin-layout">
           
-          {/* Mobile Quick Dropdown Selector (< 992px) */}
-          <div className="settings-mobile-picker-wrap">
-            <div className="settings-mobile-picker-header">
-              <span className="settings-mobile-picker-title">Settings Section</span>
-              <span className="settings-mobile-picker-count">
-                {tabs.findIndex(t => t.id === activeTab) + 1} of {tabs.length}
-              </span>
-            </div>
-            <button
-              type="button"
-              className="settings-mobile-picker-btn"
-              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {(() => {
-                  const CurrentIcon = tabs.find(t => t.id === activeTab)?.icon || Settings;
-                  return <CurrentIcon size={18} style={{ color: 'var(--primary-teal)' }} />;
-                })()}
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                  {tabs.find(t => t.id === activeTab)?.label}
-                </span>
-              </div>
-              <ChevronDown
-                size={18}
-                style={{
-                  transform: mobileDropdownOpen ? 'rotate(180deg)' : 'none',
-                  transition: 'transform 0.2s ease',
-                  color: 'var(--text-secondary)'
-                }}
-              />
-            </button>
-
-            {mobileDropdownOpen && (
-              <div className="settings-mobile-picker-menu">
-                {tabs.map((tab) => {
-                  const isAct = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      className={`settings-mobile-picker-item ${isAct ? 'active' : ''}`}
-                      onClick={() => handleTabChange(tab.id)}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <tab.icon size={18} style={{ color: isAct ? 'var(--primary-teal)' : 'var(--text-muted)' }} />
-                        <span style={{ fontWeight: isAct ? 700 : 500 }}>{tab.label}</span>
-                      </div>
-                      {isAct && <Check size={16} color="var(--primary-teal)" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Horizontally Scrollable Pills (with Left & Right Arrow buttons on mobile) */}
+          {/* Horizontally Scrollable Tabs Bar */}
           <div className="settings-tab-scroll-wrapper">
             {canScrollLeft && (
               <button
                 type="button"
                 className="settings-tab-scroll-btn scroll-left"
-                onClick={() => settingsTabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
+                onClick={() => settingsTabsRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}
                 aria-label="Scroll left"
               >
                 <ChevronLeft size={16} />
@@ -874,8 +819,7 @@ export default function SettingsPage({ currentRole }) {
                     className={`settings-tab-btn ${isAct ? 'active' : ''}`}
                   >
                     <tab.icon size={17} className="settings-tab-icon" />
-                    <span className="settings-tab-label-desktop">{tab.label}</span>
-                    <span className="settings-tab-label-mobile">{tab.shortLabel || tab.label}</span>
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}
@@ -885,7 +829,7 @@ export default function SettingsPage({ currentRole }) {
               <button
                 type="button"
                 className="settings-tab-scroll-btn scroll-right"
-                onClick={() => settingsTabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
+                onClick={() => settingsTabsRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}
                 aria-label="Scroll right"
               >
                 <ChevronRight size={16} />

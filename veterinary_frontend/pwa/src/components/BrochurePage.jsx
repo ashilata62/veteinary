@@ -5,7 +5,7 @@ import {
   Activity, PieChart, Users, Calendar, CreditCard, User, 
   Settings, TrendingUp, Shield, FileText, Smartphone, LayoutDashboard,
   Mail, MessageSquare, Briefcase, PlusSquare, Heart, RefreshCw,
-  ThumbsUp, Lock, Globe, ArrowRight, Clock, Box
+  ThumbsUp, Lock, Globe, ArrowRight, ArrowLeft, Clock, Box
 } from 'lucide-react';
 import './BrochurePage.css';
 import RegisterModal from './RegisterModal';
@@ -36,6 +36,11 @@ export default function BrochurePage() {
             <p>Veterinary Management SaaS</p>
           </div>
         </div>
+
+        <button className="vcb3-back-btn" onClick={() => navigate('/')}>
+          <ArrowLeft size={18} /> Back to Landing Page
+        </button>
+
         <div className="vcb3-header-right">
           <h4>Smart. Simple. Stress-Free.</h4>
           <h3>All-in-One Veterinary Clinic Management</h3>
@@ -46,6 +51,9 @@ export default function BrochurePage() {
       <section className="vcb3-hero-full">
         <div className="vcb3-hero-container">
           <div className="vcb3-hero-left">
+            <button className="vcb3-hero-back-link" onClick={() => navigate('/')}>
+              <ArrowLeft size={16} /> Back to Landing Page
+            </button>
             <h1 className="vcb3-hero-title">One Platform to<br/>Run Your Entire Clinic</h1>
             <p className="vcb3-hero-subtitle">Manage appointments, patients, billing, inventory<br/>and staff operations – all in one intelligent platform.</p>
             
@@ -93,32 +101,40 @@ export default function BrochurePage() {
             <h2 className="vcb3-section-title">COMPLETE CLINIC MANAGEMENT</h2>
             <div className="vcb3-management-grid">
               <div className="vcb3-mgmt-card">
-                <div className="mgmt-header teal-text"><Heart size={20}/> PATIENT CARE</div>
+                <div className="mgmt-header teal-text">
+                  <div className="mgmt-header-title"><Heart size={20}/> PATIENT CARE</div>
+                  <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&h=200" alt="Dog" className="mgmt-dog-img" />
+                </div>
                 <ul>
                   <li>Pet Profiles</li><li>Medical History</li><li>Treatments</li><li>Vaccinations</li><li>Lab Results</li><li>Digital Prescriptions</li>
                 </ul>
-                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&h=200" alt="Dog" className="mgmt-dog-img" />
               </div>
               <div className="vcb3-mgmt-card">
-                <div className="mgmt-header teal-text"><Calendar size={20}/> APPOINTMENTS</div>
+                <div className="mgmt-header teal-text">
+                  <div className="mgmt-header-title"><Calendar size={20}/> APPOINTMENTS</div>
+                  <img src="https://cdn-icons-png.flaticon.com/512/1498/1498075.png" alt="Calendar" className="mgmt-graphic-img" />
+                </div>
                 <ul>
                   <li>Smart Calendar</li><li>Doctor Availability</li><li>Queue Management</li><li>Home Visits</li><li>Vaccination Reminders</li>
                 </ul>
-                <img src="https://cdn-icons-png.flaticon.com/512/1498/1498075.png" alt="Calendar" className="mgmt-graphic-img" />
               </div>
               <div className="vcb3-mgmt-card">
-                <div className="mgmt-header teal-text"><Box size={20}/> PHARMACY <br/>& INVENTORY</div>
+                <div className="mgmt-header teal-text">
+                  <div className="mgmt-header-title"><Box size={20}/> PHARMACY & INVENTORY</div>
+                  <img src="https://cdn-icons-png.flaticon.com/512/2966/2966327.png" alt="Pharmacy" className="mgmt-graphic-img" />
+                </div>
                 <ul>
                   <li>Medicine & Stock Tracking</li><li>Low-Stock Alerts</li><li>Supplier Management</li><li>Purchase Orders</li><li>Expiry Management</li>
                 </ul>
-                <img src="https://cdn-icons-png.flaticon.com/512/2966/2966327.png" alt="Pharmacy" className="mgmt-graphic-img" />
               </div>
               <div className="vcb3-mgmt-card">
-                <div className="mgmt-header teal-text"><CreditCard size={20}/> BILLING <br/>& FINANCE</div>
+                <div className="mgmt-header teal-text">
+                  <div className="mgmt-header-title"><CreditCard size={20}/> BILLING & FINANCE</div>
+                  <img src="https://cdn-icons-png.flaticon.com/512/2534/2534204.png" alt="Billing" className="mgmt-graphic-img" />
+                </div>
                 <ul>
                   <li>Fast Invoicing</li><li>Payment Tracking</li><li>Expense Management</li><li>Cash Summary</li><li>Profit & Revenue Reports</li>
                 </ul>
-                <img src="https://cdn-icons-png.flaticon.com/512/2534/2534204.png" alt="Billing" className="mgmt-graphic-img" />
               </div>
             </div>
           </section>

@@ -60,3 +60,5 @@ veterinary_mobile/android/build/
 *.keystore
 *.jks
 
+
+*.zip

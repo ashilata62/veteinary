@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CalendarDays, Users, Dog, FileHeart,
   CreditCard, Package, BarChart3, Settings, LogOut,
   UserCog, Bell, Pill, Microscope, ClipboardPen, Clock, ClipboardList, Mail,
-  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity, Shield
+  ChevronRight, ChevronLeft, Map, CheckCircle2, UserCircle, Car, Headphones, MoreVertical, Activity, Shield, Lock
 } from 'lucide-react';
 import './Sidebar.css';
 import { isTabAllowedForPlan } from '../utils/planPermissions';
@@ -205,20 +205,8 @@ export default function Sidebar({
                     <span className="sidebar-menu-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                       <span>{item.label}</span>
                       {!isAllowed && (
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
-                          backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                          color: '#fbbf24',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          border: '1px solid rgba(245, 158, 11, 0.3)',
-                          marginLeft: '6px'
-                        }}>
-                          🔒 Lock
+                        <span title="Locked in current plan" className="lock-badge-icon">
+                          <Lock size={12} />
                         </span>
                       )}
                     </span>

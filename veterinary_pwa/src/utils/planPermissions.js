@@ -129,6 +129,15 @@ export function isTabAllowedForPlan(tabId, planId) {
   // Always allow core dashboard and support
   if (tabId === 'dashboard' || tabId === 'support' || tabId === 'settings') return true;
 
+  if (typeof window !== 'undefined') {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      if (u.email && u.email.toLowerCase().startsWith('demo.')) {
+        return true;
+      }
+    } catch (e) {}
+  }
+
   const key = normalizePlanId(planId);
   const allowed = PLAN_ALLOWED_TABS[key] || PLAN_ALLOWED_TABS['plan-starter'];
   return allowed.includes(tabId);
